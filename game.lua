@@ -58,11 +58,18 @@ function scene:create(event)
   physics.pause()
   physics.setScale(30);
   physics.setGravity(0, 9.8)
-  physics.setDrawMode("hybrid")
+  -- physics.setDrawMode("hybrid")
 
   self:createBackground()
   self:createFrame()
   self:createBall()
+
+  -- TODO Ajouter dans sa propre fonction
+  local targetEasy = display.newImageRect(self.view, "target-easy.png", 60, 60)
+  local targetEasyOutline = graphics.newOutline(2, "target-easy.png")
+  targetEasy.x = display.contentWidth / 3
+  targetEasy.y = display.contentHeight / 2
+  physics.addBody(targetEasy, "static", { outline = targetEasyOutline, density = 1.0, friction = 0.3, bounce = 0.5 })
 end
 
 function scene:createBackground()
