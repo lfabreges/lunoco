@@ -1,4 +1,4 @@
 local composer = require "composer"
 
 display.setStatusBar(display.HiddenStatusBar)
-composer.gotoScene("game")
+composer.gotoScene("scenes.game")

@@ -92,7 +92,7 @@ function scene:createBackground()
 end
 
 function scene:createBall()
-  self.ball = display.newImageRect(self.view, "ball.png", 40, 40)
+  self.ball = display.newImageRect(self.view, "images/ball.png", 40, 40)
   self.ball.x = display.contentWidth / 2
   self.ball.y = display.contentHeight / 2
 
@@ -107,7 +107,7 @@ function scene:createBall()
 end
 
 function scene:createFrame()
-  local frame = display.newImageRect(self.view, "frame.png", display.contentWidth, display.contentHeight)
+  local frame = display.newImageRect(self.view, "images/frame.png", display.contentWidth, display.contentHeight)
 
   frame.x = display.contentCenterX
   frame.y = display.contentCenterY
@@ -130,8 +130,8 @@ function scene:createFrame()
 end
 
 function scene:createTargets()
-  local targetEasy = display.newImageRect(self.view, "target-easy.png", 60, 60)
-  local targetEasyOutline = graphics.newOutline(2, "target-easy.png")
+  local targetEasy = display.newImageRect(self.view, "images/target-easy.png", 60, 60)
+  local targetEasyOutline = graphics.newOutline(2, "images/target-easy.png")
   targetEasy.x = display.contentWidth / 3
   targetEasy.y = display.contentHeight / 2
 
