@@ -5,12 +5,11 @@ local ballImpulseForce = nil
 local scale = 30
 local scene = composer.newScene()
 
-local onLateUpdate
-local onScreenTouch
-local predictBallPath
+local handleBallImpulseOnScreenTouch
+local predictBallPathOnLateUpdate
 local removePredictedBallPath
 
-onScreenTouch = function(event)
+handleBallImpulseOnScreenTouch = function(event)
   local _ballImpulseForce = { x = (event.xStart - event.x) * 2, y = (event.yStart - event.y) * 2 }
   ballImpulseForce = nil
 
@@ -24,28 +23,40 @@ onScreenTouch = function(event)
   return true
 end
 
-onLateUpdate = function()
-  if ballImpulseForce then
-    predictBallPath()
+predictBallPathOnLateUpdate = function()
+  if not ballImpulseForce then
+    return false
   end
-end
 
-predictBallPath = function()
   local timeStepInterval = 0.1
-  local gx, gy = physics.getGravity()
-  local vx, vy = scene.ball:getLinearVelocity()
+  local gravityX, gravityY = physics.getGravity()
+  local velocityX, velocityY = scene.ball:getLinearVelocity()
 
   removePredictedBallPath()
   scene.predictedBallPath = display.newGroup()
-  scene.predictedBallPath.x = scene.ball.x
-  scene.predictedBallPath.y = scene.ball.y
+  scene.view:insert(scene.predictedBallPath)
+
+  local prevStepX = nil
+  local prevStepY = nil
 
   for step = 0, 10, 1 do
     local time = step * timeStepInterval
-    local stepX = time * vx + (time * ballImpulseForce.x) / scene.ball.mass + 0.5 * gx * scale * (time * time)
-    local stepY = time * vy + (time * ballImpulseForce.y) / scene.ball.mass + 0.5 * gy * scale * (time * time)
+    local accelerationX = (time * ballImpulseForce.x) / scene.ball.mass
+    local accelerationY = (time * ballImpulseForce.y) / scene.ball.mass
+    local stepX = scene.ball.x + time * velocityX + accelerationX + 0.5 * gravityX * scale * (time * time)
+    local stepY = scene.ball.y + time * velocityY + accelerationY + 0.5 * gravityY * scale * (time * time)
+
+    if step > 0 and physics.rayCast(prevStepX, prevStepY, stepX, stepY, "any") then
+      break
+    end
+
+    prevStepX = stepX
+    prevStepY = stepY
+
     display.newCircle(scene.predictedBallPath, stepX, stepY, 2)
   end
+
+  return false
 end
 
 removePredictedBallPath = function()
@@ -126,16 +137,16 @@ end
 
 function scene:show(event)
   if event.phase == "did" then
-    Runtime:addEventListener("touch", onScreenTouch)
-    Runtime:addEventListener("lateUpdate", onLateUpdate)
+    Runtime:addEventListener("touch", handleBallImpulseOnScreenTouch)
+    Runtime:addEventListener("lateUpdate", predictBallPathOnLateUpdate)
     physics.start()
   end
 end
 
 function scene:hide(event)
   if event.phase == "will" then
-    Runtime:removeEventListener("lateUpdate", onLateUpdate)
-    Runtime:removeEventListener("touch", onScreenTouch)
+    Runtime:removeEventListener("lateUpdate", predictBallPathOnLateUpdate)
+    Runtime:removeEventListener("touch", handleBallImpulseOnScreenTouch)
     physics.stop()
   end
 end
