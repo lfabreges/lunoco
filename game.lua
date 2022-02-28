@@ -74,13 +74,7 @@ function scene:create(event)
   self:createBackground()
   self:createFrame()
   self:createBall()
-
-  -- TODO Ajouter dans sa propre fonction
-  local targetEasy = display.newImageRect(self.view, "target-easy.png", 60, 60)
-  local targetEasyOutline = graphics.newOutline(2, "target-easy.png")
-  targetEasy.x = display.contentWidth / 3
-  targetEasy.y = display.contentHeight / 2
-  physics.addBody(targetEasy, "static", { outline = targetEasyOutline, density = 1.0, friction = 0.3, bounce = 0.5 })
+  self:createTargets()
 end
 
 function scene:createBackground()
@@ -133,6 +127,22 @@ function scene:createFrame()
     friction = 0.5,
     bounce = 0.5,
   })
+end
+
+function scene:createTargets()
+  local targetEasy = display.newImageRect(self.view, "target-easy.png", 60, 60)
+  local targetEasyOutline = graphics.newOutline(2, "target-easy.png")
+  targetEasy.x = display.contentWidth / 3
+  targetEasy.y = display.contentHeight / 2
+
+  targetEasy.collision = function(self, event)
+    transition.to(self, { time = 100, alpha = 0.1, onComplete = physics.removeBody } )
+    targetEasy:removeEventListener("collision")
+    return true
+  end
+
+  physics.addBody(targetEasy, "static", { outline = targetEasyOutline, density = 1.0, friction = 0.3, bounce = 0.5 })
+  targetEasy:addEventListener("collision")
 end
 
 function scene:show(event)
