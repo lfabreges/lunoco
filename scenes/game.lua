@@ -41,10 +41,10 @@ predictBallPathOnLateUpdate = function()
 
   for step = 0, 10, 1 do
     local time = step * timeStepInterval
-    local accelerationX = (time * ballImpulseForce.x) / scene.ball.mass
-    local accelerationY = (time * ballImpulseForce.y) / scene.ball.mass
-    local stepX = scene.ball.x + time * velocityX + accelerationX + 0.5 * gravityX * scale * (time * time)
-    local stepY = scene.ball.y + time * velocityY + accelerationY + 0.5 * gravityY * scale * (time * time)
+    local accelerationX = ballImpulseForce.x / scene.ball.mass
+    local accelerationY = ballImpulseForce.y / scene.ball.mass
+    local stepX = scene.ball.x + time * velocityX + time * accelerationX + 0.5 * gravityX * scale * (time * time)
+    local stepY = scene.ball.y + time * velocityY + time * accelerationY + 0.5 * gravityY * scale * (time * time)
 
     if step > 0 and physics.rayCast(prevStepX, prevStepY, stepX, stepY, "any") then
       break
@@ -67,14 +67,20 @@ end
 function scene:create(event)
   physics.start()
   physics.pause()
-  physics.setScale(30);
+  physics.setScale(scale);
   physics.setGravity(0, 9.8)
   -- physics.setDrawMode("hybrid")
 
   self:createBackground()
   self:createFrame()
-  self:createBall()
   self:createTargets()
+  self:createBall()
+
+  --[[
+    lateUpdate : décaler tout le décord en statique au besoin
+    Décaler la balle pour la place au centre si pertinent
+    Le cadre a besoin d'être décomposé en 4 pour se coller aux bords
+  ]]
 end
 
 function scene:createBackground()
@@ -154,10 +160,12 @@ function scene:show(event)
 end
 
 function scene:hide(event)
-  if event.phase == "will" then
+  if event.phase == "did" then
     Runtime:removeEventListener("lateUpdate", predictBallPathOnLateUpdate)
     Runtime:removeEventListener("touch", handleBallImpulseOnScreenTouch)
     physics.stop()
+
+    composer.removeScene("game")
   end
 end
 
