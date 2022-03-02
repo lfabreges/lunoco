@@ -113,26 +113,26 @@ function scene:createBall()
 end
 
 function scene:createFrame()
-  local frame = display.newImageRect(self.view, "images/frame.png", display.contentWidth, display.contentHeight)
+  local frameLeft = display.newImageRect(self.view, "images/frame-left.png", 4, display.contentHeight)
+  local frameTop = display.newImageRect(self.view, "images/frame-top.png", display.contentWidth, 4)
+  local frameRight= display.newImageRect(self.view, "images/frame-right.png", 4, display.contentHeight)
+  local frameBottom = display.newImageRect(self.view, "images/frame-bottom.png", display.contentWidth, 4)
 
-  frame.x = display.contentCenterX
-  frame.y = display.contentCenterY
+  frameLeft.x = frameLeft.width / 2
+  frameLeft.y = display.contentCenterY
+  frameTop.x = display.contentCenterX
+  frameTop.y = frameTop.height / 2
+  frameRight.x = display.contentWidth - frameRight.width / 2
+  frameRight.y = display.contentCenterY
+  frameBottom.x = display.contentCenterX
+  frameBottom.y = display.contentHeight - frameBottom.height / 2
 
-  local halfScreenWidth = display.contentWidth / 2 - 4
-  local halfScreenHeight = display.contentHeight / 2 - 4
+  local frameBodyParams = { density = 1.0, friction = 0.5, bounce = 0.5 }
 
-  physics.addBody(frame, "static", {
-    chain = {
-      -halfScreenWidth, -halfScreenHeight,
-      halfScreenWidth, -halfScreenHeight,
-      halfScreenWidth, halfScreenHeight,
-      -halfScreenWidth, halfScreenHeight,
-    },
-    connectFirstAndLastChainVertex = true,
-    density = 1.0,
-    friction = 0.5,
-    bounce = 0.5,
-  })
+  physics.addBody(frameLeft, "static", frameBodyParams)
+  physics.addBody(frameTop, "static", frameBodyParams)
+  physics.addBody(frameRight, "static", frameBodyParams)
+  physics.addBody(frameBottom, "static", frameBodyParams)
 end
 
 function scene:createTargets()
