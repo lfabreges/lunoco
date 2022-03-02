@@ -34,7 +34,7 @@ predictBallPathOnLateUpdate = function()
 
   removePredictedBallPath()
   scene.predictedBallPath = display.newGroup()
-  scene.view:insert(scene.predictedBallPath)
+  scene.level:insert(scene.predictedBallPath)
 
   local prevStepX = nil
   local prevStepY = nil
@@ -72,15 +72,18 @@ function scene:create(event)
   -- physics.setDrawMode("hybrid")
 
   self:createBackground()
-  self:createFrame()
+
+  self.config = {
+    width = display.contentWidth,
+    height = display.contentHeight,
+  }
+
+  self.level = display.newGroup()
+  self.view:insert(self.level)
+
+  self:createFrame(self.config.width, self.config.height)
   self:createTargets()
   self:createBall()
-
-  --[[
-    lateUpdate : décaler tout le décord en statique au besoin
-    Décaler la balle pour la place au centre si pertinent
-    Le cadre a besoin d'être décomposé en 4 pour se coller aux bords
-  ]]
 end
 
 function scene:createBackground()
@@ -98,7 +101,7 @@ function scene:createBackground()
 end
 
 function scene:createBall()
-  self.ball = display.newImageRect(self.view, "images/ball.png", 40, 40)
+  self.ball = display.newImageRect(self.level, "images/ball.png", 40, 40)
   self.ball.x = display.contentWidth / 2
   self.ball.y = display.contentHeight / 2
 
@@ -108,24 +111,25 @@ function scene:createBall()
     friction = 0.3,
     bounce = 0.5,
   })
+
   self.ball.angularDamping = 1.5
   self.ball:setLinearVelocity(25, -60)
 end
 
-function scene:createFrame()
-  local frameLeft = display.newImageRect(self.view, "images/frame-left.png", 4, display.contentHeight)
-  local frameTop = display.newImageRect(self.view, "images/frame-top.png", display.contentWidth, 4)
-  local frameRight= display.newImageRect(self.view, "images/frame-right.png", 4, display.contentHeight)
-  local frameBottom = display.newImageRect(self.view, "images/frame-bottom.png", display.contentWidth, 4)
+function scene:createFrame(width, height)
+  local frameLeft = display.newImageRect(self.level, "images/frame-left.png", 4, height)
+  local frameTop = display.newImageRect(self.level, "images/frame-top.png", width, 4)
+  local frameRight= display.newImageRect(self.level, "images/frame-right.png", 4, height)
+  local frameBottom = display.newImageRect(self.level, "images/frame-bottom.png", width, 4)
 
   frameLeft.x = frameLeft.width / 2
-  frameLeft.y = display.contentCenterY
-  frameTop.x = display.contentCenterX
+  frameLeft.y = height / 2
+  frameTop.x = width / 2
   frameTop.y = frameTop.height / 2
-  frameRight.x = display.contentWidth - frameRight.width / 2
-  frameRight.y = display.contentCenterY
-  frameBottom.x = display.contentCenterX
-  frameBottom.y = display.contentHeight - frameBottom.height / 2
+  frameRight.x = width - frameRight.width / 2
+  frameRight.y = height / 2
+  frameBottom.x = width / 2
+  frameBottom.y = height - frameBottom.height / 2
 
   local frameBodyParams = { density = 1.0, friction = 0.5, bounce = 0.5 }
 
@@ -136,7 +140,7 @@ function scene:createFrame()
 end
 
 function scene:createTargets()
-  local targetEasy = display.newImageRect(self.view, "images/target-easy.png", 60, 60)
+  local targetEasy = display.newImageRect(self.level, "images/target-easy.png", 60, 60)
   local targetEasyOutline = graphics.newOutline(2, "images/target-easy.png")
   targetEasy.x = display.contentWidth / 3
   targetEasy.y = display.contentHeight / 2
@@ -151,8 +155,38 @@ function scene:createTargets()
   targetEasy:addEventListener("collision")
 end
 
+function scene:enterFrame()
+  local config = self.config
+  local level = self.level
+
+  if config.width <= display.safeActualContentWidth then
+    level.x = display.safeScreenOriginX + (display.safeActualContentWidth - config.width) / 2
+  else
+    local dx = display.contentCenterX - level.x - self.ball.x
+    level.x = level.x + dx
+    if level.x > display.safeScreenOriginX then
+      level.x = display.safeScreenOriginX
+    elseif level.x + config.width < display.safeScreenOriginX + display.safeActualContentWidth then
+      level.x = display.safeScreenOriginX + display.safeActualContentWidth - config.width
+    end
+  end
+
+  if config.height <= display.safeActualContentHeight then
+    level.y = display.safeScreenOriginY + (display.safeActualContentHeight - config.height) / 2
+  else
+    local dy = display.contentCenterY - level.y - self.ball.y
+    level.y = level.y + dy
+    if level.y > display.safeScreenOriginY then
+      level.y = display.safeScreenOriginY
+    elseif level.y + config.height < display.safeScreenOriginY + display.safeActualContentHeight then
+      level.y = display.safeScreenOriginY + display.safeActualContentHeight - config.height
+    end
+  end
+end
+
 function scene:show(event)
   if event.phase == "did" then
+    Runtime:addEventListener("enterFrame", scene)
     Runtime:addEventListener("touch", handleBallImpulseOnScreenTouch)
     Runtime:addEventListener("lateUpdate", predictBallPathOnLateUpdate)
     physics.start()
@@ -163,8 +197,8 @@ function scene:hide(event)
   if event.phase == "did" then
     Runtime:removeEventListener("lateUpdate", predictBallPathOnLateUpdate)
     Runtime:removeEventListener("touch", handleBallImpulseOnScreenTouch)
+    Runtime:removeEventListener("enterFrame", scene)
     physics.stop()
-
     composer.removeScene("game")
   end
 end
