@@ -122,6 +122,14 @@ function scene:createFrame(width, height)
   local frameRight= display.newImageRect(self.level, "images/frame-right.png", 4, height)
   local frameBottom = display.newImageRect(self.level, "images/frame-bottom.png", width, 4)
 
+  local extraWidth = display.actualContentWidth + width
+  local extraHeight = display.actualContentHeight + height
+
+  local frameLeftExtra = display.newImageRect(self.level, "images/frame-extra.png", extraWidth, height)
+  local frameTopExtra = display.newImageRect(self.level, "images/frame-extra.png", extraWidth, extraHeight)
+  local frameRightExtra = display.newImageRect(self.level, "images/frame-extra.png", extraWidth, height)
+  local frameBottomExtra = display.newImageRect(self.level, "images/frame-extra.png", extraWidth, extraHeight)
+
   frameLeft.x = frameLeft.width / 2
   frameLeft.y = height / 2
   frameTop.x = width / 2
@@ -130,6 +138,15 @@ function scene:createFrame(width, height)
   frameRight.y = height / 2
   frameBottom.x = width / 2
   frameBottom.y = height - frameBottom.height / 2
+
+  frameLeftExtra.x = 0 - frameLeftExtra.width / 2
+  frameLeftExtra.y = frameLeft.y
+  frameTopExtra.x = frameTop.x
+  frameTopExtra.y = 0 - frameTopExtra.height / 2
+  frameRightExtra.x = width + frameRightExtra.width / 2
+  frameRightExtra.y = frameRight.y
+  frameBottomExtra.x = frameBottom.x
+  frameBottomExtra.y = height + frameBottomExtra.height / 2
 
   local frameBodyParams = { density = 1.0, friction = 0.5, bounce = 0.5 }
 
