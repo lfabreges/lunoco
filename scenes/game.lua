@@ -1,7 +1,10 @@
 local composer = require "composer"
-local physics = require "physics"
 
+local ball = nil
 local ballImpulseForce = nil
+local config = nil
+local level = nil
+local predictedBallPath = nil
 local scale = 30
 local scene = composer.newScene()
 
@@ -15,7 +18,7 @@ handleBallImpulseOnScreenTouch = function(event)
 
   if (event.phase == "ended") then
     removePredictedBallPath()
-    scene.ball:applyLinearImpulse(_ballImpulseForce.x / scale, _ballImpulseForce.y / scale, scene.ball.x, scene.ball.y)
+    ball:applyLinearImpulse(_ballImpulseForce.x / scale, _ballImpulseForce.y / scale, ball.x, ball.y)
   elseif (event.phase == "moved") then
     ballImpulseForce = _ballImpulseForce
   end
@@ -30,21 +33,21 @@ predictBallPathOnLateUpdate = function()
 
   local timeStepInterval = 0.1
   local gravityX, gravityY = physics.getGravity()
-  local velocityX, velocityY = scene.ball:getLinearVelocity()
+  local velocityX, velocityY = ball:getLinearVelocity()
 
   removePredictedBallPath()
-  scene.predictedBallPath = display.newGroup()
-  scene.level:insert(scene.predictedBallPath)
+  predictedBallPath = display.newGroup()
+  level:insert(predictedBallPath)
 
   local prevStepX = nil
   local prevStepY = nil
 
   for step = 0, 10, 1 do
     local time = step * timeStepInterval
-    local accelerationX = ballImpulseForce.x / scene.ball.mass
-    local accelerationY = ballImpulseForce.y / scene.ball.mass
-    local stepX = scene.ball.x + time * velocityX + time * accelerationX + 0.5 * gravityX * scale * (time * time)
-    local stepY = scene.ball.y + time * velocityY + time * accelerationY + 0.5 * gravityY * scale * (time * time)
+    local accelerationX = ballImpulseForce.x / ball.mass
+    local accelerationY = ballImpulseForce.y / ball.mass
+    local stepX = ball.x + time * velocityX + time * accelerationX + 0.5 * gravityX * scale * (time * time)
+    local stepY = ball.y + time * velocityY + time * accelerationY + 0.5 * gravityY * scale * (time * time)
 
     if step > 0 and physics.rayCast(prevStepX, prevStepY, stepX, stepY, "any") then
       break
@@ -53,15 +56,13 @@ predictBallPathOnLateUpdate = function()
     prevStepX = stepX
     prevStepY = stepY
 
-    display.newCircle(scene.predictedBallPath, stepX, stepY, 2)
+    display.newCircle(predictedBallPath, stepX, stepY, 2)
   end
-
-  return false
 end
 
 removePredictedBallPath = function()
-  display.remove(scene.predictedBallPath)
-  scene.predictedBallPath = nil
+  display.remove(predictedBallPath)
+  predictedBallPath = nil
 end
 
 function scene:create(event)
@@ -69,19 +70,18 @@ function scene:create(event)
   physics.pause()
   physics.setScale(scale);
   physics.setGravity(0, 9.8)
-  -- physics.setDrawMode("hybrid")
 
   self:createBackground()
 
-  self.config = {
+  config = {
     width = display.contentWidth,
     height = display.contentHeight,
   }
 
-  self.level = display.newGroup()
-  self.view:insert(self.level)
+  level = display.newGroup()
+  self.view:insert(level)
 
-  self:createFrame(self.config.width, self.config.height)
+  self:createFrame()
   self:createTargets()
   self:createBall()
 end
@@ -101,34 +101,27 @@ function scene:createBackground()
 end
 
 function scene:createBall()
-  self.ball = display.newImageRect(self.level, "images/ball.png", 40, 40)
-  self.ball.x = display.contentWidth / 2
-  self.ball.y = display.contentHeight / 2
-
-  physics.addBody(self.ball, {
-    radius = self.ball.width / 2 - 1,
-    density = 1.0,
-    friction = 0.3,
-    bounce = 0.5,
-  })
-
-  self.ball.angularDamping = 1.5
-  self.ball:setLinearVelocity(25, -60)
+  ball = display.newImageRect(level, "images/ball.png", 40, 40)
+  ball.x = display.contentWidth / 2
+  ball.y = display.contentHeight / 2
+  physics.addBody(ball, { radius = ball.width / 2 - 1, density = 1.0, friction = 0.3, bounce = 0.5 })
+  ball.angularDamping = 1.5
+  ball:setLinearVelocity(25, -60)
 end
 
-function scene:createFrame(width, height)
-  local frameLeft = display.newImageRect(self.level, "images/frame-left.png", 4, height)
-  local frameTop = display.newImageRect(self.level, "images/frame-top.png", width, 4)
-  local frameRight= display.newImageRect(self.level, "images/frame-right.png", 4, height)
-  local frameBottom = display.newImageRect(self.level, "images/frame-bottom.png", width, 4)
-
+function scene:createFrame()
+  local width = config.width
+  local height = config.height
+  local frameLeft = display.newImageRect(level, "images/frame-left.png", 4, height)
+  local frameTop = display.newImageRect(level, "images/frame-top.png", width, 4)
+  local frameRight= display.newImageRect(level, "images/frame-right.png", 4, height)
+  local frameBottom = display.newImageRect(level, "images/frame-bottom.png", width, 4)
   local extraWidth = display.actualContentWidth + width
   local extraHeight = display.actualContentHeight + height
-
-  local frameLeftExtra = display.newImageRect(self.level, "images/frame-extra.png", extraWidth, height)
-  local frameTopExtra = display.newImageRect(self.level, "images/frame-extra.png", extraWidth, extraHeight)
-  local frameRightExtra = display.newImageRect(self.level, "images/frame-extra.png", extraWidth, height)
-  local frameBottomExtra = display.newImageRect(self.level, "images/frame-extra.png", extraWidth, extraHeight)
+  local frameLeftExtra = display.newImageRect(level, "images/frame-extra.png", extraWidth, height)
+  local frameTopExtra = display.newImageRect(level, "images/frame-extra.png", extraWidth, extraHeight)
+  local frameRightExtra = display.newImageRect(level, "images/frame-extra.png", extraWidth, height)
+  local frameBottomExtra = display.newImageRect(level, "images/frame-extra.png", extraWidth, extraHeight)
 
   frameLeft.x = frameLeft.width / 2
   frameLeft.y = height / 2
@@ -138,7 +131,6 @@ function scene:createFrame(width, height)
   frameRight.y = height / 2
   frameBottom.x = width / 2
   frameBottom.y = height - frameBottom.height / 2
-
   frameLeftExtra.x = 0 - frameLeftExtra.width / 2
   frameLeftExtra.y = frameLeft.y
   frameTopExtra.x = frameTop.x
@@ -157,7 +149,7 @@ function scene:createFrame(width, height)
 end
 
 function scene:createTargets()
-  local targetEasy = display.newImageRect(self.level, "images/target-easy.png", 60, 60)
+  local targetEasy = display.newImageRect(level, "images/target-easy.png", 60, 60)
   local targetEasyOutline = graphics.newOutline(2, "images/target-easy.png")
   targetEasy.x = display.contentWidth / 3
   targetEasy.y = display.contentHeight / 2
@@ -173,13 +165,10 @@ function scene:createTargets()
 end
 
 function scene:enterFrame()
-  local config = self.config
-  local level = self.level
-
   if config.width <= display.safeActualContentWidth then
     level.x = display.safeScreenOriginX + (display.safeActualContentWidth - config.width) / 2
   else
-    local dx = display.contentCenterX - level.x - self.ball.x
+    local dx = display.contentCenterX - level.x - ball.x
     level.x = level.x + dx
     if level.x > display.safeScreenOriginX then
       level.x = display.safeScreenOriginX
@@ -191,7 +180,7 @@ function scene:enterFrame()
   if config.height <= display.safeActualContentHeight then
     level.y = display.safeScreenOriginY + (display.safeActualContentHeight - config.height) / 2
   else
-    local dy = display.contentCenterY - level.y - self.ball.y
+    local dy = display.contentCenterY - level.y - ball.y
     level.y = level.y + dy
     if level.y > display.safeScreenOriginY then
       level.y = display.safeScreenOriginY
@@ -221,8 +210,10 @@ function scene:hide(event)
 end
 
 function scene:destroy(event)
-  package.loaded[physics] = nil
-  physics = nil
+  config = nil
+  ball = nil
+  level = nil
+  predictedBallPath = nil
 end
 
 scene:addEventListener("create", scene)
