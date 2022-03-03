@@ -2,6 +2,7 @@ local composer = require "composer"
 
 local ball = nil
 local ballImpulseForce = nil
+local borderWidth = 4
 local config = nil
 local level = nil
 local predictedBallPath = nil
@@ -70,6 +71,7 @@ function scene:create(event)
   physics.pause()
   physics.setScale(scale);
   physics.setGravity(0, 9.8)
+  -- physics.setDrawMode("hybrid");
 
   self:createBackground()
 
@@ -82,6 +84,7 @@ function scene:create(event)
   self.view:insert(level)
 
   self:createFrame()
+  self:createObstacles()
   self:createTargets()
   self:createBall()
 end
@@ -112,10 +115,10 @@ end
 function scene:createFrame()
   local width = config.width
   local height = config.height
-  local frameLeft = display.newImageRect(level, "images/frame-left.png", 4, height)
-  local frameTop = display.newImageRect(level, "images/frame-top.png", width, 4)
-  local frameRight= display.newImageRect(level, "images/frame-right.png", 4, height)
-  local frameBottom = display.newImageRect(level, "images/frame-bottom.png", width, 4)
+  local frameLeft = display.newImageRect(level, "images/frame-left.png", borderWidth, height)
+  local frameTop = display.newImageRect(level, "images/frame-top.png", width, borderWidth)
+  local frameRight= display.newImageRect(level, "images/frame-right.png", borderWidth, height)
+  local frameBottom = display.newImageRect(level, "images/frame-bottom.png", width, borderWidth)
   local extraWidth = display.actualContentWidth + width
   local extraHeight = display.actualContentHeight + height
   local frameLeftExtra = display.newImageRect(level, "images/frame-extra.png", extraWidth, height)
@@ -148,9 +151,21 @@ function scene:createFrame()
   physics.addBody(frameBottom, "static", frameBodyParams)
 end
 
+function scene:createObstacles()
+  local obstacleCorner = display.newImageRect(level, "images/obstacle-corner.png", 100, 100)
+  local tobstacleCornerOutline = graphics.newOutline(2, "images/obstacle-corner-outline.png")
+  obstacleCorner.x = level.x + borderWidth + obstacleCorner.width / 2
+  obstacleCorner.y = level.y + config.height - borderWidth - obstacleCorner.height / 2
+
+  physics.addBody(
+    obstacleCorner,
+    "static",
+    { outline = tobstacleCornerOutline, density = 1.0, friction = 0.3, bounce = 0.5 }
+  )
+end
+
 function scene:createTargets()
   local targetEasy = display.newImageRect(level, "images/target-easy.png", 60, 60)
-  local targetEasyOutline = graphics.newOutline(2, "images/target-easy.png")
   targetEasy.x = display.contentWidth / 3
   targetEasy.y = display.contentHeight / 2
 
@@ -160,7 +175,7 @@ function scene:createTargets()
     return true
   end
 
-  physics.addBody(targetEasy, "static", { outline = targetEasyOutline, density = 1.0, friction = 0.3, bounce = 0.5 })
+  physics.addBody(targetEasy, "static", { density = 1.0, friction = 0.3, bounce = 0.5 })
   targetEasy:addEventListener("collision")
 end
 
