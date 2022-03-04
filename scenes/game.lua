@@ -70,7 +70,7 @@ function scene:create(event)
   physics.pause()
   physics.setScale(scale);
   physics.setGravity(0, 9.8)
-  physics.setDrawMode("hybrid");
+  -- physics.setDrawMode("hybrid");
 
   config = require "levels.0001"
 
@@ -185,7 +185,12 @@ function scene:createObstacles()
       local barrier = display.newGroup()
       level:insert(barrier)
 
-      -- local barrierDrawing = display.newImageRect(corner, "images/corner.png", config.width, config.height)
+      local barrierDrawing = display.newImageRect(
+        barrier,
+        "images/" .. config.type .. ".png",
+        config.width,
+        config.height
+      )
       local barrierOutline = display.newImageRect(
         barrier,
         "images/" .. config.type .. "-outline.png",
