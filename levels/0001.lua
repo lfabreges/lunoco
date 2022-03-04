@@ -61,15 +61,30 @@ return {
     {
       type = "vertical-barrier",
       x = borderWidth + unit * 29,
-      y = borderWidth + unit * 20,
+      y = borderWidth + unit * 25,
       width = unit * 4,
       height = unit * 18,
     },
   },
   targets = {
     {
+      type = "easy",
       x = unit * 8,
       y = unit * 5,
+      width = unit * 5,
+      height = unit * 5,
+    },
+    {
+      type = "normal",
+      x = unit * 28,
+      y = unit * 18,
+      width = unit * 5,
+      height = unit * 5,
+    },
+    {
+      type = "hard",
+      x = unit * 7,
+      y = unit * 21,
       width = unit * 5,
       height = unit * 5,
     },

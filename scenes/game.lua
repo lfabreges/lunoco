@@ -70,7 +70,7 @@ function scene:create(event)
   physics.pause()
   physics.setScale(scale);
   physics.setGravity(0, 9.8)
-  physics.setDrawMode("hybrid");
+  -- physics.setDrawMode("hybrid");
 
   config = require "levels.0001"
 
@@ -231,7 +231,12 @@ function scene:createTargets()
     local target = display.newGroup()
     level:insert(target)
 
-    local targetDrawing = display.newImageRect(target, "images/target-easy.png", config.width, config.height)
+    local targetDrawing = display.newImageRect(
+      target,
+      "images/target-" .. config.type .. ".png",
+      config.width,
+      config.height
+    )
     local targetOutline = display.newImageRect(target, "images/target-outline.png", config.width, config.height)
 
     target.anchorChildren = true
