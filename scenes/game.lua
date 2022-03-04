@@ -71,7 +71,7 @@ function scene:create(event)
   physics.pause()
   physics.setScale(scale);
   physics.setGravity(0, 9.8)
-  -- physics.setDrawMode("hybrid");
+  physics.setDrawMode("hybrid");
 
   self:createBackground()
 
@@ -152,31 +152,49 @@ function scene:createFrame()
 end
 
 function scene:createObstacles()
-  local obstacleCorner = display.newImageRect(level, "images/obstacle-corner.png", 100, 100)
-  local tobstacleCornerOutline = graphics.newOutline(2, "images/obstacle-corner-outline.png")
-  obstacleCorner.x = level.x + borderWidth + obstacleCorner.width / 2
-  obstacleCorner.y = level.y + config.height - borderWidth - obstacleCorner.height / 2
+  local corner = display.newGroup()
+  level:insert(corner)
+
+  local cornerDrawing = display.newImageRect(corner, "images/corner.png", 100, 100)
+  local cornerOutline = display.newImageRect(corner, "images/corner-outline.png", 100, 100)
+
+  corner.x = level.x + borderWidth + corner.width / 2
+  corner.y = level.y + config.height - borderWidth - corner.height / 2
 
   physics.addBody(
-    obstacleCorner,
+    corner,
     "static",
-    { outline = tobstacleCornerOutline, density = 1.0, friction = 0.3, bounce = 0.5 }
+    {
+      density = 1.0,
+      friction = 0.3,
+      bounce = 0.5,
+      connectFirstAndLastChainVertex = true,
+      chain = {
+        -50, -50, -49, -45, -45, -33, -41, -26, -35, -17, -27, -7, -20, 1, -4, 15,
+        5, 23, 19, 34, 29, 42, 37, 46, 50, 50, -50, 50
+      }
+    }
   )
 end
 
 function scene:createTargets()
-  local targetEasy = display.newImageRect(level, "images/target-easy.png", 60, 60)
-  targetEasy.x = display.contentWidth / 3
-  targetEasy.y = display.contentHeight / 2
+  local target = display.newGroup()
+  level:insert(target)
 
-  targetEasy.collision = function(self, event)
+  local targetDrawing = display.newImageRect(target, "images/target-easy.png", 60, 60)
+  local targetOutline = display.newImageRect(target, "images/target-outline.png", 60, 60)
+
+  target.x = display.contentWidth / 3
+  target.y = display.contentHeight / 2
+
+  target.collision = function(self, event)
     transition.to(self, { time = 100, alpha = 0.1, onComplete = physics.removeBody } )
-    targetEasy:removeEventListener("collision")
+    target:removeEventListener("collision")
     return true
   end
 
-  physics.addBody(targetEasy, "static", { density = 1.0, friction = 0.3, bounce = 0.5 })
-  targetEasy:addEventListener("collision")
+  physics.addBody(target, "static", { density = 1.0, friction = 0.3, bounce = 0.5 })
+  target:addEventListener("collision")
 end
 
 function scene:enterFrame()
