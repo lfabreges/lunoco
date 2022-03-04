@@ -70,7 +70,7 @@ function scene:create(event)
   physics.pause()
   physics.setScale(scale);
   physics.setGravity(0, 9.8)
-  -- physics.setDrawMode("hybrid");
+  physics.setDrawMode("hybrid");
 
   config = require "levels.0001"
 
@@ -159,8 +159,22 @@ function scene:createObstacles()
       corner.rotation = config.rotation
 
       local chain = {
-        -50, -50, -49, -45, -45, -33, -41, -26, -35, -17, -27, -7, -20, 1,
-        -4, 15, 5, 23, 19, 34, 29, 42, 37, 46, 50, 50, -50, 50,
+        -50, -50,
+        -49, -44,
+        -47, -38,
+        -45, -33,
+        -41, -26,
+        -35, -17,
+        -27, -7,
+        -20, 1,
+        -4, 18,
+        5, 26,
+        19, 37,
+        29, 43,
+        37, 47,
+        44, 49,
+        50, 50,
+        -50, 50,
       }
 
       local scaledChain = {}
