@@ -78,6 +78,9 @@ function scene:create(event)
   config = {
     width = display.contentWidth,
     height = display.contentHeight,
+    targets = {
+      { x = 140, y = 120, width = 60, height = 60 },
+    },
   }
 
   level = display.newGroup()
@@ -178,23 +181,25 @@ function scene:createObstacles()
 end
 
 function scene:createTargets()
-  local target = display.newGroup()
-  level:insert(target)
+  for _, config in ipairs(config.targets) do
+    local target = display.newGroup()
+    level:insert(target)
 
-  local targetDrawing = display.newImageRect(target, "images/target-easy.png", 60, 60)
-  local targetOutline = display.newImageRect(target, "images/target-outline.png", 60, 60)
+    local targetDrawing = display.newImageRect(target, "images/target-easy.png", config.width, config.height)
+    local targetOutline = display.newImageRect(target, "images/target-outline.png", config.width, config.height)
 
-  target.x = display.contentWidth / 3
-  target.y = display.contentHeight / 2
+    target.x = config.x
+    target.y = config.y
 
-  target.collision = function(self, event)
-    transition.to(self, { time = 100, alpha = 0.1, onComplete = physics.removeBody } )
-    target:removeEventListener("collision")
-    return true
+    target.collision = function(self, event)
+      transition.to(self, { time = 100, alpha = 0.1, onComplete = physics.removeBody } )
+      target:removeEventListener("collision")
+      return true
+    end
+
+    physics.addBody(target, "static", { density = 1.0, friction = 0.3, bounce = 0.5 })
+    target:addEventListener("collision")
   end
-
-  physics.addBody(target, "static", { density = 1.0, friction = 0.3, bounce = 0.5 })
-  target:addEventListener("collision")
 end
 
 function scene:enterFrame()
