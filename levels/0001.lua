@@ -1,6 +1,8 @@
 local borderWidth = 4
-local width = display.contentWidth
-local height = display.contentHeight
+local width = 320
+local height = 480
+local unit = width / 40
+local cornerWidth = unit * 10
 
 return {
   borderWidth = borderWidth,
@@ -8,63 +10,68 @@ return {
   height = height,
   ball = {
     x = width / 2,
-    y = height - borderWidth - 15,
-    width = 30,
+    y = height - borderWidth - unit,
+    width = unit * 4,
   },
   obstacles = {
     {
       type = "corner",
-      x = borderWidth + 40,
-      y = height - borderWidth - 40,
-      width = 80,
-      height = 80,
+      x = borderWidth,
+      y = height - borderWidth - cornerWidth,
+      width = cornerWidth,
+      height = cornerWidth,
     },
     {
       type = "corner",
-      x = width - borderWidth - 40,
-      y = height - borderWidth - 40,
-      width = 80,
-      height = 80,
+      x = width - borderWidth - cornerWidth,
+      y = height - borderWidth,
+      width = cornerWidth,
+      height = cornerWidth,
       rotation = 270,
     },
     {
       type = "corner",
-      x = width - borderWidth - 40,
-      y = borderWidth + 40,
-      width = 80,
-      height = 80,
+      x = width - borderWidth,
+      y = borderWidth + cornerWidth,
+      width = cornerWidth,
+      height = cornerWidth,
       rotation = 180,
     },
     {
       type = "horizontal-barrier",
-      x = borderWidth + 40,
-      y = height - borderWidth - 140,
-      width = 80,
-      height = 30,
+      x = borderWidth,
+      y = borderWidth + unit * 38,
+      width = unit * 10,
+      height = unit * 4,
     },
     {
       type = "horizontal-barrier-large",
-      x = borderWidth + 120,
-      y = height - borderWidth - 220,
-      width = 140,
-      height = 30,
+      x = borderWidth + unit * 5,
+      y = borderWidth + unit * 28,
+      width = unit * 18,
+      height = unit * 4,
     },
     {
       type = "horizontal-barrier-large",
-      x = borderWidth + 150,
-      y = 100,
-      width = 220,
-      height = 30,
+      x = borderWidth + unit * 7,
+      y = unit * 12,
+      width = unit * 26,
+      height = unit * 4,
     },
     {
       type = "vertical-barrier",
-      x = borderWidth + 250,
-      y = height - borderWidth - 220,
-      width = 30,
-      height = 140,
+      x = borderWidth + unit * 29,
+      y = borderWidth + unit * 20,
+      width = unit * 4,
+      height = unit * 18,
     },
   },
   targets = {
-    { x = 80, y = 50, width = 40, height = 40 },
+    {
+      x = unit * 8,
+      y = unit * 5,
+      width = unit * 5,
+      height = unit * 5,
+    },
   },
 }

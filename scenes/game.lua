@@ -154,6 +154,9 @@ function scene:createObstacles()
       local cornerDrawing = display.newImageRect(corner, "images/corner.png", config.width, config.height)
       local cornerOutline = display.newImageRect(corner, "images/corner-outline.png", config.width, config.height)
 
+      corner.anchorChildren = true
+      corner.anchorX = 0
+      corner.anchorY = 0
       corner.x = config.x
       corner.y = config.y
       corner.rotation = config.rotation
@@ -212,6 +215,9 @@ function scene:createObstacles()
         config.height
       )
 
+      barrier.anchorChildren = true
+      barrier.anchorX = 0
+      barrier.anchorY = 0
       barrier.x = config.x
       barrier.y = config.y
 
@@ -228,6 +234,9 @@ function scene:createTargets()
     local targetDrawing = display.newImageRect(target, "images/target-easy.png", config.width, config.height)
     local targetOutline = display.newImageRect(target, "images/target-outline.png", config.width, config.height)
 
+    target.anchorChildren = true
+    target.anchorX = 0
+    target.anchorY = 0
     target.x = config.x
     target.y = config.y
 
