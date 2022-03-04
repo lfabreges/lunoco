@@ -78,6 +78,15 @@ function scene:create(event)
   config = {
     width = display.contentWidth,
     height = display.contentHeight,
+    obstacles = {
+      {
+        type = "corner",
+        x = borderWidth + 50,
+        y = display.contentHeight - borderWidth - 50,
+        width = 100,
+        height = 100,
+      },
+    },
     targets = {
       { x = 140, y = 120, width = 60, height = 60 },
     },
@@ -85,7 +94,6 @@ function scene:create(event)
 
   level = display.newGroup()
   self.view:insert(level)
-
   self:createFrame()
   self:createObstacles()
   self:createTargets()
@@ -155,29 +163,42 @@ function scene:createFrame()
 end
 
 function scene:createObstacles()
-  local corner = display.newGroup()
-  level:insert(corner)
+  for _, config in ipairs(config.obstacles) do
+    if config.type == "corner" then
+      local corner = display.newGroup()
+      level:insert(corner)
 
-  local cornerDrawing = display.newImageRect(corner, "images/corner.png", 100, 100)
-  local cornerOutline = display.newImageRect(corner, "images/corner-outline.png", 100, 100)
+      local cornerDrawing = display.newImageRect(corner, "images/corner.png", config.width, config.height)
+      local cornerOutline = display.newImageRect(corner, "images/corner-outline.png", config.width, config.height)
 
-  corner.x = level.x + borderWidth + corner.width / 2
-  corner.y = level.y + config.height - borderWidth - corner.height / 2
+      corner.x = config.x
+      corner.y = config.y
 
-  physics.addBody(
-    corner,
-    "static",
-    {
-      density = 1.0,
-      friction = 0.3,
-      bounce = 0.5,
-      connectFirstAndLastChainVertex = true,
-      chain = {
-        -50, -50, -49, -45, -45, -33, -41, -26, -35, -17, -27, -7, -20, 1, -4, 15,
-        5, 23, 19, 34, 29, 42, 37, 46, 50, 50, -50, 50
+      local chain = {
+        -50, -50, -49, -45, -45, -33, -41, -26, -35, -17, -27, -7, -20, 1,
+        -4, 15, 5, 23, 19, 34, 29, 42, 37, 46, 50, 50, -50, 50,
       }
-    }
-  )
+
+      local scaledChain = {}
+
+      for i = 1, #chain, 2 do
+        scaledChain[i] = chain[i] * config.width / 100
+        scaledChain[i + 1] = chain[i + 1] * config.height / 100
+      end
+
+      physics.addBody(
+        corner,
+        "static",
+        {
+          density = 1.0,
+          friction = 0.3,
+          bounce = 0.5,
+          connectFirstAndLastChainVertex = true,
+          chain = scaledChain
+        }
+      )
+    end
+  end
 end
 
 function scene:createTargets()
