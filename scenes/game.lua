@@ -2,7 +2,6 @@ local composer = require "composer"
 
 local ball = nil
 local ballImpulseForce = nil
-local borderWidth = 4
 local config = nil
 local level = nil
 local predictedBallPath = nil
@@ -73,41 +72,9 @@ function scene:create(event)
   physics.setGravity(0, 9.8)
   physics.setDrawMode("hybrid");
 
+  config = require "levels.0001"
+
   self:createBackground()
-
-  config = {
-    width = display.contentWidth,
-    height = display.contentHeight,
-    obstacles = {
-      {
-        type = "corner",
-        x = borderWidth + 50,
-        y = display.contentHeight - borderWidth - 50,
-        width = 100,
-        height = 100,
-      },
-      {
-        type = "corner",
-        x = display.contentWidth - borderWidth - 50,
-        y = display.contentHeight - borderWidth - 50,
-        width = 100,
-        height = 100,
-        rotation = 270,
-      },
-      {
-        type = "corner",
-        x = display.contentWidth - borderWidth - 50,
-        y = borderWidth + 50,
-        width = 100,
-        height = 100,
-        rotation = 180,
-      },
-    },
-    targets = {
-      { x = 140, y = 120, width = 60, height = 60 },
-    },
-  }
-
   level = display.newGroup()
   self.view:insert(level)
   self:createFrame()
@@ -140,6 +107,7 @@ function scene:createBall()
 end
 
 function scene:createFrame()
+  local borderWidth = config.borderWidth
   local width = config.width
   local height = config.height
   local frameLeft = display.newImageRect(level, "images/frame-left.png", borderWidth, height)
