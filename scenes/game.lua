@@ -86,6 +86,22 @@ function scene:create(event)
         width = 100,
         height = 100,
       },
+      {
+        type = "corner",
+        x = display.contentWidth - borderWidth - 50,
+        y = display.contentHeight - borderWidth - 50,
+        width = 100,
+        height = 100,
+        rotation = 270,
+      },
+      {
+        type = "corner",
+        x = display.contentWidth - borderWidth - 50,
+        y = borderWidth + 50,
+        width = 100,
+        height = 100,
+        rotation = 180,
+      },
     },
     targets = {
       { x = 140, y = 120, width = 60, height = 60 },
@@ -173,6 +189,7 @@ function scene:createObstacles()
 
       corner.x = config.x
       corner.y = config.y
+      corner.rotation = config.rotation
 
       local chain = {
         -50, -50, -49, -45, -45, -33, -41, -26, -35, -17, -27, -7, -20, 1,
