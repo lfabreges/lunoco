@@ -98,12 +98,11 @@ function scene:createBackground()
 end
 
 function scene:createBall()
-  ball = display.newImageRect(level, "images/ball.png", 40, 40)
-  ball.x = display.contentWidth / 2
-  ball.y = display.contentHeight / 2
+  ball = display.newImageRect(level, "images/ball.png", config.ball.width, config.ball.width)
+  ball.x = config.ball.x
+  ball.y = config.ball.y
   physics.addBody(ball, { radius = ball.width / 2 - 1, density = 1.0, friction = 0.3, bounce = 0.5 })
   ball.angularDamping = 1.5
-  ball:setLinearVelocity(25, -60)
 end
 
 function scene:createFrame()
@@ -182,6 +181,22 @@ function scene:createObstacles()
           chain = scaledChain
         }
       )
+    elseif config.type:sub(1, 18) == "horizontal-barrier" or config.type:sub(1, 16) == "vertical-barrier" then
+      local barrier = display.newGroup()
+      level:insert(barrier)
+
+      -- local barrierDrawing = display.newImageRect(corner, "images/corner.png", config.width, config.height)
+      local barrierOutline = display.newImageRect(
+        barrier,
+        "images/" .. config.type .. "-outline.png",
+        config.width,
+        config.height
+      )
+
+      barrier.x = config.x
+      barrier.y = config.y
+
+      physics.addBody(barrier, "static", { density = 1.0, friction = 0.3, bounce = 0.5 })
     end
   end
 end
