@@ -8,6 +8,10 @@ local predictedBallPath = nil
 local scale = 30
 local scene = composer.newScene()
 
+local sounds = {
+  ball = audio.loadSound("sounds/ball.wav"),
+}
+
 local handleBallImpulseOnScreenTouch
 local predictBallPathOnLateUpdate
 local removePredictedBallPath
@@ -19,6 +23,8 @@ handleBallImpulseOnScreenTouch = function(event)
   if (event.phase == "ended") then
     removePredictedBallPath()
     ball:applyLinearImpulse(_ballImpulseForce.x / scale, _ballImpulseForce.y / scale, ball.x, ball.y)
+    audio.setVolume(0.2, { channel = 1 });
+    audio.play(sounds.ball, { channel = 1 })
   elseif (event.phase == "moved") then
     ballImpulseForce = _ballImpulseForce
   end
@@ -68,9 +74,9 @@ end
 function scene:create(event)
   physics.start()
   physics.pause()
-  physics.setScale(scale);
+  physics.setScale(scale)
   physics.setGravity(0, 9.8)
-  -- physics.setDrawMode("hybrid");
+  -- physics.setDrawMode("hybrid")
 
   config = require "levels.0001"
 
@@ -296,7 +302,10 @@ function scene:hide(event)
     Runtime:removeEventListener("lateUpdate", predictBallPathOnLateUpdate)
     Runtime:removeEventListener("touch", handleBallImpulseOnScreenTouch)
     Runtime:removeEventListener("enterFrame", scene)
+
+    audio.stop()
     physics.stop()
+
     composer.removeScene("game")
   end
 end
@@ -306,6 +315,11 @@ function scene:destroy(event)
   ball = nil
   level = nil
   predictedBallPath = nil
+
+  for key, _ in pairs(sounds) do
+    audio.dispose(sounds[key])
+    soundTable[key] = nil
+  end
 end
 
 scene:addEventListener("create", scene)
