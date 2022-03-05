@@ -119,7 +119,7 @@ function scene:createBall()
   ball.angularDamping = 1.5
 
   ball.postCollision = function(self, event)
-    if event.force >= 1 then
+    if event.force >= 2 then
       play(sounds.collision, event.force / 100)
     end
   end
