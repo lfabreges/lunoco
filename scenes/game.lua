@@ -142,12 +142,16 @@ function scene:createFrame()
   local frameRightExtra = display.newImageRect(level, "images/frame-extra.png", extraWidth, height)
   local frameBottomExtra = display.newImageRect(level, "images/frame-extra.png", extraWidth, extraHeight)
 
+  frameLeft.type = "frame"
   frameLeft.x = frameLeft.width / 2
   frameLeft.y = height / 2
+  frameTop.type = "frame"
   frameTop.x = width / 2
   frameTop.y = frameTop.height / 2
+  frameRight.type = "frame"
   frameRight.x = width - frameRight.width / 2
   frameRight.y = height / 2
+  frameBottom.type = "frame"
   frameBottom.x = width / 2
   frameBottom.y = height - frameBottom.height / 2
   frameLeftExtra.x = 0 - frameLeftExtra.width / 2
