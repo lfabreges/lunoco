@@ -9,10 +9,13 @@ local scale = 30
 local scene = composer.newScene()
 
 local sounds = {
-  ball = audio.loadSound("sounds/ball.wav"),
+  ball = { handle = audio.loadSound("sounds/ball.wav"), volume = 0.2 },
+  collision = { handle = audio.loadSound("sounds/collision.wav"), volume = 0.1 },
+  targetDestroyed = { handle = audio.loadSound("sounds/target-destroyed.wav"), volume = 0.4 },
 }
 
 local handleBallImpulseOnScreenTouch
+local play
 local predictBallPathOnLateUpdate
 local removePredictedBallPath
 
@@ -23,13 +26,18 @@ handleBallImpulseOnScreenTouch = function(event)
   if (event.phase == "ended") then
     removePredictedBallPath()
     ball:applyLinearImpulse(_ballImpulseForce.x / scale, _ballImpulseForce.y / scale, ball.x, ball.y)
-    audio.setVolume(0.2, { channel = 1 });
-    audio.play(sounds.ball, { channel = 1 })
+    play(sounds.ball)
   elseif (event.phase == "moved") then
     ballImpulseForce = _ballImpulseForce
   end
 
   return true
+end
+
+play = function(sound, volume)
+  local freeChannel = audio.findFreeChannel()
+  audio.setVolume(volume or sound.volume, { channel = freeChannel })
+  audio.play(sound.handle, { channel = freeChannel })
 end
 
 predictBallPathOnLateUpdate = function()
@@ -109,6 +117,14 @@ function scene:createBall()
   ball.y = config.ball.y
   physics.addBody(ball, { radius = ball.width / 2 - 1, density = 1.0, friction = 0.3, bounce = 0.5 })
   ball.angularDamping = 1.5
+
+  ball.postCollision = function(self, event)
+    if event.force >= 1 then
+      play(sounds.collision, event.force / 100)
+    end
+  end
+
+  ball:addEventListener("postCollision")
 end
 
 function scene:createFrame()
@@ -160,6 +176,7 @@ function scene:createObstacles()
       local cornerDrawing = display.newImageRect(corner, "images/corner.png", config.width, config.height)
       local cornerOutline = display.newImageRect(corner, "images/corner-outline.png", config.width, config.height)
 
+      corner.type = "corner"
       corner.anchorChildren = true
       corner.anchorX = 0
       corner.anchorY = 0
@@ -221,6 +238,7 @@ function scene:createObstacles()
         config.height
       )
 
+      barrier.type = "barrier"
       barrier.anchorChildren = true
       barrier.anchorX = 0
       barrier.anchorY = 0
@@ -245,6 +263,7 @@ function scene:createTargets()
     )
     local targetOutline = display.newImageRect(target, "images/target-outline.png", config.width, config.height)
 
+    target.type = "target"
     target.anchorChildren = true
     target.anchorX = 0
     target.anchorY = 0
@@ -254,6 +273,7 @@ function scene:createTargets()
     target.collision = function(self, event)
       transition.to(self, { time = 100, alpha = 0.1, onComplete = physics.removeBody } )
       target:removeEventListener("collision")
+      play(sounds.targetDestroyed)
       return true
     end
 
