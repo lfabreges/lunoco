@@ -26,6 +26,7 @@ handleBallImpulseOnScreenTouch = function(event)
   if (event.phase == "ended") then
     removePredictedBallPath()
     ball:setLinearVelocity(_ballImpulseForce.x, _ballImpulseForce.y)
+    ball.numberOfShots = ball.numberOfShots + 1
     play(sounds.ball)
   elseif (event.phase == "moved") then
     ballImpulseForce = _ballImpulseForce
@@ -112,14 +113,16 @@ function scene:createBall()
   ball = display.newImageRect(level, "images/ball.png", config.ball.width, config.ball.width)
   ball.x = config.ball.x
   ball.y = config.ball.y
-  physics.addBody(ball, { radius = ball.width / 2 - 1, density = 1.0, friction = 0.3, bounce = 0.5 })
-  ball.angularDamping = 1.5
+  ball.numberOfShots = 0
 
   ball.postCollision = function(self, event)
     if event.force >= 2 then
       play(sounds.collision, event.force / 100)
     end
   end
+
+  physics.addBody(ball, { radius = ball.width / 2 - 1, density = 1.0, friction = 0.3, bounce = 0.5 })
+  ball.angularDamping = 1.5
 
   ball:addEventListener("postCollision")
 end
@@ -226,18 +229,10 @@ function scene:createObstacles()
       local barrier = display.newGroup()
       level:insert(barrier)
 
-      local barrierDrawing = display.newImageRect(
-        barrier,
-        "images/" .. config.type .. ".png",
-        config.width,
-        config.height
-      )
-      local barrierOutline = display.newImageRect(
-        barrier,
-        "images/" .. config.type .. "-outline.png",
-        config.width,
-        config.height
-      )
+      local barrierImage = "images/" .. config.type .. ".png"
+      local barrierDrawing = display.newImageRect(barrier, barrierImage, config.width, config.height)
+      local barrierOutlineImage =  "images/" .. config.type .. "-outline.png"
+      local barrierOutline = display.newImageRect(barrier, barrierOutlineImage, config.width, config.height)
 
       barrier.type = "barrier"
       barrier.anchorChildren = true
@@ -252,16 +247,14 @@ function scene:createObstacles()
 end
 
 function scene:createTargets()
+  local numberOfTargets = 0
+
   for _, config in ipairs(config.targets) do
     local target = display.newGroup()
     level:insert(target)
 
-    local targetDrawing = display.newImageRect(
-      target,
-      "images/target-" .. config.type .. ".png",
-      config.width,
-      config.height
-    )
+    local targetImage = "images/target-" .. config.type .. ".png"
+    local targetDrawing = display.newImageRect(target, targetImage, config.width, config.height)
     local targetOutline = display.newImageRect(target, "images/target-outline.png", config.width, config.height)
 
     target.type = "target"
@@ -271,15 +264,36 @@ function scene:createTargets()
     target.x = config.x
     target.y = config.y
 
-    target.collision = function(self, event)
-      transition.to(self, { time = 100, alpha = 0.1, onComplete = physics.removeBody } )
-      target:removeEventListener("collision")
-      play(sounds.targetDestroyed)
-      return true
+    local targetResistance = 5
+
+    if config.type == "easy" then
+      targetResistance = targetResistance / 2
+    elseif config.type == "hard" then
+      targetResistance = targetResistance * 2
     end
 
+    target.postCollision = function(self, event)
+      if event.force < targetResistance then
+        return false
+      end
+
+      transition.to(self, { time = 100, alpha = 0.1, onComplete = physics.removeBody } )
+      target:removeEventListener("postCollision")
+      numberOfTargets = numberOfTargets - 1
+      play(sounds.targetDestroyed)
+
+      print(event.force)
+      print("Collision")
+
+      if (numberOfTargets == 0) then
+        -- TODO GAME OVER
+        print(ball.numberOfShots)
+      end
+    end
+
+    numberOfTargets = numberOfTargets + 1
     physics.addBody(target, "static", { density = 1.0, friction = 0.3, bounce = 0.5 })
-    target:addEventListener("collision")
+    target:addEventListener("postCollision")
   end
 end
 
