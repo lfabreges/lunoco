@@ -1,62 +1,64 @@
 local composer = require "composer"
+local utils = require "utils"
 
 local ball = nil
 local ballImpulseForce = nil
 local config = nil
-local environment = system.getInfo("environment")
 local level = nil
 local levelName = nil
+local numberOfShots = nil
 local predictedBallPath = nil
 local scale = 30
 local scene = composer.newScene()
 
 local sounds = {
-  ball = { handle = audio.loadSound("sounds/ball.wav"), volume = 0.2 },
-  collision = { handle = audio.loadSound("sounds/collision.wav"), volume = 0.1 },
-  targetDestroyed = { handle = audio.loadSound("sounds/target-destroyed.wav"), volume = 0.4 },
+  ball = audio.loadSound("sounds/ball.wav"),
+  collision = audio.loadSound("sounds/collision.wav"),
+  targetDestroyed = audio.loadSound("sounds/target-destroyed.wav"),
 }
 
 local gameOver
 local handleBallImpulseOnScreenTouch
-local isSimulator
-local playAudio
 local predictBallPathOnLateUpdate
 local removePredictedBallPath
 
 gameOver = function()
-  -- TODO GAME OVER WITH STARS DEPENDING ON BALL NUMBER OF SHOTS
+  local numberOfStars = 0
+
+  if numberOfShots <= config.difficulty.three then
+    numberOfStars = 3
+  elseif numberOfShots <= config.difficulty.two then
+    numberOfStars = 2
+  elseif numberOfShots <= config.difficulty.one then
+    numberOfStars = 1
+  end
+
   composer.showOverlay("scenes.game-over", {
     isModal = true,
     effect = "fade",
     time = 100,
-    params = {},
+    params = {
+      levelName = levelName,
+      numberOfShots = numberOfShots,
+      numberOfStars = numberOfStars,
+    },
   })
 end
 
 handleBallImpulseOnScreenTouch = function(event)
-  local _ballImpulseForce = { x = (event.xStart - event.x) * 2, y = (event.yStart - event.y) * 2 }
+  local _ballImpulseForce = { x = (event.xStart - event.x) * 3, y = (event.yStart - event.y) * 3 }
   ballImpulseForce = nil
 
   if (event.phase == "ended") then
     removePredictedBallPath()
     ball:setLinearVelocity(_ballImpulseForce.x, _ballImpulseForce.y)
-    ball.numberOfShots = ball.numberOfShots + 1
-    playAudio(sounds.ball)
+    numberOfShots = numberOfShots + 1
+    utils.playAudio(sounds.ball, 0.4)
   elseif (event.phase == "moved") then
     ballImpulseForce = _ballImpulseForce
   end
 
   return true
-end
-
-isSimulator = function()
-  return environment == "simulator"
-end
-
-playAudio = function(sound, volume)
-  local freeChannel = audio.findFreeChannel()
-  audio.setVolume(volume or sound.volume, { channel = freeChannel })
-  audio.play(sound.handle, { channel = freeChannel })
 end
 
 predictBallPathOnLateUpdate = function()
@@ -101,7 +103,7 @@ function scene:create(event)
   physics.setScale(scale)
   physics.setGravity(0, 9.8)
 
-  if isSimulator() then
+  if utils.isSimulator() then
     -- physics.setDrawMode("hybrid")
   end
 
@@ -128,18 +130,19 @@ function scene:createBackground()
 
   background.anchorX = 0
   background.anchorY = 0
-  background:setFillColor(.5)
+  background:setFillColor(0.5)
 end
 
 function scene:createBall()
   ball = display.newImageRect(level, "images/ball.png", config.ball.width, config.ball.width)
   ball.x = config.ball.x
   ball.y = config.ball.y
-  ball.numberOfShots = 0
+
+  numberOfShots = 0
 
   ball.postCollision = function(self, event)
     if event.force >= 2 then
-      playAudio(sounds.collision, event.force / 100)
+      utils.playAudio(sounds.collision, event.force / 100)
     end
   end
 
@@ -302,7 +305,7 @@ function scene:createTargets()
       transition.to(self, { time = 100, alpha = 0.1, onComplete = physics.removeBody } )
       target:removeEventListener("postCollision")
       numberOfTargets = numberOfTargets - 1
-      playAudio(sounds.targetDestroyed)
+      utils.playAudio(sounds.targetDestroyed, 1.0)
 
       if (numberOfTargets == 0) then
         gameOver()
@@ -349,7 +352,7 @@ function scene:show(event)
     physics.start()
 
     --[[
-    if isSimulator() then
+    if utils.isSimulator() then
       timer.performWithDelay(
         100,
         function()
@@ -382,7 +385,7 @@ function scene:destroy(event)
 
   for key, _ in pairs(sounds) do
     audio.dispose(sounds[key])
-    soundTable[key] = nil
+    sounds[key] = nil
   end
 end
 
