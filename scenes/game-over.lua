@@ -1,5 +1,7 @@
 local composer = require "composer"
+local i18n = require "i18n"
 local utils = require "utils"
+local widget = require "widget"
 
 local scene = composer.newScene()
 
@@ -22,8 +24,39 @@ function scene:create(event)
 
   background.anchorX = 0
   background.anchorY = 0
-  background.alpha = 0.75
   background:setFillColor(0.0)
+
+  display.newText({
+    align = "center",
+    font = native.systemFontBold,
+    fontSize = 25,
+    parent = self.view,
+    text = i18n("finished_in", numberOfShots),
+    x = display.contentCenterX,
+    y = display.contentCenterY / 2,
+  })
+
+  local function retry()
+    composer.gotoScene("scenes.game", {
+      effect = "fade",
+      time = 500,
+      params = { levelName = levelName }
+    })
+    return true
+  end
+
+  local retryButton = widget.newButton({
+    label = i18n("retry"),
+    labelColor = { default = { 1.0 }, over = { 0.5 } },
+    defaultFile = "images/button.png",
+    overFile = "images/button-over.png",
+    width = 154, height = 40,
+    onRelease = retry
+  })
+
+  retryButton.x = display.contentCenterX
+  retryButton.y = display.contentCenterY + display.contentCenterY / 2
+  self.view:insert(retryButton)
 end
 
 
@@ -59,8 +92,9 @@ end
 
 function scene:hide(event)
   if event.phase == "did" then
+    audio.stop()
     timer.cancel("displayStars")
-    composer.removeScene("game-over")
+    composer.removeScene("scenes.game-over")
   end
 end
 

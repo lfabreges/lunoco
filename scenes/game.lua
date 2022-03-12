@@ -33,10 +33,9 @@ gameOver = function()
     numberOfStars = 1
   end
 
-  composer.showOverlay("scenes.game-over", {
-    isModal = true,
+  composer.gotoScene("scenes.game-over", {
     effect = "fade",
-    time = 100,
+    time = 500,
     params = {
       levelName = levelName,
       numberOfShots = numberOfShots,
@@ -373,7 +372,7 @@ function scene:hide(event)
     audio.stop()
     physics.stop()
 
-    composer.removeScene("game")
+    composer.removeScene("scenes.game")
   end
 end
 

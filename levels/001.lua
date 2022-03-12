@@ -15,7 +15,7 @@ return {
   height = height,
   ball = {
     x = width / 2,
-    y = height - borderWidth - unit,
+    y = height - borderWidth - unit * 2,
     width = unit * 4,
   },
   obstacles = {
