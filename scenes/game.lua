@@ -25,7 +25,7 @@ handleBallImpulseOnScreenTouch = function(event)
 
   if (event.phase == "ended") then
     removePredictedBallPath()
-    ball:applyLinearImpulse(_ballImpulseForce.x / scale, _ballImpulseForce.y / scale, ball.x, ball.y)
+    ball:setLinearVelocity(_ballImpulseForce.x, _ballImpulseForce.y)
     play(sounds.ball)
   elseif (event.phase == "moved") then
     ballImpulseForce = _ballImpulseForce
@@ -47,7 +47,6 @@ predictBallPathOnLateUpdate = function()
 
   local timeStepInterval = 0.1
   local gravityX, gravityY = physics.getGravity()
-  local velocityX, velocityY = ball:getLinearVelocity()
 
   removePredictedBallPath()
   predictedBallPath = display.newGroup()
@@ -58,10 +57,8 @@ predictBallPathOnLateUpdate = function()
 
   for step = 0, 10, 1 do
     local time = step * timeStepInterval
-    local accelerationX = ballImpulseForce.x / ball.mass
-    local accelerationY = ballImpulseForce.y / ball.mass
-    local stepX = ball.x + time * velocityX + time * accelerationX + 0.5 * gravityX * scale * (time * time)
-    local stepY = ball.y + time * velocityY + time * accelerationY + 0.5 * gravityY * scale * (time * time)
+    local stepX = ball.x + time * ballImpulseForce.x + 0.5 * gravityX * scale * (time * time)
+    local stepY = ball.y + time * ballImpulseForce.y + 0.5 * gravityY * scale * (time * time)
 
     if step > 0 and physics.rayCast(prevStepX, prevStepY, stepX, stepY, "any") then
       break
