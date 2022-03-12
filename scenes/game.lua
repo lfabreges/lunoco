@@ -250,7 +250,7 @@ function scene:createObstacles()
           chain = scaledChain
         }
       )
-    elseif config.type:sub(1, 18) == "horizontal-barrier" or config.type:sub(1, 16) == "vertical-barrier" then
+    elseif config.type:starts("horizontal-barrier") or config.type:starts("vertical-barrier") then
       local barrier = display.newGroup()
       level:insert(barrier)
 
