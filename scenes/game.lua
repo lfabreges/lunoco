@@ -3,7 +3,9 @@ local composer = require "composer"
 local ball = nil
 local ballImpulseForce = nil
 local config = nil
+local environment = system.getInfo("environment")
 local level = nil
+local levelName = nil
 local predictedBallPath = nil
 local scale = 30
 local scene = composer.newScene()
@@ -14,10 +16,22 @@ local sounds = {
   targetDestroyed = { handle = audio.loadSound("sounds/target-destroyed.wav"), volume = 0.4 },
 }
 
+local gameOver
 local handleBallImpulseOnScreenTouch
-local play
+local isSimulator
+local playAudio
 local predictBallPathOnLateUpdate
 local removePredictedBallPath
+
+gameOver = function()
+  -- TODO GAME OVER WITH STARS DEPENDING ON BALL NUMBER OF SHOTS
+  composer.showOverlay("scenes.game-over", {
+    isModal = true,
+    effect = "fade",
+    time = 100,
+    params = {},
+  })
+end
 
 handleBallImpulseOnScreenTouch = function(event)
   local _ballImpulseForce = { x = (event.xStart - event.x) * 2, y = (event.yStart - event.y) * 2 }
@@ -27,7 +41,7 @@ handleBallImpulseOnScreenTouch = function(event)
     removePredictedBallPath()
     ball:setLinearVelocity(_ballImpulseForce.x, _ballImpulseForce.y)
     ball.numberOfShots = ball.numberOfShots + 1
-    play(sounds.ball)
+    playAudio(sounds.ball)
   elseif (event.phase == "moved") then
     ballImpulseForce = _ballImpulseForce
   end
@@ -35,7 +49,11 @@ handleBallImpulseOnScreenTouch = function(event)
   return true
 end
 
-play = function(sound, volume)
+isSimulator = function()
+  return environment == "simulator"
+end
+
+playAudio = function(sound, volume)
   local freeChannel = audio.findFreeChannel()
   audio.setVolume(volume or sound.volume, { channel = freeChannel })
   audio.play(sound.handle, { channel = freeChannel })
@@ -82,9 +100,13 @@ function scene:create(event)
   physics.pause()
   physics.setScale(scale)
   physics.setGravity(0, 9.8)
-  -- physics.setDrawMode("hybrid")
 
-  config = require "levels.0001"
+  if isSimulator() then
+    -- physics.setDrawMode("hybrid")
+  end
+
+  levelName = event.params.levelName
+  config = require ("levels." .. levelName)
 
   self:createBackground()
   level = display.newGroup()
@@ -117,7 +139,7 @@ function scene:createBall()
 
   ball.postCollision = function(self, event)
     if event.force >= 2 then
-      play(sounds.collision, event.force / 100)
+      playAudio(sounds.collision, event.force / 100)
     end
   end
 
@@ -280,14 +302,10 @@ function scene:createTargets()
       transition.to(self, { time = 100, alpha = 0.1, onComplete = physics.removeBody } )
       target:removeEventListener("postCollision")
       numberOfTargets = numberOfTargets - 1
-      play(sounds.targetDestroyed)
-
-      print(event.force)
-      print("Collision")
+      playAudio(sounds.targetDestroyed)
 
       if (numberOfTargets == 0) then
-        -- TODO GAME OVER
-        print(ball.numberOfShots)
+        gameOver()
       end
     end
 
@@ -329,6 +347,17 @@ function scene:show(event)
     Runtime:addEventListener("touch", handleBallImpulseOnScreenTouch)
     Runtime:addEventListener("lateUpdate", predictBallPathOnLateUpdate)
     physics.start()
+
+    --[[
+    if isSimulator() then
+      timer.performWithDelay(
+        100,
+        function()
+          display.save(self.view, { baseDir = system.TemporaryDirectory, filename = levelName .. ".png" })
+        end
+      )
+    end
+    ]]
   end
 end
 
