@@ -33,6 +33,13 @@ gameOver = function()
     numberOfStars = 1
   end
 
+  local scores = utils.loadScores()
+
+  if (not scores[levelName] or scores[levelName].numberOfShots > numberOfShots) then
+    scores[levelName] = { numberOfShots = numberOfShots, numberOfStars = numberOfStars }
+    utils.saveScores(scores)
+  end
+
   composer.gotoScene("scenes.game-over", {
     effect = "crossFade",
     time = 500,

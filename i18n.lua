@@ -1,17 +1,11 @@
 local json = require "json"
+local utils = require "utils"
 
 local defaultLocale = "en"
 local locale = system.getPreference("ui", "language"):sub(1, 2):lower()
 
 local function loadTranslations(locale)
-  local filepath = system.pathForFile("locales/" .. locale .. ".json")
-  if filepath then
-    local content = json.decodeFile(filepath)
-    if content then
-      return content
-    end
-  end
-  return {}
+  return utils.loadJson("locales/" .. locale .. ".json")
 end
 
 local translations = loadTranslations(defaultLocale)
