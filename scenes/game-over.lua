@@ -50,13 +50,39 @@ function scene:create(event)
     labelColor = { default = { 1.0 }, over = { 0.5 } },
     defaultFile = "images/button.png",
     overFile = "images/button-over.png",
-    width = 154, height = 40,
+    width = 120, height = 40,
     onRelease = retry
   })
 
-  retryButton.x = display.contentCenterX
+  retryButton.x = display.contentCenterX - 70
   retryButton.y = display.contentCenterY + display.contentCenterY / 2
   self.view:insert(retryButton)
+
+  local levelNumber = tonumber(levelName)
+  local nextLevelNumber = levelNumber + 1
+  local nextLevelName = string.format("%03d", nextLevelNumber)
+
+  local function nextLevel()
+    composer.gotoScene("scenes.game", {
+      effect = "crossFade",
+      time = 500,
+      params = { levelName = nextLevelName }
+    })
+    return true
+  end
+
+  local nextButton = widget.newButton({
+    label = i18n("next"),
+    labelColor = { default = { 1.0 }, over = { 0.5 } },
+    defaultFile = "images/button.png",
+    overFile = "images/button-over.png",
+    width = 120, height = 40,
+    onRelease = nextLevel
+  })
+
+  nextButton.x = display.contentCenterX + 70
+  nextButton.y = display.contentCenterY + display.contentCenterY / 2
+  self.view:insert(nextButton)
 end
 
 
