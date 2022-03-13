@@ -34,7 +34,7 @@ gameOver = function()
   end
 
   composer.gotoScene("scenes.game-over", {
-    effect = "fade",
+    effect = "crossFade",
     time = 500,
     params = {
       levelName = levelName,

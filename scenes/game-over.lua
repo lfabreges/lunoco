@@ -38,7 +38,7 @@ function scene:create(event)
 
   local function retry()
     composer.gotoScene("scenes.game", {
-      effect = "fade",
+      effect = "crossFade",
       time = 500,
       params = { levelName = levelName }
     })
