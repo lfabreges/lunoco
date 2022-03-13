@@ -19,6 +19,7 @@ local sounds = {
 
 local gameOver
 local handleBallImpulseOnScreenTouch
+local pauseOnTap
 local predictBallPathOnLateUpdate
 local removePredictedBallPath
 
@@ -55,15 +56,26 @@ handleBallImpulseOnScreenTouch = function(event)
   local _ballImpulseForce = { x = (event.xStart - event.x) * 3, y = (event.yStart - event.y) * 3 }
   ballImpulseForce = nil
 
-  if (event.phase == "ended") then
+  if event.phase == "began" then
+    display.getCurrentStage():setFocus(event.target)
+  elseif event.phase == "ended" or event.phase == "cancelled" then
     removePredictedBallPath()
-    ball:setLinearVelocity(_ballImpulseForce.x, _ballImpulseForce.y)
-    numberOfShots = numberOfShots + 1
-    utils.playAudio(sounds.ball, 0.4)
-  elseif (event.phase == "moved") then
+    display.getCurrentStage():setFocus(nil)
+
+    if event.phase == "ended" then
+      ball:setLinearVelocity(_ballImpulseForce.x, _ballImpulseForce.y)
+      numberOfShots = numberOfShots + 1
+      utils.playAudio(sounds.ball, 0.4)
+    end
+  elseif event.phase == "moved" then
     ballImpulseForce = _ballImpulseForce
   end
 
+  return true
+end
+
+pauseOnTap = function()
+  scene:pause()
   return true
 end
 
@@ -110,33 +122,42 @@ function scene:create(event)
   physics.setGravity(0, 9.8)
 
   if utils.isSimulator() then
-    -- physics.setDrawMode("hybrid")
+    physics.setDrawMode("hybrid")
   end
 
   levelName = event.params.levelName
   config = require ("levels." .. levelName)
 
-  self:createBackground()
+  local screenX = display.screenOriginX
+  local screenY = display.screenOriginY
+  local screenWidth = display.actualContentWidth
+  local screenHeight = display.actualContentHeight
+
+  local background = display.newRect(self.view, screenX, screenY, screenWidth, screenHeight)
+  background.anchorX = 0
+  background.anchorY = 0
+  background:setFillColor(0.5)
+
   level = display.newGroup()
-  self.view:insert(level)
   self:createFrame()
   self:createObstacles()
   self:createTargets()
   self:createBall()
-end
+  self.view:insert(level)
 
-function scene:createBackground()
-  local background = display.newRect(
-    self.view,
-    display.screenOriginX,
-    display.screenOriginY,
-    display.actualContentWidth,
-    display.actualContentHeight
-  )
+  local tapRectangle = display.newRect(self.view, screenX, screenY, screenWidth, screenHeight * 0.2)
+  tapRectangle.anchorX = 0
+  tapRectangle.anchorY = 0
+  tapRectangle.alpha = 0
+  tapRectangle.isHitTestable = true
+  tapRectangle:addEventListener("tap", pauseOnTap)
 
-  background.anchorX = 0
-  background.anchorY = 0
-  background:setFillColor(0.5)
+  local touchRectangle = display.newRect(self.view, screenX, screenY + screenHeight, screenWidth, screenHeight * 0.8)
+  touchRectangle.anchorX = 0
+  touchRectangle.anchorY = 1
+  touchRectangle.alpha = 0
+  touchRectangle.isHitTestable = true
+  touchRectangle:addEventListener("touch", handleBallImpulseOnScreenTouch)
 end
 
 function scene:createBall()
@@ -228,11 +249,14 @@ function scene:createObstacles()
         -35, -17,
         -27, -7,
         -20, 1,
-        -4, 18,
-        5, 26,
-        19, 37,
-        29, 43,
-        37, 47,
+        -14, 8,
+        -8, 14,
+        -1, 20,
+        7, 27,
+        17, 35,
+        26, 41,
+        33, 45,
+        38, 47,
         44, 49,
         50, 50,
         -50, 50,
@@ -350,10 +374,20 @@ function scene:enterFrame()
   end
 end
 
+function scene:pause(event)
+  audio.pause()
+  physics.pause()
+  composer.showOverlay("scenes.pause", { isModal = true })
+end
+
+function scene:resume()
+  physics.start()
+  audio.resume()
+end
+
 function scene:show(event)
   if event.phase == "did" then
     Runtime:addEventListener("enterFrame", scene)
-    Runtime:addEventListener("touch", handleBallImpulseOnScreenTouch)
     Runtime:addEventListener("lateUpdate", predictBallPathOnLateUpdate)
     physics.start()
 
@@ -373,12 +407,9 @@ end
 function scene:hide(event)
   if event.phase == "did" then
     Runtime:removeEventListener("lateUpdate", predictBallPathOnLateUpdate)
-    Runtime:removeEventListener("touch", handleBallImpulseOnScreenTouch)
     Runtime:removeEventListener("enterFrame", scene)
-
     audio.stop()
     physics.stop()
-
     composer.removeScene("scenes.game")
   end
 end
