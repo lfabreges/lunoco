@@ -95,7 +95,7 @@ function scene:show(event)
     stars = display.newGroup()
     self.view:insert(stars)
   elseif event.phase == "did" then
-    timer.performWithDelay(1000, displayStars, 3, "displayStars")
+    timer.performWithDelay(500, displayStars, 3, "displayStars")
   end
 end
 
