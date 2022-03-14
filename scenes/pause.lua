@@ -15,7 +15,7 @@ local function resumeGame()
   return true
 end
 
-local function retryGame()
+local function retryLevel()
   navigation.reloadGame(levelName)
   return true
 end
@@ -42,7 +42,7 @@ function scene:create(event)
     defaultFile = "images/button.png",
     overFile = "images/button-over.png",
     width = 160, height = 40,
-    onRelease = retryGame
+    onRelease = retryLevel
   })
 
   retryButton.x = display.contentCenterX
