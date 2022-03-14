@@ -9,10 +9,13 @@ local function loadTranslations(locale)
 end
 
 local translations = loadTranslations(defaultLocale)
-local localizedTranslations = loadTranslations(locale)
 
-for key, value in pairs(localizedTranslations) do
-  translations[key] = value
+-- TODO Add supported locales here
+if locale == "" then
+  local localizedTranslations = loadTranslations(locale)
+  for key, value in pairs(localizedTranslations) do
+    translations[key] = value
+  end
 end
 
 local function i18n(key, ...)
