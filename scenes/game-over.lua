@@ -1,5 +1,7 @@
+local components = require "components"
 local composer = require "composer"
 local i18n = require "i18n"
+local navigation = require "navigation"
 local utils = require "utils"
 local widget = require "widget"
 
@@ -14,17 +16,7 @@ function scene:create(event)
   local levelName = event.params.levelName
   local numberOfShots = event.params.numberOfShots
 
-  local background = display.newRect(
-    self.view,
-    display.screenOriginX,
-    display.screenOriginY,
-    display.actualContentWidth,
-    display.actualContentHeight
-  )
-
-  background.anchorX = 0
-  background.anchorY = 0
-  background:setFillColor(0.0)
+  components.newOverlayBackground(self.view)
 
   display.newText({
     align = "center",
@@ -37,11 +29,7 @@ function scene:create(event)
   })
 
   local function retry()
-    composer.gotoScene("scenes.game", {
-      effect = "crossFade",
-      time = 500,
-      params = { levelName = levelName }
-    })
+    navigation.reloadGame(levelName)
     return true
   end
 
@@ -63,11 +51,7 @@ function scene:create(event)
   local nextLevelName = string.format("%03d", nextLevelNumber)
 
   local function nextLevel()
-    composer.gotoScene("scenes.game", {
-      effect = "crossFade",
-      time = 500,
-      params = { levelName = nextLevelName }
-    })
+    navigation.reloadGame(nextLevelName)
     return true
   end
 
@@ -83,13 +67,6 @@ function scene:create(event)
   nextButton.x = display.contentCenterX + 70
   nextButton.y = display.contentCenterY + display.contentCenterY / 2
   self.view:insert(nextButton)
-end
-
-
-playAudio = function(sound, volume)
-  local freeChannel = audio.findFreeChannel()
-  audio.setVolume(volume or sound.volume, { channel = freeChannel })
-  audio.play(sound.handle, { channel = freeChannel })
 end
 
 function scene:show(event)

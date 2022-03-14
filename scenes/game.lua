@@ -1,4 +1,5 @@
 local composer = require "composer"
+local navigation = require "navigation"
 local utils = require "utils"
 
 local ball = nil
@@ -41,7 +42,8 @@ gameOver = function()
     utils.saveScores(scores)
   end
 
-  composer.gotoScene("scenes.game-over", {
+  composer.showOverlay("scenes.game-over", {
+    isModal = true,
     effect = "crossFade",
     time = 500,
     params = {
@@ -122,7 +124,7 @@ function scene:create(event)
   physics.setGravity(0, 9.8)
 
   if utils.isSimulator() then
-    physics.setDrawMode("hybrid")
+    -- physics.setDrawMode("hybrid")
   end
 
   levelName = event.params.levelName
@@ -145,14 +147,14 @@ function scene:create(event)
   self:createBall()
   self.view:insert(level)
 
-  local tapRectangle = display.newRect(self.view, screenX, screenY, screenWidth, screenHeight * 0.2)
+  local tapRectangle = display.newRect(self.view, screenX, screenY, screenWidth, screenHeight * 0.3)
   tapRectangle.anchorX = 0
   tapRectangle.anchorY = 0
   tapRectangle.alpha = 0
   tapRectangle.isHitTestable = true
   tapRectangle:addEventListener("tap", pauseOnTap)
 
-  local touchRectangle = display.newRect(self.view, screenX, screenY + screenHeight, screenWidth, screenHeight * 0.8)
+  local touchRectangle = display.newRect(self.view, screenX, screenY + screenHeight, screenWidth, screenHeight * 0.7)
   touchRectangle.anchorX = 0
   touchRectangle.anchorY = 1
   touchRectangle.alpha = 0
@@ -377,7 +379,7 @@ end
 function scene:pause(event)
   audio.pause()
   physics.pause()
-  composer.showOverlay("scenes.pause", { isModal = true })
+  composer.showOverlay("scenes.pause", { isModal = true, params = { levelName = levelName }})
 end
 
 function scene:resume()
