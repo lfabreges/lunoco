@@ -9,6 +9,11 @@ local scene = composer.newScene()
 local levelName = nil
 local shouldResumeGame = false
 
+local function gotoLevels()
+  navigation.gotoLevels()
+  return true
+end
+
 local function resumeGame()
   shouldResumeGame = true
   composer.hideOverlay()
@@ -33,7 +38,7 @@ function scene:create(event)
   })
 
   resumeButton.x = display.contentCenterX
-  resumeButton.y = display.contentCenterY - 30
+  resumeButton.y = display.contentCenterY - 60
   self.view:insert(resumeButton)
 
   local retryButton = widget.newButton({
@@ -46,8 +51,21 @@ function scene:create(event)
   })
 
   retryButton.x = display.contentCenterX
-  retryButton.y = display.contentCenterY + 30
+  retryButton.y = display.contentCenterY
   self.view:insert(retryButton)
+
+  local levelsButton = widget.newButton({
+    label = i18n("levels"),
+    labelColor = { default = { 1.0 }, over = { 0.5 } },
+    defaultFile = "images/button.png",
+    overFile = "images/button-over.png",
+    width = 160, height = 40,
+    onRelease = gotoLevels
+  })
+
+  levelsButton.x = display.contentCenterX
+  levelsButton.y = display.contentCenterY + 60
+  self.view:insert(levelsButton)
 end
 
 function scene:show(event)

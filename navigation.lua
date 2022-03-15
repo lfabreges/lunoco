@@ -2,6 +2,13 @@ local composer = require "composer"
 
 local navigation = {}
 
+local defaultEffect = "crossFade"
+local defaultTime = 500
+
+navigation.gotoLevels = function()
+  composer.gotoScene("scenes.levels", { effect = defaultEffect, time = defaultTime })
+end
+
 navigation.reloadGame = function(levelName)
   composer.hideOverlay()
 
@@ -15,8 +22,8 @@ navigation.reloadGame = function(levelName)
     params = {
       screenCapture = screenCapture,
       nextScene = "scenes.game",
-      effect = "crossFade",
-      time = 500,
+      effect = defaultEffect,
+      time = defaultTime,
       nextParams = {
         levelName = levelName
       }

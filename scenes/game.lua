@@ -377,16 +377,14 @@ function scene:show(event)
 
     physics.start()
 
-    --[[
     if utils.isSimulator() then
       timer.performWithDelay(
-        100,
+        0,
         function()
           display.save(self.view, { baseDir = system.TemporaryDirectory, filename = levelName .. ".png" })
         end
       )
     end
-    ]]
   end
 end
 

@@ -31,11 +31,8 @@ local function displayStars(event)
   utils.playAudio(isFullStar and sounds.starFull or sounds.starEmpty, 1.0)
 end
 
-local function gotoNextLevel()
-  local levelNumber = tonumber(levelName)
-  local nextLevelNumber = levelNumber + 1
-  local nextLevelName = string.format("%03d", nextLevelNumber)
-  navigation.reloadGame(nextLevelName)
+local function gotoLevels()
+  navigation.gotoLevels()
   return true
 end
 
@@ -70,18 +67,18 @@ function scene:create(event)
   retryButton.y = display.contentCenterY + display.contentCenterY / 2
   self.view:insert(retryButton)
 
-  local nextButton = widget.newButton({
-    label = i18n("next"),
+  local levelsButton = widget.newButton({
+    label = i18n("levels"),
     labelColor = { default = { 1.0 }, over = { 0.5 } },
     defaultFile = "images/button.png",
     overFile = "images/button-over.png",
     width = 120, height = 40,
-    onRelease = gotoNextLevel
+    onRelease = gotoLevels
   })
 
-  nextButton.x = display.contentCenterX + 70
-  nextButton.y = display.contentCenterY + display.contentCenterY / 2
-  self.view:insert(nextButton)
+  levelsButton.x = display.contentCenterX + 70
+  levelsButton.y = display.contentCenterY + display.contentCenterY / 2
+  self.view:insert(levelsButton)
 end
 
 function scene:show(event)
