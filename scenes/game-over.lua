@@ -97,10 +97,12 @@ function scene:show(event)
 end
 
 function scene:hide(event)
-  if event.phase == "did" then
-    display.remove(stars)
-    audio.stop()
+  if event.phase == "will" then
     timer.cancel("displayStars")
+    audio.stop()
+  elseif event.phase == "did" then
+    display.remove(stars)
+    stars = nil
   end
 end
 

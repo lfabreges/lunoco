@@ -19,13 +19,7 @@ local sounds = {
   targetDestroyed = audio.loadSound("sounds/target-destroyed.wav"),
 }
 
-local gameOver
-local handleBallImpulseOnScreenTouch
-local pauseOnTap
-local predictBallPathOnLateUpdate
-local removePredictedBallPath
-
-gameOver = function()
+local function gameOver()
   local numberOfStars = 0
 
   if numberOfShots <= config.difficulty.three then
@@ -55,14 +49,15 @@ gameOver = function()
   })
 end
 
-handleBallImpulseOnScreenTouch = function(event)
+local function handleBallImpulseOnScreenTouch(event)
   local _ballImpulseForce = { x = (event.xStart - event.x) * 3, y = (event.yStart - event.y) * 3 }
   ballImpulseForce = nil
 
   if event.phase == "began" then
     display.getCurrentStage():setFocus(event.target)
   elseif event.phase == "ended" or event.phase == "cancelled" then
-    removePredictedBallPath()
+    display.remove(predictedBallPath)
+    predictedBallPath = nil
     display.getCurrentStage():setFocus(nil)
 
     if event.phase == "ended" then
@@ -77,12 +72,12 @@ handleBallImpulseOnScreenTouch = function(event)
   return true
 end
 
-pauseOnTap = function()
+local function pauseOnTap()
   scene:pause()
   return true
 end
 
-predictBallPathOnLateUpdate = function()
+local function predictBallPathOnLateUpdate()
   if not ballImpulseForce then
     return false
   end
@@ -90,7 +85,7 @@ predictBallPathOnLateUpdate = function()
   local timeStepInterval = 0.1
   local gravityX, gravityY = physics.getGravity()
 
-  removePredictedBallPath()
+  display.remove(predictedBallPath)
   predictedBallPath = components.newGroup(level)
 
   local prevStepX = nil
@@ -112,24 +107,7 @@ predictBallPathOnLateUpdate = function()
   end
 end
 
-removePredictedBallPath = function()
-  display.remove(predictedBallPath)
-  predictedBallPath = nil
-end
-
 function scene:create(event)
-  physics.start()
-  physics.pause()
-  physics.setScale(scale)
-  physics.setGravity(0, 9.8)
-
-  if utils.isSimulator() then
-    -- physics.setDrawMode("hybrid")
-  end
-
-  levelName = event.params.levelName
-  config = require ("levels." .. levelName)
-
   local screenX = display.screenOriginX
   local screenY = display.screenOriginY
   local screenWidth = display.actualContentWidth
@@ -139,12 +117,6 @@ function scene:create(event)
   background.anchorX = 0
   background.anchorY = 0
   background:setFillColor(0.5)
-
-  level = components.newGroup(self.view)
-  self:createFrame()
-  self:createObstacles()
-  self:createTargets()
-  self:createBall()
 
   local tapRectangle = display.newRect(self.view, screenX, screenY, screenWidth, screenHeight * 0.3)
   tapRectangle.anchorX = 0
@@ -159,6 +131,14 @@ function scene:create(event)
   touchRectangle.alpha = 0
   touchRectangle.isHitTestable = true
   touchRectangle:addEventListener("touch", handleBallImpulseOnScreenTouch)
+end
+
+function scene:createLevel()
+  level = components.newGroup(self.view)
+  self:createFrame()
+  self:createObstacles()
+  self:createTargets()
+  self:createBall()
 end
 
 function scene:createBall()
@@ -381,9 +361,20 @@ function scene:resume()
 end
 
 function scene:show(event)
-  if event.phase == "did" then
+  if event.phase == "will" then
+    levelName = event.params.levelName
+    config = require ("levels." .. levelName)
+
+    physics.start()
+    physics.pause()
+    physics.setScale(scale)
+    physics.setGravity(0, 9.8)
+
+    self:createLevel()
+  elseif event.phase == "did" then
     Runtime:addEventListener("enterFrame", scene)
     Runtime:addEventListener("lateUpdate", predictBallPathOnLateUpdate)
+
     physics.start()
 
     --[[
@@ -403,18 +394,18 @@ function scene:hide(event)
   if event.phase == "did" then
     Runtime:removeEventListener("lateUpdate", predictBallPathOnLateUpdate)
     Runtime:removeEventListener("enterFrame", scene)
+
     audio.stop()
     physics.stop()
-    composer.removeScene("scenes.game")
+
+    display.remove(level)
+    ball = nil
+    level = nil
+    predictedBallPath = nil
   end
 end
 
 function scene:destroy(event)
-  config = nil
-  ball = nil
-  level = nil
-  predictedBallPath = nil
-
   for key, _ in pairs(sounds) do
     audio.dispose(sounds[key])
     sounds[key] = nil
