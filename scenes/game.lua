@@ -381,7 +381,15 @@ function scene:show(event)
       timer.performWithDelay(
         0,
         function()
-          display.save(self.view, { baseDir = system.TemporaryDirectory, filename = levelName .. ".png" })
+          local screenshot = display.captureBounds(display.currentStage.contentBounds)
+
+          display.save(screenshot, {
+            baseDir = system.TemporaryDirectory,
+            filename = levelName .. ".png",
+            captureOffscreenArea = true,
+          })
+
+          display.remove(screenshot)
         end
       )
     end
