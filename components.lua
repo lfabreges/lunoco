@@ -1,5 +1,11 @@
 local components = {}
 
+components.newGroup = function(parent)
+  local group = display.newGroup()
+  parent:insert(group)
+  return group
+end
+
 components.newOverlayBackground = function(parent)
   local background = display.newRect(
     parent,

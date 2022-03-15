@@ -20,9 +20,7 @@ local sounds = {
 local function displayStars(event)
   local isFullStar = numberOfStars >= event.count
 
-  local star = display.newGroup()
-  stars:insert(star)
-
+  local star = components.newGroup(stars)
   local starImage = "images/star-" .. (isFullStar and "full" or "empty") .. ".png"
   local starDrawing = display.newImageRect(star, "images/star-outline.png", 75, 75)
   local starOutline = display.newImageRect(star, starImage, 75, 75)
@@ -92,8 +90,7 @@ function scene:show(event)
     numberOfShots = event.params.numberOfShots
     numberOfStars = event.params.numberOfStars
     finishedInText.text = i18n("finished_in", numberOfShots)
-    stars = display.newGroup()
-    self.view:insert(stars)
+    stars = components.newGroup(self.view)
   elseif event.phase == "did" then
     timer.performWithDelay(500, displayStars, 3, "displayStars")
   end

@@ -1,3 +1,4 @@
+local components = require "components"
 local composer = require "composer"
 local navigation = require "navigation"
 local utils = require "utils"
@@ -90,8 +91,7 @@ predictBallPathOnLateUpdate = function()
   local gravityX, gravityY = physics.getGravity()
 
   removePredictedBallPath()
-  predictedBallPath = display.newGroup()
-  level:insert(predictedBallPath)
+  predictedBallPath = components.newGroup(level)
 
   local prevStepX = nil
   local prevStepY = nil
@@ -140,12 +140,11 @@ function scene:create(event)
   background.anchorY = 0
   background:setFillColor(0.5)
 
-  level = display.newGroup()
+  level = components.newGroup(self.view)
   self:createFrame()
   self:createObstacles()
   self:createTargets()
   self:createBall()
-  self.view:insert(level)
 
   local tapRectangle = display.newRect(self.view, screenX, screenY, screenWidth, screenHeight * 0.3)
   tapRectangle.anchorX = 0
@@ -228,9 +227,7 @@ end
 function scene:createObstacles()
   for _, config in ipairs(config.obstacles) do
     if config.type == "corner" then
-      local corner = display.newGroup()
-      level:insert(corner)
-
+      local corner = components.newGroup(level)
       local cornerDrawing = display.newImageRect(corner, "images/corner.png", config.width, config.height)
       local cornerOutline = display.newImageRect(corner, "images/corner-outline.png", config.width, config.height)
 
@@ -283,9 +280,7 @@ function scene:createObstacles()
         }
       )
     elseif config.type:starts("horizontal-barrier") or config.type:starts("vertical-barrier") then
-      local barrier = display.newGroup()
-      level:insert(barrier)
-
+      local barrier = components.newGroup(level)
       local barrierImage = "images/" .. config.type .. ".png"
       local barrierDrawing = display.newImageRect(barrier, barrierImage, config.width, config.height)
       local barrierOutlineImage =  "images/" .. config.type .. "-outline.png"
@@ -307,9 +302,7 @@ function scene:createTargets()
   local numberOfTargets = 0
 
   for _, config in ipairs(config.targets) do
-    local target = display.newGroup()
-    level:insert(target)
-
+    local target = components.newGroup(level)
     local targetImage = "images/target-" .. config.type .. ".png"
     local targetDrawing = display.newImageRect(target, targetImage, config.width, config.height)
     local targetOutline = display.newImageRect(target, "images/target-outline.png", config.width, config.height)
