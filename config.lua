@@ -5,7 +5,8 @@ application = {
     scale = "letterbox",
     fps = 60,
     imageSuffix = {
-      ["@2x"] = 1.5
+      ["@2x"] = 1.5,
+      ["@4x"] = 3.5,
     },
   },
 }

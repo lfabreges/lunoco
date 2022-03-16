@@ -22,11 +22,11 @@ local sounds = {
 local function gameOver()
   local numberOfStars = 0
 
-  if numberOfShots <= config.difficulty.three then
+  if numberOfShots <= config.stars.three then
     numberOfStars = 3
-  elseif numberOfShots <= config.difficulty.two then
+  elseif numberOfShots <= config.stars.two then
     numberOfStars = 2
-  elseif numberOfShots <= config.difficulty.one then
+  elseif numberOfShots <= config.stars.one then
     numberOfStars = 1
   end
 

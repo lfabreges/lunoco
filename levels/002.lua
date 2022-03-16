@@ -5,7 +5,7 @@ local unit = width / 40
 local cornerWidth = unit * 10
 
 return {
-  difficulty = {
+  stars = {
     one = 6,
     two = 4,
     three = 2,
