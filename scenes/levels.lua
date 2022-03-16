@@ -21,6 +21,7 @@ function scene:create(event)
   local screenWidth = display.actualContentWidth
   local screenHeight = display.actualContentHeight
   local spaceWidth = (display.actualContentWidth - 240) / 3
+  local topInset, leftInset, bottomInset, rightInset = display.getSafeAreaInsets()
 
   local background = display.newRect(self.view, screenX, screenY, screenWidth, screenHeight)
   background.anchorX = 0
@@ -28,16 +29,17 @@ function scene:create(event)
   background:setFillColor(0.25)
 
   local scrollview = widget.newScrollView({
-    left = display.safeScreenOriginX,
-    top = display.safeScreenOriginY,
-    width = display.safeActualContentWidth,
-    height = display.safeActualContentHeight,
+    left = display.screenOriginX,
+    top = display.screenOriginY,
+    width = display.actualContentWidth,
+    height = display.actualContentHeight,
     hideBackground = true,
     hideScrollBar = true,
-    topPadding = spaceWidth,
-    bottomPadding = spaceWidth,
-    leftPadding = 0,
-    rightPadding = 0,
+    horizontalScrollDisabled = true,
+    topPadding = topInset + spaceWidth,
+    bottomPadding = bottomInset + spaceWidth,
+    leftPadding = leftInset,
+    rightPadding = rightInset,
   })
 
   self.view:insert(scrollview)
@@ -54,6 +56,7 @@ function scene:create(event)
 
   table.sort(levelNames)
 
+  local centerX = scrollview.width * 0.5
   local scores = utils.loadScores()
   local y = 0
 
@@ -66,9 +69,9 @@ function scene:create(event)
     levelImage.y = y
 
     if isEven then
-      levelImage.x = display.contentCenterX + 60 + spaceWidth / 2
+      levelImage.x = centerX + 60 + spaceWidth / 2
     else
-      levelImage.x = display.contentCenterX - 60 - spaceWidth / 2
+      levelImage.x = centerX - 60 - spaceWidth / 2
     end
 
     local levelButton = widget.newButton({
