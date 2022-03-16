@@ -1,4 +1,4 @@
-local borderWidth = 4
+local borderWidth = 10
 local width = 320
 local height = 480
 local unit = width / 40

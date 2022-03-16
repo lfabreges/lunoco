@@ -1,4 +1,4 @@
-local borderWidth = 4
+local borderWidth = 10
 local width = 320
 local height = 480
 local unit = width / 40
@@ -46,7 +46,7 @@ return {
       type = "horizontal-barrier-large",
       x = borderWidth + unit * 12,
       y = borderWidth + unit * 8,
-      width = unit * 22,
+      width = unit * 20,
       height = unit * 4,
     },
     {
@@ -67,7 +67,7 @@ return {
     },
     {
       type = "normal",
-      x = borderWidth + unit * 30,
+      x = borderWidth + unit * 28,
       y = borderWidth + unit * 40,
       width = unit * 5,
       height = unit * 5,
@@ -81,7 +81,7 @@ return {
     },
     {
       type = "hard",
-      x = borderWidth + unit * 32,
+      x = borderWidth + unit * 30,
       y = borderWidth + unit * 24,
       width = unit * 5,
       height = unit * 5,
