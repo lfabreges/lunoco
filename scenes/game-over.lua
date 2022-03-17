@@ -3,7 +3,6 @@ local composer = require "composer"
 local i18n = require "i18n"
 local navigation = require "navigation"
 local utils = require "utils"
-local widget = require "widget"
 
 local finishedInText = nil
 local levelName = nil
@@ -54,31 +53,13 @@ function scene:create(event)
     y = display.contentCenterY / 2,
   })
 
-  local retryButton = widget.newButton({
-    label = i18n("retry"),
-    labelColor = { default = { 1.0 }, over = { 0.5 } },
-    defaultFile = "images/button.png",
-    overFile = "images/button-over.png",
-    width = 120, height = 40,
-    onRelease = retryLevel
-  })
-
+  local retryButton = components.newButton(self.view, { label = i18n("retry"), width = 120, onRelease = retryLevel })
   retryButton.x = display.contentCenterX - 70
   retryButton.y = display.contentCenterY + display.contentCenterY / 2
-  self.view:insert(retryButton)
 
-  local levelsButton = widget.newButton({
-    label = i18n("levels"),
-    labelColor = { default = { 1.0 }, over = { 0.5 } },
-    defaultFile = "images/button.png",
-    overFile = "images/button-over.png",
-    width = 120, height = 40,
-    onRelease = gotoLevels
-  })
-
+  local levelsButton = components.newButton(self.view, { label = i18n("levels"), width = 120, onRelease = gotoLevels })
   levelsButton.x = display.contentCenterX + 70
   levelsButton.y = display.contentCenterY + display.contentCenterY / 2
-  self.view:insert(levelsButton)
 end
 
 function scene:show(event)

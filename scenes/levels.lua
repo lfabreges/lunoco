@@ -79,7 +79,7 @@ function scene:create(event)
       width = 120,
       height = 180,
       fillColor = { default = { 0, 0, 0, 0.01 }, over = { 0, 0, 0, 0.5 } },
-      onRelease = function() startLevel(levelName) end
+      onRelease = function() return startLevel(levelName) end
     })
 
     levelButton.anchorY = 0

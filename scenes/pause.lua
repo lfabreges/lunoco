@@ -2,7 +2,6 @@ local components = require "components"
 local composer = require "composer"
 local i18n = require "i18n"
 local navigation = require "navigation"
-local widget = require "widget"
 
 local scene = composer.newScene()
 
@@ -28,44 +27,17 @@ end
 function scene:create(event)
   components.newOverlayBackground(self.view)
 
-  local resumeButton = widget.newButton({
-    label = i18n("resume"),
-    labelColor = { default = { 1.0 }, over = { 0.5 } },
-    defaultFile = "images/button.png",
-    overFile = "images/button-over.png",
-    width = 160, height = 40,
-    onRelease = resumeGame
-  })
-
+  local resumeButton = components.newButton(self.view, { label = i18n("resume"), onRelease = resumeGame })
   resumeButton.x = display.contentCenterX
   resumeButton.y = display.contentCenterY - 60
-  self.view:insert(resumeButton)
 
-  local retryButton = widget.newButton({
-    label = i18n("retry"),
-    labelColor = { default = { 1.0 }, over = { 0.5 } },
-    defaultFile = "images/button.png",
-    overFile = "images/button-over.png",
-    width = 160, height = 40,
-    onRelease = retryLevel
-  })
-
+  local retryButton = components.newButton(self.view, { label = i18n("retry"), onRelease = retryLevel })
   retryButton.x = display.contentCenterX
   retryButton.y = display.contentCenterY
-  self.view:insert(retryButton)
 
-  local levelsButton = widget.newButton({
-    label = i18n("levels"),
-    labelColor = { default = { 1.0 }, over = { 0.5 } },
-    defaultFile = "images/button.png",
-    overFile = "images/button-over.png",
-    width = 160, height = 40,
-    onRelease = gotoLevels
-  })
-
+  local levelsButton = components.newButton(self.view, { label = i18n("levels"), onRelease = gotoLevels })
   levelsButton.x = display.contentCenterX
   levelsButton.y = display.contentCenterY + 60
-  self.view:insert(levelsButton)
 end
 
 function scene:show(event)
