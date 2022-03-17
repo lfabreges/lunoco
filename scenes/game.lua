@@ -72,11 +72,6 @@ local function handleBallImpulseOnScreenTouch(event)
   return true
 end
 
-local function pauseOnTap()
-  scene:pause()
-  return true
-end
-
 local function predictBallPathOnLateUpdate()
   if not ballImpulseForce then
     return false
@@ -107,6 +102,25 @@ local function predictBallPathOnLateUpdate()
   end
 end
 
+local function takeLevelScreenshotInSimulator()
+  if utils.isSimulator() then
+    timer.performWithDelay(
+      0,
+      function()
+        local screenshot = display.captureBounds(display.currentStage.contentBounds)
+
+        display.save(screenshot, {
+          baseDir = system.TemporaryDirectory,
+          filename = levelName .. ".png",
+          captureOffscreenArea = true,
+        })
+
+        display.remove(screenshot)
+      end
+    )
+  end
+end
+
 function scene:create(event)
   local screenX = display.screenOriginX
   local screenY = display.screenOriginY
@@ -123,7 +137,7 @@ function scene:create(event)
   tapRectangle.anchorY = 0
   tapRectangle.alpha = 0
   tapRectangle.isHitTestable = true
-  tapRectangle:addEventListener("tap", pauseOnTap)
+  tapRectangle:addEventListener("tap", scene.pauseOnTap)
 
   local touchRectangle = display.newRect(self.view, screenX, screenY + screenHeight, screenWidth, screenHeight * 0.7)
   touchRectangle.anchorX = 0
@@ -148,9 +162,10 @@ function scene:createLevel()
 end
 
 function scene:createBall()
-  ball = display.newImageRect(level, "images/ball.png", config.ball.width, config.ball.width)
-  ball.x = config.ball.x
-  ball.y = config.ball.y
+  ball = display.newImageRect(level, "images/ball.png", 30, 30)
+
+  ball.x = 10 + config.ball.x
+  ball.y = 10 + config.ball.y - 15
 
   numberOfShots = 0
 
@@ -168,6 +183,7 @@ end
 
 function scene:createFrame()
   local frame = display.newImageRect(level, "images/frame.png", 480, 720)
+
   frame.x = display.contentCenterX
   frame.y = display.contentCenterY
 
@@ -188,33 +204,13 @@ function scene:createObstacles()
       local cornerOutline = display.newImageRect(corner, "images/corner-outline.png", config.width, config.height)
 
       corner.type = "corner"
-      corner.anchorChildren = true
-      corner.anchorX = 0
-      corner.anchorY = 0
-      corner.x = config.x
-      corner.y = config.y
+      corner.x = 10 + config.x + corner.width / 2
+      corner.y = 10 + config.y + corner.height / 2
       corner.rotation = config.rotation
 
       local chain = {
-        -50, -50,
-        -49, -44,
-        -47, -38,
-        -45, -33,
-        -41, -26,
-        -35, -17,
-        -27, -7,
-        -20, 1,
-        -14, 8,
-        -8, 14,
-        -1, 20,
-        7, 27,
-        17, 35,
-        26, 41,
-        33, 45,
-        38, 47,
-        44, 49,
-        50, 50,
-        -50, 50,
+        -50, -50, -49, -44, -47, -38, -45, -33, -41, -26, -35, -17, -27, -7, -20, 1, -14, 8,
+        -8, 14, -1, 20, 7, 27, 17, 35, 26, 41, 33, 45, 38, 47, 44, 49, 50, 50, -50, 50,
       }
 
       local scaledChain = {}
@@ -246,8 +242,8 @@ function scene:createObstacles()
       barrier.anchorChildren = true
       barrier.anchorX = 0
       barrier.anchorY = 0
-      barrier.x = config.x
-      barrier.y = config.y
+      barrier.x = 10 + config.x
+      barrier.y = 10 + config.y
 
       physics.addBody(barrier, "static", { density = 1.0, friction = 0.3, bounce = 0.5 })
     end
@@ -267,8 +263,8 @@ function scene:createTargets()
     target.anchorChildren = true
     target.anchorX = 0
     target.anchorY = 0
-    target.x = config.x
-    target.y = config.y
+    target.x = 10 + config.x
+    target.y = 10 + config.y
 
     local targetResistance = 5
 
@@ -299,10 +295,11 @@ function scene:createTargets()
   end
 end
 
-function scene:pause(event)
+function scene:pauseOnTap()
   audio.pause()
   physics.pause()
   composer.showOverlay("scenes.pause", { isModal = true, params = { levelName = levelName }})
+  return true
 end
 
 function scene:resume()
@@ -314,39 +311,19 @@ function scene:show(event)
   if event.phase == "will" then
     levelName = event.params.levelName
     config = require ("levels." .. levelName)
-
     self:createLevel()
   elseif event.phase == "did" then
     Runtime:addEventListener("lateUpdate", predictBallPathOnLateUpdate)
-
     physics.start()
-
-    if utils.isSimulator() then
-      timer.performWithDelay(
-        0,
-        function()
-          local screenshot = display.captureBounds(display.currentStage.contentBounds)
-
-          display.save(screenshot, {
-            baseDir = system.TemporaryDirectory,
-            filename = levelName .. ".png",
-            captureOffscreenArea = true,
-          })
-
-          display.remove(screenshot)
-        end
-      )
-    end
+    takeLevelScreenshotInSimulator()
   end
 end
 
 function scene:hide(event)
   if event.phase == "did" then
     Runtime:removeEventListener("lateUpdate", predictBallPathOnLateUpdate)
-
     audio.stop()
     physics.stop()
-
     display.remove(level)
     ball = nil
     level = nil
