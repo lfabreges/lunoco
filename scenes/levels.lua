@@ -45,16 +45,27 @@ function scene:create(event)
   self.view:insert(scrollview)
 
   local levelNames = {}
-  local levelsPath = system.pathForFile("levels", system.ResourceDirectory)
+  local numberOfLevels = 3
 
-  for filename in lfs.dir(levelsPath) do
-    local levelName = filename:match("^(.+)%.lua$")
-    if levelName then
-      table.insert(levelNames, levelName)
+  if utils.isSimulator() then
+    local levelsPath = system.pathForFile("levels", system.ResourceDirectory)
+    local actualNumberOfLevels = 0
+
+    for filename in lfs.dir(levelsPath) do
+      if filename:match("^.+%.lua$") then
+        actualNumberOfLevels = actualNumberOfLevels + 1
+      end
     end
+
+    assert(
+      actualNumberOfLevels == numberOfLevels,
+      "Expected 'numberOfLevels = " .. actualNumberOfLevels .. "' in scenes.levels"
+    )
   end
 
-  table.sort(levelNames)
+  for levelNumber = 1, numberOfLevels do
+    table.insert(levelNames, string.format("%03d", levelNumber))
+  end
 
   local centerX = scrollview.width * 0.5
   local scores = utils.loadScores()

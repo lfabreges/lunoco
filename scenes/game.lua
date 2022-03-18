@@ -50,7 +50,7 @@ local function gameOver()
 end
 
 local function handleBallImpulseOnScreenTouch(event)
-  local _ballImpulseForce = { x = (event.xStart - event.x) * 3, y = (event.yStart - event.y) * 3 }
+  local _ballImpulseForce = { x = (event.xStart - event.x) * 4, y = (event.yStart - event.y) * 4 }
   ballImpulseForce = nil
 
   if event.phase == "began" then
