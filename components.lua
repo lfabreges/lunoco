@@ -40,7 +40,7 @@ components.newOverlayBackground = function(parent)
 
   background.anchorX = 0
   background.anchorY = 0
-  background.alpha = 0.8
+  background.alpha = 0.9
   background:setFillColor(0.0)
 
   return background
