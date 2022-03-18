@@ -7,16 +7,16 @@ return {
     {
       type = "corner",
       x = 0,
-      y = 310,
-      width = 150,
-      height = 150,
+      y = 380,
+      width = 80,
+      height = 80,
     },
     {
       type = "corner",
-      x = 150,
-      y = 310,
-      width = 150,
-      height = 150,
+      x = 220,
+      y = 380,
+      width = 80,
+      height = 80,
       rotation = 270,
     },
     {
