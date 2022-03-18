@@ -22,9 +22,14 @@ local function displayStars(event)
   local star = components.newGroup(stars)
   local starImage = "images/star-" .. (isFullStar and "full" or "empty") .. ".png"
   local starDrawing = display.newImageRect(star, starImage, 75, 75)
+  local starMask = graphics.newMask("images/star-mask.png")
 
   star.x = display.contentCenterX + (event.count - 2) * 90
   star.y = display.contentCenterY
+
+  starDrawing:setMask(starMask)
+  starDrawing.maskScaleX = starDrawing.width / 400
+  starDrawing.maskScaleY = starDrawing.height / 400
 
   utils.playAudio(isFullStar and sounds.starFull or sounds.starEmpty, 1.0)
 end

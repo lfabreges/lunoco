@@ -113,10 +113,15 @@ function scene:create(event)
         local star = components.newGroup(group)
         local starImage = "images/star-" .. (isFullStar and "full" or "empty") .. ".png"
         local starDrawing = display.newImageRect(star, starImage, 20, 20)
+        local starMask = graphics.newMask("images/star-mask.png")
 
         star.anchorY = 0
         star.x = levelImage.x + (starCount - 2) * 25
         star.y = y + 180 + 20
+
+        starDrawing:setMask(starMask)
+        starDrawing.maskScaleX = starDrawing.width / 400
+        starDrawing.maskScaleY = starDrawing.height / 400
       end
     end
 
