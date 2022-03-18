@@ -21,8 +21,7 @@ local function displayStars(event)
 
   local star = components.newGroup(stars)
   local starImage = "images/star-" .. (isFullStar and "full" or "empty") .. ".png"
-  local starDrawing = display.newImageRect(star, "images/star-outline.png", 75, 75)
-  local starOutline = display.newImageRect(star, starImage, 75, 75)
+  local starDrawing = display.newImageRect(star, starImage, 75, 75)
 
   star.x = display.contentCenterX + (event.count - 2) * 90
   star.y = display.contentCenterY

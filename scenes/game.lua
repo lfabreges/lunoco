@@ -217,18 +217,9 @@ function scene:createObstacles()
         scaledChain[i + 1] = chain[i + 1] * config.height / 100
       end
 
-      local cornerOutline = display.newLine(corner, scaledChain[1], scaledChain[2], scaledChain[3], scaledChain[4])
-      cornerOutline:setStrokeColor(0.2)
-      cornerOutline.strokeWidth = 1
-
-      for i = 5, #scaledChain, 2 do
-        cornerOutline:append(scaledChain[i], scaledChain[i + 1])
-      end
-
       physics.addBody(corner, "static", { density = 1.0, friction = 0.3, bounce = 0.5, chain = scaledChain })
     elseif config.type:starts("horizontal-barrier") or config.type:starts("vertical-barrier") then
       local barrier = components.newGroup(level)
-      local barrierOutline = display.newRect(barrier, 0, 0, config.width, config.height)
       local barrierImage = "images/" .. config.type .. ".png"
       local barrierDrawing = display.newImageRect(barrier, barrierImage, config.width - 2, config.height - 2)
 
@@ -238,7 +229,6 @@ function scene:createObstacles()
       barrier.anchorY = 0
       barrier.x = 10 + config.x
       barrier.y = 10 + config.y
-      barrierOutline:setFillColor(0.2)
 
       physics.addBody(barrier, "static", { density = 1.0, friction = 0.3, bounce = 0.5 })
     end
@@ -250,7 +240,6 @@ function scene:createTargets()
 
   for _, config in ipairs(config.targets) do
     local target = components.newGroup(level)
-    local targetOutline = display.newRect(target, 0, 0, config.width, config.height)
     local targetImage = "images/target-" .. config.type .. ".png"
     local targetDrawing = display.newImageRect(target, targetImage, config.width - 2, config.height - 2)
 
@@ -260,7 +249,6 @@ function scene:createTargets()
     target.anchorY = 0
     target.x = 10 + config.x
     target.y = 10 + config.y
-    targetOutline:setFillColor(0.2)
 
     local targetResistance = 5
 

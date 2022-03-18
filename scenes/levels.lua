@@ -112,8 +112,7 @@ function scene:create(event)
 
         local star = components.newGroup(group)
         local starImage = "images/star-" .. (isFullStar and "full" or "empty") .. ".png"
-        local starDrawing = display.newImageRect(star, "images/star-outline.png", 20, 20)
-        local starOutline = display.newImageRect(star, starImage, 20, 20)
+        local starDrawing = display.newImageRect(star, starImage, 20, 20)
 
         star.anchorY = 0
         star.x = levelImage.x + (starCount - 2) * 25
