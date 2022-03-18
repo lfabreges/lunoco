@@ -195,6 +195,11 @@ function scene:createObstacles()
       local corner = components.newGroup(level)
       local cornerDrawing = display.newImageRect(corner, "images/corner.png", config.width, config.height)
       local cornerOutline = display.newImageRect(corner, "images/corner-outline.png", config.width, config.height)
+      local cornerMask = graphics.newMask("images/corner-mask.png")
+
+      cornerDrawing:setMask(cornerMask)
+      cornerDrawing.maskScaleX = cornerDrawing.width / 400
+      cornerDrawing.maskScaleY = cornerDrawing.height / 400
 
       corner.type = "corner"
       corner.x = 10 + config.x + corner.width / 2

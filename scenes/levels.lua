@@ -124,7 +124,7 @@ function scene:create(event)
     scrollview:insert(group)
 
     if isEven then
-      y = y + 220 + spaceWidth
+      y = y + 240
     end
   end
 end
