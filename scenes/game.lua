@@ -193,8 +193,7 @@ function scene:createObstacles()
   for _, config in ipairs(config.obstacles) do
     if config.type == "corner" then
       local corner = components.newGroup(level)
-      local cornerDrawing = display.newImageRect(corner, "images/corner.png", config.width, config.height)
-      local cornerOutline = display.newImageRect(corner, "images/corner-outline.png", config.width, config.height)
+      local cornerDrawing = display.newImageRect(corner, "images/corner.png", config.width - 2, config.height - 2)
       local cornerMask = graphics.newMask("images/corner-mask.png")
 
       cornerDrawing:setMask(cornerMask)
@@ -208,7 +207,7 @@ function scene:createObstacles()
 
       local chain = {
         -50, -50, -49, -44, -47, -38, -45, -33, -41, -26, -35, -17, -27, -7, -20, 1, -14, 8,
-        -8, 14, -1, 20, 7, 27, 17, 35, 26, 41, 33, 45, 38, 47, 44, 49, 50, 50, -50, 50,
+        -8, 14, -1, 20, 7, 27, 17, 35, 26, 41, 33, 45, 38, 47, 44, 49, 50, 50, -50, 50, -50, -50
       }
 
       local scaledChain = {}
@@ -218,17 +217,15 @@ function scene:createObstacles()
         scaledChain[i + 1] = chain[i + 1] * config.height / 100
       end
 
-      physics.addBody(
-        corner,
-        "static",
-        {
-          density = 1.0,
-          friction = 0.3,
-          bounce = 0.5,
-          connectFirstAndLastChainVertex = true,
-          chain = scaledChain
-        }
-      )
+      local cornerOutline = display.newLine(corner, scaledChain[1], scaledChain[2], scaledChain[3], scaledChain[4])
+      cornerOutline:setStrokeColor(0.2)
+      cornerOutline.strokeWidth = 1
+
+      for i = 5, #scaledChain, 2 do
+        cornerOutline:append(scaledChain[i], scaledChain[i + 1])
+      end
+
+      physics.addBody(corner, "static", { density = 1.0, friction = 0.3, bounce = 0.5, chain = scaledChain })
     elseif config.type:starts("horizontal-barrier") or config.type:starts("vertical-barrier") then
       local barrier = components.newGroup(level)
       local barrierOutline = display.newRect(barrier, 0, 0, config.width, config.height)
