@@ -193,7 +193,7 @@ function scene:createObstacles()
   for _, config in ipairs(config.obstacles) do
     if config.type == "corner" then
       local corner = components.newGroup(level)
-      local cornerDrawing = display.newImageRect(corner, "images/corner.png", config.width - 2, config.height - 2)
+      local cornerDrawing = display.newImageRect(corner, "images/corner.png", config.width, config.height)
       local cornerMask = graphics.newMask("images/corner-mask.png")
 
       cornerDrawing:setMask(cornerMask)
@@ -221,7 +221,7 @@ function scene:createObstacles()
     elseif config.type:starts("horizontal-barrier") or config.type:starts("vertical-barrier") then
       local barrier = components.newGroup(level)
       local barrierImage = "images/" .. config.type .. ".png"
-      local barrierDrawing = display.newImageRect(barrier, barrierImage, config.width - 2, config.height - 2)
+      local barrierDrawing = display.newImageRect(barrier, barrierImage, config.width, config.height)
 
       barrier.type = "barrier"
       barrier.anchorChildren = true
@@ -241,7 +241,7 @@ function scene:createTargets()
   for _, config in ipairs(config.targets) do
     local target = components.newGroup(level)
     local targetImage = "images/target-" .. config.type .. ".png"
-    local targetDrawing = display.newImageRect(target, targetImage, config.width - 2, config.height - 2)
+    local targetDrawing = display.newImageRect(target, targetImage, config.width, config.height)
 
     target.type = "target"
     target.anchorChildren = true
