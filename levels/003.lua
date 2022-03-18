@@ -64,7 +64,7 @@ return {
   },
   targets = {
     {
-      type = "hard",
+      type = "normal",
       x = 130,
       y = 180,
       width = 40,

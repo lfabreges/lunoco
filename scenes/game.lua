@@ -250,7 +250,7 @@ function scene:createTargets()
     target.x = 10 + config.x
     target.y = 10 + config.y
 
-    local targetResistance = 5
+    local targetResistance = 8
 
     if config.type == "easy" then
       targetResistance = targetResistance / 2
