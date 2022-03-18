@@ -63,9 +63,11 @@ function scene:create(event)
   for index, levelName in ipairs(levelNames) do
     local group = display.newGroup()
     local isEven = math.fmod(index, 2) == 0
-    local levelImage = display.newImageRect(group, "levels/" .. levelName .. ".png", 120, 180)
+    local levelImage = nil
 
-    if not levelImage then
+    if utils.fileExists("level." .. levelName .. ".png", system.DocumentsDirectory) then
+      levelImage = display.newImageRect(group, "level." .. levelName .. ".png", system.DocumentsDirectory, 120, 180)
+    else
       levelImage = display.newImageRect(group, "images/level-unknown.png", 120, 180)
     end
 
@@ -91,23 +93,21 @@ function scene:create(event)
     levelButton.y = levelImage.y
     group:insert(levelButton)
 
-    local numberOfStars = 0
-
     if scores[levelName] then
-      numberOfStars = scores[levelName].numberOfStars
-    end
+      local numberOfStars = scores[levelName].numberOfStars
 
-    for starCount = 1, 3 do
-      local isFullStar = numberOfStars >= starCount
+      for starCount = 1, 3 do
+        local isFullStar = numberOfStars >= starCount
 
-      local star = components.newGroup(group)
-      local starImage = "images/star-" .. (isFullStar and "full" or "empty") .. ".png"
-      local starDrawing = display.newImageRect(star, "images/star-outline.png", 20, 20)
-      local starOutline = display.newImageRect(star, starImage, 20, 20)
+        local star = components.newGroup(group)
+        local starImage = "images/star-" .. (isFullStar and "full" or "empty") .. ".png"
+        local starDrawing = display.newImageRect(star, "images/star-outline.png", 20, 20)
+        local starOutline = display.newImageRect(star, starImage, 20, 20)
 
-      star.anchorY = 0
-      star.x = levelImage.x + (starCount - 2) * 25
-      star.y = y + 180 + 20
+        star.anchorY = 0
+        star.x = levelImage.x + (starCount - 2) * 25
+        star.y = y + 180 + 20
+      end
     end
 
     scrollview:insert(group)
@@ -120,7 +120,6 @@ end
 
 function scene:hide(event)
   if event.phase == "did" then
-    -- TODO Gérer proprement la mise à jour des étoiles plutôt que de tout supprimer
     composer.removeScene("scenes.levels")
   end
 end

@@ -102,23 +102,16 @@ local function predictBallPathOnLateUpdate()
   end
 end
 
-local function takeLevelScreenshotInSimulator()
-  if utils.isSimulator() then
-    timer.performWithDelay(
-      0,
-      function()
-        local screenshot = display.captureBounds(display.currentStage.contentBounds)
+local function takeLevelScreenshot()
+  local screenshot = display.captureBounds(display.currentStage.contentBounds)
 
-        display.save(screenshot, {
-          baseDir = system.TemporaryDirectory,
-          filename = levelName .. ".png",
-          captureOffscreenArea = true,
-        })
+  display.save(screenshot, {
+    baseDir = system.DocumentsDirectory,
+    filename = "level." .. levelName .. ".png",
+    captureOffscreenArea = true,
+  })
 
-        display.remove(screenshot)
-      end
-    )
-  end
+  display.remove(screenshot)
 end
 
 function scene:create(event)
@@ -315,7 +308,7 @@ function scene:show(event)
   elseif event.phase == "did" then
     Runtime:addEventListener("lateUpdate", predictBallPathOnLateUpdate)
     physics.start()
-    takeLevelScreenshotInSimulator()
+    timer.performWithDelay(0, takeLevelScreenshot)
   end
 end
 

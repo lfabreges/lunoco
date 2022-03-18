@@ -4,6 +4,18 @@ local utils = {}
 
 local environment = system.getInfo("environment")
 
+utils.fileExists = function(filename, baseDirectory)
+  baseDirectory = baseDirectory or system.ResourceDirectory
+  local filepath = system.pathForFile(filename, baseDirectory)
+  local file = io.open(filepath)
+  if file then
+    file:close()
+    return true
+  else
+    return false
+  end
+end
+
 utils.isSimulator = function()
   return environment == "simulator"
 end
