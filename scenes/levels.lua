@@ -65,6 +65,10 @@ function scene:create(event)
     local isEven = math.fmod(index, 2) == 0
     local levelImage = display.newImageRect(group, "levels/" .. levelName .. ".png", 120, 180)
 
+    if not levelImage then
+      levelImage = display.newImageRect(group, "images/level-unknown.png", 120, 180)
+    end
+
     levelImage.anchorY = 0
     levelImage.y = y
 
