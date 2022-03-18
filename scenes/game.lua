@@ -231,10 +231,9 @@ function scene:createObstacles()
       )
     elseif config.type:starts("horizontal-barrier") or config.type:starts("vertical-barrier") then
       local barrier = components.newGroup(level)
+      local barrierOutline = display.newRect(barrier, 0, 0, config.width, config.height)
       local barrierImage = "images/" .. config.type .. ".png"
-      local barrierDrawing = display.newImageRect(barrier, barrierImage, config.width, config.height)
-      local barrierOutlineImage =  "images/" .. config.type .. "-outline.png"
-      local barrierOutline = display.newImageRect(barrier, barrierOutlineImage, config.width, config.height)
+      local barrierDrawing = display.newImageRect(barrier, barrierImage, config.width - 2, config.height - 2)
 
       barrier.type = "barrier"
       barrier.anchorChildren = true
@@ -242,6 +241,7 @@ function scene:createObstacles()
       barrier.anchorY = 0
       barrier.x = 10 + config.x
       barrier.y = 10 + config.y
+      barrierOutline:setFillColor(0.2)
 
       physics.addBody(barrier, "static", { density = 1.0, friction = 0.3, bounce = 0.5 })
     end
@@ -253,9 +253,9 @@ function scene:createTargets()
 
   for _, config in ipairs(config.targets) do
     local target = components.newGroup(level)
+    local targetOutline = display.newRect(target, 0, 0, config.width, config.height)
     local targetImage = "images/target-" .. config.type .. ".png"
-    local targetDrawing = display.newImageRect(target, targetImage, config.width, config.height)
-    local targetOutline = display.newImageRect(target, "images/target-outline.png", config.width, config.height)
+    local targetDrawing = display.newImageRect(target, targetImage, config.width - 2, config.height - 2)
 
     target.type = "target"
     target.anchorChildren = true
@@ -263,6 +263,7 @@ function scene:createTargets()
     target.anchorY = 0
     target.x = 10 + config.x
     target.y = 10 + config.y
+    targetOutline:setFillColor(0.2)
 
     local targetResistance = 5
 
