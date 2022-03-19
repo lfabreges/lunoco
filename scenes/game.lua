@@ -197,8 +197,8 @@ function scene:createObstacles()
       local cornerMask = graphics.newMask("images/corner-mask.png")
 
       cornerDrawing:setMask(cornerMask)
-      cornerDrawing.maskScaleX = cornerDrawing.width / 400
-      cornerDrawing.maskScaleY = cornerDrawing.height / 400
+      cornerDrawing.maskScaleX = cornerDrawing.width / 394
+      cornerDrawing.maskScaleY = cornerDrawing.height / 394
 
       corner.type = "corner"
       corner.x = 10 + config.x + corner.width / 2

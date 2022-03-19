@@ -28,8 +28,8 @@ local function displayStars(event)
   star.y = display.contentCenterY
 
   starDrawing:setMask(starMask)
-  starDrawing.maskScaleX = starDrawing.width / 400
-  starDrawing.maskScaleY = starDrawing.height / 400
+  starDrawing.maskScaleX = starDrawing.width / 394
+  starDrawing.maskScaleY = starDrawing.height / 394
 
   utils.playAudio(isFullStar and sounds.starFull or sounds.starEmpty, 1.0)
 end

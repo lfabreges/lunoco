@@ -130,8 +130,8 @@ function scene:create(event)
         star.y = y + 180 + 20
 
         starDrawing:setMask(starMask)
-        starDrawing.maskScaleX = starDrawing.width / 400
-        starDrawing.maskScaleY = starDrawing.height / 400
+        starDrawing.maskScaleX = starDrawing.width / 394
+        starDrawing.maskScaleY = starDrawing.height / 394
       end
     end
 
