@@ -152,6 +152,8 @@ function scene:createLevel()
   self:createObstacles()
   self:createTargets()
   self:createBall()
+
+  numberOfShots = 0
 end
 
 function scene:createBall()
@@ -159,8 +161,6 @@ function scene:createBall()
 
   ball.x = 10 + config.ball.x
   ball.y = 10 + config.ball.y - 15
-
-  numberOfShots = 0
 
   ball.postCollision = function(self, event)
     if event.force >= 2 then
