@@ -91,12 +91,22 @@ function scene:create(event)
       levelImage.x = centerX - 60 - spaceWidth / 2
     end
 
+    local function onLevelButtonEvent(event)
+      if event.phase == "ended" then
+        startLevel(levelName)
+      elseif event.phase == "moved" then
+        if math.abs(event.y - event.yStart) > 10 then
+          scrollview:takeFocus(event)
+        end
+      end
+    end
+
     local levelButton = widget.newButton({
       shape = "rect",
       width = 120,
       height = 180,
       fillColor = { default = { 0, 0, 0, 0.01 }, over = { 0, 0, 0, 0.5 } },
-      onRelease = function() return startLevel(levelName) end
+      onEvent = onLevelButtonEvent,
     })
 
     levelButton.anchorY = 0
