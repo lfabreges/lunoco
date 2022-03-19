@@ -14,27 +14,11 @@ return {
     },
     {
       type = "corner",
-      x = 150,
-      y = 0,
-      width = 75,
-      height = 75,
-      rotation = 90,
-    },
-    {
-      type = "corner",
       x = 0,
       y = 0,
       width = 75,
       height = 75,
       rotation = 90,
-    },
-    {
-      type = "corner",
-      x = 75,
-      y = 0,
-      width = 75,
-      height = 75,
-      rotation = 180,
     },
     {
       type = "vertical-barrier",
