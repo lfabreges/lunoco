@@ -106,7 +106,7 @@ local function createMoveAndPinchListener(object, onMove, onPinch)
       end
 
       if numberOfEvents > 1 then
-        local distanceX, distanceY, totalDistance = calculateDistance(firstEvent, secondEvent)
+        local distanceX, distanceY, totalDistance = calculateDistances(firstEvent, secondEvent)
         local deltaDistanceX = distanceX - previousDistanceX
         local deltaDistanceY = distanceY - previousDistanceY
         local deltaTotalDistance = totalDistance - previousTotalDistance
