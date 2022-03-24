@@ -10,3 +10,4 @@
 * Personnaliser les icones
 * components / utils / fusionner ?
 * Commence à bouger presque sans délai avec les buttons et scrollview
+* Gérer le pluriel dans la localisation

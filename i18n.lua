@@ -4,7 +4,7 @@ local utils = require "utils"
 
 local defaultLocale = "en"
 local locale = system.getPreference("ui", "language"):sub(1, 2):lower()
-local supportedLocales = { "en" }
+local supportedLocales = { "en", "fr" }
 
 local function isLocaleSupported(locale)
   for _, supportedLocale in ipairs(supportedLocales) do
