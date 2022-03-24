@@ -1,9 +1,10 @@
 local multitouch = {}
 
-local function calculateDistance(firstEvent, secondEvent)
+local function calculateDistances(firstEvent, secondEvent)
   local distanceX = math.abs(firstEvent.x - secondEvent.x)
   local distanceY = math.abs(firstEvent.y - secondEvent.y)
-  return math.sqrt(distanceX * distanceX + distanceY * distanceY)
+  local totalDistance = math.sqrt(distanceX * distanceX + distanceY * distanceY)
+  return distanceX, distanceY, totalDistance
 end
 
 local function calculateMiddle(firstEvent, secondEvent)
@@ -64,10 +65,12 @@ local function createEventListener(listener)
   return onTouch
 end
 
-local function createMoveAndPinchListener(onMove, onPinch)
-  local prevX
-  local prevY
-  local prevDistance
+local function createMoveAndPinchListener(object, onMove, onPinch)
+  local previousX
+  local previousY
+  local previousDistanceX
+  local previousDistanceY
+  local previousTotalDistance
 
   local function onMultitouch(event)
     local phase = event.phase
@@ -82,33 +85,34 @@ local function createMoveAndPinchListener(onMove, onPinch)
 
     if phase == "began" then
       if index == 1 then
-        display.getCurrentStage():setFocus(overlay)
-        prevX, prevY = firstEvent.x, firstEvent.y
+        display.getCurrentStage():setFocus(object)
+        previousX, previousY = firstEvent.x, firstEvent.y
       elseif index == 2 then
-        prevX, prevY = calculateMiddle(firstEvent, secondEvent)
-        prevDistance = calculateDistance(firstEvent, secondEvent)
+        previousX, previousY = calculateMiddle(firstEvent, secondEvent)
+        previousDistanceX, previousDistanceY, previousTotalDistance = calculateDistances(firstEvent, secondEvent)
       end
 
     elseif phase == "moved" then
-      local dx, dy
+      local x, y
       if numberOfEvents == 1 then
-        dx, dy = firstEvent.x - prevX, firstEvent.y - prevY
-        prevX, prevY = firstEvent.x, firstEvent.y
+        x, y = firstEvent.x, firstEvent.y
       else
-        local middleX, middleY = calculateMiddle(firstEvent, secondEvent)
-        dx, dy = middleX - prevX, middleY - prevY
-        prevX, prevY = middleX, middleY
+        x, y = calculateMiddle(firstEvent, secondEvent)
       end
+      local deltaX, deltaY = x - previousX, y - previousY
+      previousX, previousY = x, y
       if onMove then
-        onMove(dx, dy)
+        onMove(deltaX, deltaY)
       end
 
       if numberOfEvents > 1 then
-        local distance = calculateDistance(firstEvent, secondEvent)
-        local dDistance = distance - prevDistance
-        prevDistance = distance
+        local distanceX, distanceY, totalDistance = calculateDistance(firstEvent, secondEvent)
+        local deltaDistanceX = distanceX - previousDistanceX
+        local deltaDistanceY = distanceY - previousDistanceY
+        local deltaTotalDistance = totalDistance - previousTotalDistance
+        previousDistanceX, previousDistanceY, previousTotalDistance = distanceX, distanceY, totalDistance
         if onPinch then
-          onPinch(dDistance)
+          onPinch(deltaDistanceX, deltaDistanceY, deltaTotalDistance)
         end
       end
 
@@ -117,12 +121,12 @@ local function createMoveAndPinchListener(onMove, onPinch)
         display.getCurrentStage():setFocus(nil)
       elseif numberOfEvents == 2 then
         local remainingEvent = index == 1 and secondEvent or firstEvent
-        prevX, prevY = remainingEvent.x, remainingEvent.y
+        previousX, previousY = remainingEvent.x, remainingEvent.y
       else
         local remainingEvent = index == 1 and secondEvent or firstEvent
         local thirdEvent = event.events[3]
-        prevX, prevY = calculateMiddle(remainingEvent, thirdEvent)
-        prevDistance = calculateDistance(remainingEvent, thirdEvent)
+        previousX, previousY = calculateMiddle(remainingEvent, thirdEvent)
+        previousDistanceX, previousDistanceY, previousTotalDistance = calculateDistances(remainingEvent, thirdEvent)
       end
     end
 
@@ -147,7 +151,7 @@ multitouch.removeEventListener = function(object, listener)
 end
 
 multitouch.addMoveAndPinchListener = function(object, onMove, onPinch)
-  local listener = createMoveAndPinchListener(onMove, onPinch)
+  local listener = createMoveAndPinchListener(object, onMove, onPinch)
   multitouch.removeMoveAndPinchListener(object)
   multitouch.addEventListener(object, listener)
   object.multitouchMoveAndPinchListener = listener

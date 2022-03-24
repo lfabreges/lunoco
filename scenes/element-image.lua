@@ -59,25 +59,34 @@ function scene:show(event)
       height
     )
 
-    -- TODO à personnaliser en fonction de l'élément
-    local minScale = math.max(200 / width, 200 / height)
+    local minX = frontContainer.x - frontContainer.width / 2
+    local minY = frontContainer.y - frontContainer.height / 2
+    local maxX = frontContainer.x + frontContainer.width / 2
+    local maxY = frontContainer.y + frontContainer.height / 2
+    local minXScale = frontContainer.width / width
+    local minYScale = frontContainer.height / height
     local maxScale = 4
 
-     -- TODO Ajouter ensuite les limites sur le move pour garder l'image en visu
-
-    local function onMove(dx, dy)
-      frontPhoto.x, frontPhoto.y = frontPhoto.x + dx, frontPhoto.y + dy
-      backPhoto.x, backPhoto.y = backPhoto.x + dx, backPhoto.y + dy
+    local function onMove(deltaX, deltaY)
+      local bounds = backPhoto.contentBounds
+      deltaX = bounds.xMax + deltaX < maxX and maxX - bounds.xMax or deltaX
+      deltaX = bounds.xMin + deltaX > minX and minX - bounds.xMin or deltaX
+      deltaY = bounds.yMax + deltaY < maxY and maxY - bounds.yMax or deltaY
+      deltaY = bounds.yMin + deltaY > minY and minY - bounds.yMin or deltaY
+      backPhoto.x, backPhoto.y = backPhoto.x + deltaX, backPhoto.y + deltaY
+      frontPhoto.x, frontPhoto.y = frontPhoto.x + deltaX, frontPhoto.y + deltaY
     end
 
-    local function onPinch(dDistance)
-      local scale = math.min(maxScale, math.max(minScale, frontPhoto.xScale + dDistance / 200))
-      frontPhoto.xScale, frontPhoto.yScale = scale, scale
-      backPhoto.xScale, backPhoto.yScale = scale, scale
+    local function onPinch(deltaDistanceX, deltaDistanceY)
+      local xScale = math.min(maxScale, math.max(minXScale, frontPhoto.xScale + deltaDistanceX / 200))
+      local yScale = math.min(maxScale, math.max(minYScale, frontPhoto.yScale + deltaDistanceY / 200))
+      frontPhoto.xScale, backPhoto.xScale = xScale, xScale
+      frontPhoto.yScale, backPhoto.yScale = yScale, yScale
     end
+
+    onPinch(0, 0)
 
     multitouch.addMoveAndPinchListener(overlay, onMove, onPinch)
-    onPinch(0)
   end
 end
 
