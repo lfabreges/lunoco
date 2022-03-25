@@ -1,18 +1,11 @@
+local components = require "components"
 local composer = require "composer"
 local multitouch = require "libraries.multitouch"
 
 local scene = composer.newScene()
 
 function scene:create(event)
-  local screenX = display.screenOriginX
-  local screenY = display.screenOriginY
-  local screenWidth = display.actualContentWidth
-  local screenHeight = display.actualContentHeight
-
-  local background = display.newRect(self.view, screenX, screenY, screenWidth, screenHeight)
-  background.anchorX = 0
-  background.anchorY = 0
-  background:setFillColor(0.5)
+  components.newBackground(self.view)
 end
 
 function scene:show(event)

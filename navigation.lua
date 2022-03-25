@@ -5,6 +5,14 @@ local navigation = {}
 local defaultEffect = "crossFade"
 local defaultTime = 500
 
+navigation.gotoCustomizeLevel = function(levelName)
+  composer.gotoScene("scenes.customize-level", {
+    effect = defaultEffect,
+    time = defaultTime,
+    params = { levelName = levelName },
+  })
+end
+
 navigation.gotoLevels = function()
   composer.gotoScene("scenes.levels", { effect = defaultEffect, time = defaultTime })
 end

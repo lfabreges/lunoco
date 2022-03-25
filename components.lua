@@ -2,6 +2,18 @@ local widget = require "widget"
 
 local components = {}
 
+components.newBackground = function(parent)
+  local screenX = display.screenOriginX
+  local screenY = display.screenOriginY
+  local screenWidth = display.actualContentWidth
+  local screenHeight = display.actualContentHeight
+  local background = display.newRect(parent, screenX, screenY, screenWidth, screenHeight)
+  background.anchorX = 0
+  background.anchorY = 0
+  background:setFillColor(0.25)
+  return background
+end
+
 components.newButton = function(parent, options)
   local buttonOptions = {
     labelColor = { default = { 1.0 }, over = { 0.5 } },
@@ -30,19 +42,8 @@ components.newGroup = function(parent)
 end
 
 components.newOverlayBackground = function(parent)
-  local background = display.newRect(
-    parent,
-    display.screenOriginX,
-    display.screenOriginY,
-    display.actualContentWidth,
-    display.actualContentHeight
-  )
-
-  background.anchorX = 0
-  background.anchorY = 0
-  background.alpha = 0.9
-  background:setFillColor(0.0)
-
+  local background = components.newBackground(parent)
+  background:setFillColor(0, 0, 0, 0.9)
   return background
 end
 

@@ -8,6 +8,11 @@ local scene = composer.newScene()
 local levelName = nil
 local shouldResumeGame = false
 
+local function gotoCustomizeLevel()
+  navigation.gotoCustomizeLevel(levelName)
+  return true
+end
+
 local function gotoLevels()
   navigation.gotoLevels()
   return true
@@ -29,15 +34,19 @@ function scene:create(event)
 
   local resumeButton = components.newButton(self.view, { label = i18n("resume"), onRelease = resumeGame })
   resumeButton.x = display.contentCenterX
-  resumeButton.y = display.contentCenterY - 60
+  resumeButton.y = display.contentCenterY - 90
 
   local retryButton = components.newButton(self.view, { label = i18n("retry"), onRelease = retryLevel })
   retryButton.x = display.contentCenterX
-  retryButton.y = display.contentCenterY
+  retryButton.y = display.contentCenterY - 30
 
   local levelsButton = components.newButton(self.view, { label = i18n("levels"), onRelease = gotoLevels })
   levelsButton.x = display.contentCenterX
-  levelsButton.y = display.contentCenterY + 60
+  levelsButton.y = display.contentCenterY + 30
+
+  local customizeButton = components.newButton(self.view, { label = i18n("customize"), onRelease = gotoCustomizeLevel })
+  customizeButton.x = display.contentCenterX
+  customizeButton.y = display.contentCenterY + 90
 end
 
 function scene:show(event)

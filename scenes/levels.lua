@@ -16,17 +16,10 @@ local function startLevel(levelName)
 end
 
 function scene:create(event)
-  local screenX = display.screenOriginX
-  local screenY = display.screenOriginY
-  local screenWidth = display.actualContentWidth
-  local screenHeight = display.actualContentHeight
   local spaceWidth = (display.actualContentWidth - 240) / 3
   local topInset, leftInset, bottomInset, rightInset = display.getSafeAreaInsets()
 
-  local background = display.newRect(self.view, screenX, screenY, screenWidth, screenHeight)
-  background.anchorX = 0
-  background.anchorY = 0
-  background:setFillColor(0.25)
+  components.newBackground(self.view)
 
   local scrollview = widget.newScrollView({
     left = display.screenOriginX,
@@ -95,7 +88,7 @@ function scene:create(event)
       if event.phase == "ended" then
         startLevel(levelName)
       elseif event.phase == "moved" then
-        if math.abs(event.y - event.yStart) > 10 then
+        if math.abs(event.y - event.yStart) > 5 then
           scrollview:takeFocus(event)
         end
       end

@@ -120,9 +120,7 @@ function scene:create(event)
   local screenWidth = display.actualContentWidth
   local screenHeight = display.actualContentHeight
 
-  local background = display.newRect(self.view, screenX, screenY, screenWidth, screenHeight)
-  background.anchorX = 0
-  background.anchorY = 0
+  local background = components.newBackground(self.view)
   background:setFillColor(0.5)
 
   local tapRectangle = display.newRect(self.view, screenX, screenY, screenWidth, screenHeight * 0.3)
