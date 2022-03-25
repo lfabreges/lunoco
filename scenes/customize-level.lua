@@ -7,9 +7,9 @@ local levelName = nil
 local scene = composer.newScene()
 local scrollview = nil
 
-local function elementsFromLevelConfig()
+local function elementsTypesFromLevelConfig()
   local config = require ("levels." .. levelName)
-  local elements = { "ball" }
+  local elementsTypes = { "ball" }
   local hashset = {}
 
   for _, obstacle in pairs(config.obstacles) do
@@ -18,12 +18,12 @@ local function elementsFromLevelConfig()
   for _, target in pairs(config.targets) do
     hashset["target-" .. target.type] = true
   end
-  for element, _ in pairs(hashset) do
-    table.insert(elements, element)
+  for elementType, _ in pairs(hashset) do
+    table.insert(elementsTypes, elementType)
   end
 
-  table.sort(elements)
-  return elements
+  table.sort(elementsTypes)
+  return elementsTypes
 end
 
 function scene:create(event)
@@ -39,8 +39,8 @@ function scene:create(event)
     hideBackground = true,
     hideScrollBar = true,
     horizontalScrollDisabled = true,
-    topPadding = topInset,
-    bottomPadding = bottomInset,
+    topPadding = topInset + 20,
+    bottomPadding = bottomInset + 20,
     leftPadding = leftInset,
     rightPadding = rightInset,
   })
@@ -49,10 +49,60 @@ function scene:create(event)
 end
 
 function scene:createElements()
-  local elements = elementsFromLevelConfig()
+  local elementsTypes = elementsTypesFromLevelConfig()
+  local y = 0
 
-  for _, element in ipairs(elements) do
-    print(element)
+  elements = components.newGroup(scrollview)
+
+  for _, elementType in ipairs(elementsTypes) do
+    local element = nil
+    local row = components.newGroup(elements)
+
+    row.anchorX, row.anchorY = 0, 0
+    row.x, row.y = 20, y
+
+    if elementType == "ball" then
+      element = components.newBall(row, levelName, 50, 50)
+    elseif elementType == "obstacle-corner" then
+      element = components.newObstacleCorner(row, levelName, 50, 50)
+    elseif elementType:starts("obstacle-horizontal-barrier") then
+      element = components.newObstacleBarrier(row, levelName, elementType:sub(10), 50, 20)
+    elseif elementType:starts("obstacle-vertical-barrier") then
+      element = components.newObstacleBarrier(row, levelName, elementType:sub(10), 20, 50)
+    elseif elementType:starts("target-") then
+      element = components.newTarget(row, levelName, elementType:sub(8), 50, 50)
+    end
+
+    if element then
+      element.x = 25
+      element.y = 25
+
+      local selectPhotoButton = components.newButton(row, {
+        label = "TODO",
+        width = 100,
+        onRelease = function()
+          if media.hasSource(media.PhotoLibrary) then
+            media.selectPhoto({ mediaSource = media.PhotoLibrary, listener = function(event)
+              local photo = event.target
+              composer.gotoScene("scenes.element-image", {
+                params = {
+                  elementType = elementType,
+                  levelName = levelName,
+                  photo = photo
+                } })
+            end })
+          else
+            -- TODO
+            native.showAlert( "TODO", "This device does not have a photo library.", { "OK" } )
+          end
+        end
+      })
+
+      selectPhotoButton.x = 120
+      selectPhotoButton.y = 25
+
+      y = y + 70
+    end
   end
 
   -- Les infos à récupérer pour chaque élément :

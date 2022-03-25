@@ -1,8 +1,20 @@
 local components = require "components"
 local composer = require "composer"
 local multitouch = require "libraries.multitouch"
+local navigation = require "navigation"
 
 local scene = composer.newScene()
+
+local elements = {
+  ["ball"] = { width = 200, height = 200, mask = "images/ball-mask.png" },
+  ["obstacle-corner"] = { width = 200, height = 200, mask = "images/corner-mask.png" },
+  ["obstacle-horizontal-barrier"] = { width = 200, height = 50 },
+  ["obstacle-horizontal-barrier-large"] = { width = 200, height = 50 },
+  ["obstacle-vertical-barrier"] = { width = 75, height = 300 },
+  ["target-easy"] = { width = 200, height = 200 },
+  ["target-normal"] = { width = 200, height = 200 },
+  ["target-hard"] = { width = 200, height = 200 },
+}
 
 function scene:create(event)
   components.newBackground(self.view)
@@ -12,6 +24,9 @@ function scene:show(event)
   if event.phase == "did" then
     system.activate("multitouch")
 
+    local elementType = event.params.elementType
+    local element = elements[elementType]
+    local levelName = event.params.levelName
     local photo = event.params.photo
     local screenX = display.screenOriginX
     local screenY = display.screenOriginY
@@ -38,9 +53,7 @@ function scene:show(event)
     overlay.anchorY = 0
     overlay:setFillColor(0, 0, 0, 0.5)
 
-    -- TODO Aux bonnes coordonnées de l'élément
-    -- Avec un masque pour les éléments qui le nécessite
-    local frontContainer = display.newContainer(self.view, 200, 200)
+    local frontContainer = display.newContainer(self.view, element.width, element.height)
     frontContainer.x = display.contentCenterX
     frontContainer.y = display.contentCenterY
 
@@ -51,6 +64,13 @@ function scene:show(event)
       width,
       height
     )
+
+    if element.mask then
+      local frontPhotoMask = graphics.newMask(element.mask)
+      frontContainer:setMask(frontPhotoMask)
+      frontContainer.maskScaleX = frontContainer.width / 394
+      frontContainer.maskScaleY = frontContainer.height / 394
+    end
 
     local minX = frontContainer.x - frontContainer.width / 2
     local minY = frontContainer.y - frontContainer.height / 2
@@ -80,6 +100,21 @@ function scene:show(event)
     onPinch(0, 0)
 
     multitouch.addMoveAndPinchListener(overlay, onMove, onPinch)
+
+    -- TODO Mettre ça bien
+
+    local saveButton = components.newButton(self.view, { label = "💾", width = 100, onRelease = function()
+      display.save(frontContainer, {
+        filename = "level." .. levelName .. "." .. elementType .. ".png",
+        baseDir = system.DocumentsDirectory,
+      })
+      navigation.gotoCustomizeLevel(levelName)
+    end })
+
+    saveButton.anchorX = 1
+    saveButton.anchorY = 0
+    saveButton.x = 120
+    saveButton.y = 20
   end
 end
 

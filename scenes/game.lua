@@ -155,7 +155,7 @@ function scene:createLevel()
 end
 
 function scene:createBall()
-  ball = display.newImageRect(level, "images/ball.png", 30, 30)
+  ball = components.newBall(level, levelName, 30, 30)
 
   ball.x = 10 + config.ball.x
   ball.y = 10 + config.ball.y - 15
@@ -190,13 +190,7 @@ end
 function scene:createObstacles()
   for _, config in ipairs(config.obstacles) do
     if config.type == "corner" then
-      local corner = components.newGroup(level)
-      local cornerDrawing = display.newImageRect(corner, "images/corner.png", config.width, config.height)
-      local cornerMask = graphics.newMask("images/corner-mask.png")
-
-      cornerDrawing:setMask(cornerMask)
-      cornerDrawing.maskScaleX = cornerDrawing.width / 394
-      cornerDrawing.maskScaleY = cornerDrawing.height / 394
+      local corner = components.newObstacleCorner(level, levelName, config.width, config.height)
 
       corner.type = "corner"
       corner.x = 10 + config.x + corner.width / 2
@@ -216,10 +210,9 @@ function scene:createObstacles()
       end
 
       physics.addBody(corner, "static", { density = 1.0, friction = 0.3, bounce = 0.5, chain = scaledChain })
+
     elseif config.type:starts("horizontal-barrier") or config.type:starts("vertical-barrier") then
-      local barrier = components.newGroup(level)
-      local barrierImage = "images/" .. config.type .. ".png"
-      local barrierDrawing = display.newImageRect(barrier, barrierImage, config.width, config.height)
+      local barrier = components.newObstacleBarrier(level, levelName, config.type, config.width, config.height)
 
       barrier.type = "barrier"
       barrier.anchorChildren = true
@@ -237,9 +230,7 @@ function scene:createTargets()
   local numberOfTargets = 0
 
   for _, config in ipairs(config.targets) do
-    local target = components.newGroup(level)
-    local targetImage = "images/target-" .. config.type .. ".png"
-    local targetDrawing = display.newImageRect(target, targetImage, config.width, config.height)
+    local target = components.newTarget(level, levelName, config.type, config.width, config.height)
 
     target.type = "target"
     target.anchorChildren = true

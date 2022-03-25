@@ -10,3 +10,4 @@
 * Personnaliser les icones
 * components / utils / fusionner ?
 * Gérer le pluriel dans la localisation
+* Supprimer vertical-barrier et ajouter simplement une rotation ?
