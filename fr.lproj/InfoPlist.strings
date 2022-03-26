@@ -1,2 +1,2 @@
-NSCameraUsageDescription = "Lunoco souhaite accéder à l'appareil photo";
-NSPhotoLibraryUsageDescription = "Lunoco souhaite accéder à vos photos";
+NSCameraUsageDescription = "Votre appareil photo servira à personnaliser le jeu";
+NSPhotoLibraryUsageDescription = "Votre bibliothèque de photos servira à personnaliser le jeu";
