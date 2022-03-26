@@ -99,7 +99,7 @@ function scene:createElements()
         local function onSelectPhotoButton(event)
           if event.phase == "ended" then
             media.selectPhoto({ mediaSource = media.PhotoLibrary, listener = function(event)
-              if event.target then
+              if event.completed then
                 navigation.gotoElementImage(levelName, elementType, event.target)
               end
             end })
@@ -127,7 +127,7 @@ function scene:createElements()
         local function onTakePhotoButton(event)
           if event.phase == "ended" then
             media.capturePhoto({ listener = function(event)
-              if event.target then
+              if event.completed then
                 navigation.gotoElementImage(levelName, elementType, event.target)
               end
             end })
