@@ -60,7 +60,7 @@ function scene:create(event)
 
   local gameTitle = display.newText({
     align = "center",
-    text = i18n("title"),
+    text = i18n.t("title"),
     font = native.systemFontBold,
     fontSize = 40,
     x = scrollview.width * 0.5,

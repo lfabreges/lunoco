@@ -2,7 +2,10 @@
   "back": "<",
   "cancel" : "X",
   "customize": "Customize",
-  "finished_in": "Finished in %d shots !",
+  "finished_in": {
+    "one": "Finished in 1 shot !",
+    "other": "Finished in {count} shots !"
+  },
   "levels": "Levels",
   "resume": "Resume",
   "retry": "Retry",

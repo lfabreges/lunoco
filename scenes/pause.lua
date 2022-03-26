@@ -28,19 +28,31 @@ end
 function scene:create(event)
   components.newOverlayBackground(self.view)
 
-  local resumeButton = components.newButton(self.view, { label = i18n("resume"), onRelease = resumeGame })
+  local resumeButton = components.newButton(self.view, {
+    label = i18n.t("resume"),
+    onRelease = resumeGame,
+  })
   resumeButton.x = display.contentCenterX
   resumeButton.y = display.contentCenterY - 90
 
-  local retryButton = components.newButton(self.view, { label = i18n("retry"), onRelease = retryLevel })
+  local retryButton = components.newButton(self.view, {
+    label = i18n.t("retry"),
+    onRelease = retryLevel,
+  })
   retryButton.x = display.contentCenterX
   retryButton.y = display.contentCenterY - 30
 
-  local levelsButton = components.newButton(self.view, { label = i18n("levels"), onRelease = gotoLevels })
+  local levelsButton = components.newButton(self.view, {
+    label = i18n.t("levels"),
+    onRelease = gotoLevels,
+  })
   levelsButton.x = display.contentCenterX
   levelsButton.y = display.contentCenterY + 30
 
-  local customizeButton = components.newButton(self.view, { label = i18n("customize"), onRelease = gotoCustomizeLevel })
+  local customizeButton = components.newButton(self.view, {
+    label = i18n.t("customize"),
+    onRelease = gotoCustomizeLevel,
+  })
   customizeButton.x = display.contentCenterX
   customizeButton.y = display.contentCenterY + 90
 end

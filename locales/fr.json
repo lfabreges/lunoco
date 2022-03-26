@@ -1,6 +1,9 @@
 {
   "customize": "Personnaliser",
-  "finished_in": "Terminé en %d tirs !",
+  "finished_in": {
+    "one": "Terminé en 1 tir !",
+    "other": "Terminé en {count} tirs !"
+  },
   "levels": "Niveaux",
   "resume": "Reprendre",
   "retry": "Réessayer",

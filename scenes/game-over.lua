@@ -52,11 +52,19 @@ function scene:create(event)
     y = display.contentCenterY / 2,
   })
 
-  local retryButton = components.newButton(self.view, { label = i18n("retry"), width = 120, onRelease = retryLevel })
+  local retryButton = components.newButton(self.view, {
+    label = i18n.t("retry"),
+    width = 120,
+    onRelease = retryLevel,
+  })
   retryButton.x = display.contentCenterX - 70
   retryButton.y = display.contentCenterY + display.contentCenterY / 2
 
-  local levelsButton = components.newButton(self.view, { label = i18n("levels"), width = 120, onRelease = gotoLevels })
+  local levelsButton = components.newButton(self.view, {
+    label = i18n.t("levels"),
+    width = 120,
+    onRelease = gotoLevels,
+  })
   levelsButton.x = display.contentCenterX + 70
   levelsButton.y = display.contentCenterY + display.contentCenterY / 2
 end
@@ -66,7 +74,7 @@ function scene:show(event)
     levelName = event.params.levelName
     numberOfShots = event.params.numberOfShots
     numberOfStars = event.params.numberOfStars
-    finishedInText.text = i18n("finished_in", numberOfShots)
+    finishedInText.text = i18n.p("finished_in", numberOfShots)
     stars = components.newGroup(self.view)
   elseif event.phase == "did" then
     timer.performWithDelay(500, displayStars, 3, "displayStars")

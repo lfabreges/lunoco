@@ -67,13 +67,13 @@ function scene:create(event)
 
   local topInset, leftInset, bottomInset, rightInset = display.getSafeAreaInsets()
 
-  local goBackButton = components.newButton(self.view, { label = i18n("back"), width = 40, onRelease = goBack })
+  local goBackButton = components.newButton(self.view, { label = i18n.t("back"), width = 40, onRelease = goBack })
   goBackButton.anchorX = 0
   goBackButton.anchorY = 0
   goBackButton.x = background.contentBounds.xMin + leftInset + 20
   goBackButton.y = background.contentBounds.yMin + topInset + 20
 
-  local saveButton = components.newButton(self.view, { label = i18n("save"), width = 120, onRelease = saveImage })
+  local saveButton = components.newButton(self.view, { label = i18n.t("save"), width = 120, onRelease = saveImage })
   saveButton.anchorX = 1
   saveButton.anchorY = 0
   saveButton.x = background.contentBounds.xMax - rightInset - 20

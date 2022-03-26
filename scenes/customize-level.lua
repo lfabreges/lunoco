@@ -54,7 +54,7 @@ function scene:create(event)
   local background = components.newBackground(self.view)
   local topInset, leftInset, bottomInset, rightInset = display.getSafeAreaInsets()
 
-  local goBackButton = components.newButton(self.view, { label = i18n("back"), width = 40, onRelease = goBack })
+  local goBackButton = components.newButton(self.view, { label = i18n.t("back"), width = 40, onRelease = goBack })
   goBackButton.anchorX = 0
   goBackButton.anchorY = 0
   goBackButton.x = background.contentBounds.xMin + leftInset + 20
@@ -111,7 +111,7 @@ function scene:createElements()
         end
 
         local selectPhotoButton = components.newButton(row, {
-          label = i18n("select_photo"),
+          label = i18n.t("select_photo"),
           width = 80,
           onEvent = onSelectPhotoButton,
         })
@@ -139,7 +139,7 @@ function scene:createElements()
         end
 
         local takePhotoButton = components.newButton(row, {
-          label = i18n("take_photo"),
+          label = i18n.t("take_photo"),
           width = 80,
           onEvent = onTakePhotoButton,
         })
@@ -173,7 +173,7 @@ function scene:createElements()
         end
 
         removeCustomizationButton = components.newButton(row, {
-          label = i18n("cancel"),
+          label = i18n.t("cancel"),
           width = 40,
           onEvent = onRemoveCustomizationButton,
         })

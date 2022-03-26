@@ -2,6 +2,8 @@ local json = require "json"
 local lfs = require "lfs"
 local utils = require "utils"
 
+local i18n = {}
+
 local defaultLocale = "en"
 local locale = system.getPreference("ui", "language"):sub(1, 2):lower()
 local supportedLocales = { "en", "fr" }
@@ -41,8 +43,19 @@ if locale ~= defaultLocale and isLocaleSupported(locale) then
   end
 end
 
-local function i18n(key, ...)
+i18n.t = function(key, ...)
   local translation = translations[key] or key
+  return translation:format(...)
+end
+
+i18n.p = function(key, count, ...)
+  local translation = nil
+  if translations[key] then
+    translation = count == 0 and translations[key].zero or nil
+    translation = translation or count == 1 and translations[key].one or translations[key].other
+  end
+  translation = translation or key
+  translation = translation:gsub("{count}", count)
   return translation:format(...)
 end
 
