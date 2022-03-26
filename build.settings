@@ -29,7 +29,15 @@ settings = {
   },
 
   excludeFiles = {
-    all = { "*.xcf", "Icon.png", "Icon-*dpi.png", "Images.xcassets" },
-    android = { "LaunchScreen.storyboardc" },
+    all = {
+      "*.xcf",
+      "Icon.png",
+      "Icon-1024.png",
+      "Icon-*dpi.png",
+      "Images.xcassets",
+    },
+    android = {
+      "LaunchScreen.storyboardc",
+    },
   },
 }
