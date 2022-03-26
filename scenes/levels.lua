@@ -64,7 +64,7 @@ function scene:create(event)
     font = native.systemFontBold,
     fontSize = 40,
     x = scrollview.width * 0.5,
-    y = 20,
+    y = 30,
   })
 
   scrollview:insert(gameTitle)
@@ -75,7 +75,7 @@ function scene:show(event)
     local centerX = scrollview.width * 0.5
     local content = components.newGroup(scrollview)
     local scores = utils.loadScores()
-    local y = 80
+    local y = 90
 
     for index, levelName in ipairs(levelNames) do
       local isEven = index % 2 == 0

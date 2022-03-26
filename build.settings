@@ -6,13 +6,20 @@ settings = {
 
   android = {
     usesPermissions = {
+      "android.permission.CAMERA",
       "android.permission.INTERNET",
+      "android.permission.WRITE_EXTERNAL_STORAGE",
     },
   },
 
   iphone = {
     xcassets = "Images.xcassets",
     plist = {
+      CFBundleDisplayName = "Lunoco",
+      CFBundleLocalizations = { "fr" },
+      CFBundleName = "Lunoco",
+      NSCameraUsageDescription = "Lunoco would like to access the camera",
+      NSPhotoLibraryUsageDescription = "Lunoco would like to access the photo library",
       UIStatusBarHidden = false,
       UILaunchStoryboardName = "LaunchScreen",
     },
