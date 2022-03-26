@@ -298,6 +298,7 @@ function scene:hide(event)
     Runtime:removeEventListener("lateUpdate", predictBallPathOnLateUpdate)
     audio.stop()
     physics.stop()
+    transition.cancel()
     display.remove(level)
     ball = nil
     level = nil

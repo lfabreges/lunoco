@@ -42,6 +42,13 @@ utils.playAudio = function(handle, volume)
   audio.play(handle, { channel = freeChannel })
 end
 
+utils.printMemoryUsage = function()
+  local systemMemoryUsed = collectgarbage("count") / 1000
+  local textureMemoryUsed = system.getInfo("textureMemoryUsed") / 1000000
+  print("System", "Memory Used:", string.format("%.03f", systemMemoryUsed), "Mb")
+  print("Texture", "Memory Used:", string.format("%.03f", textureMemoryUsed), "Mb")
+ end
+
 utils.saveJson = function(content, filename, baseDirectory)
   local filepath = system.pathForFile(filename, baseDirectory or system.ResourceDirectory)
   local file = io.open(filepath, "w")

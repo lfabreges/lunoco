@@ -200,6 +200,7 @@ end
 
 function scene:hide(event)
   if event.phase == "did" then
+    transition.cancel()
     display.remove(elements)
     elements = nil
   end

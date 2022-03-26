@@ -1,0 +1,87 @@
+return {
+  ball = {
+    x = 150,
+    y = 460,
+  },
+  obstacles = {
+    {
+      type = "corner",
+      x = 0,
+      y = 380,
+      width = 80,
+      height = 80,
+    },
+    {
+      type = "corner",
+      x = 220,
+      y = 380,
+      width = 80,
+      height = 80,
+      rotation = 270,
+    },
+    {
+      type = "corner",
+      x = 220,
+      y = 0,
+      width = 80,
+      height = 80,
+      rotation = 180,
+    },
+    {
+      type = "vertical-barrier",
+      x = 50,
+      y = 80,
+      width = 30,
+      height = 240,
+    },
+    {
+      type = "horizontal-barrier-large",
+      x = 50,
+      y = 320,
+      width = 200,
+      height = 30,
+    },
+    {
+      type = "vertical-barrier",
+      x = 220,
+      y = 80,
+      width = 30,
+      height = 240,
+    },
+    {
+      type = "horizontal-barrier",
+      x = 140,
+      y = 80,
+      width = 80,
+      height = 30,
+    },
+    {
+      type = "horizontal-barrier",
+      x = 80,
+      y = 170,
+      width = 80,
+      height = 30,
+    },
+  },
+  stars = {
+    one = 4,
+    two = 3,
+    three = 2,
+  },
+  targets = {
+    {
+      type = "normal",
+      x = 20,
+      y = 20,
+      width = 40,
+      height = 40,
+    },
+    {
+      type = "hard",
+      x = 130,
+      y = 250,
+      width = 40,
+      height = 40,
+    },
+  },
+}

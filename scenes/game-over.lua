@@ -18,18 +18,15 @@ local sounds = {
 
 local function displayStars(event)
   local isFullStar = numberOfStars >= event.count
-
-  local star = components.newGroup(stars)
   local starImage = "images/star-" .. (isFullStar and "full" or "empty") .. ".png"
-  local starDrawing = display.newImageRect(star, starImage, 75, 75)
+  local star = display.newImageRect(stars, starImage, 75, 75)
   local starMask = graphics.newMask("images/star-mask.png")
 
   star.x = display.contentCenterX + (event.count - 2) * 90
   star.y = display.contentCenterY
-
-  starDrawing:setMask(starMask)
-  starDrawing.maskScaleX = starDrawing.width / 394
-  starDrawing.maskScaleY = starDrawing.height / 394
+  star:setMask(starMask)
+  star.maskScaleX = star.width / 394
+  star.maskScaleY = star.height / 394
 
   utils.playAudio(isFullStar and sounds.starFull or sounds.starEmpty, 1.0)
 end

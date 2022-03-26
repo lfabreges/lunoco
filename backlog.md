@@ -1,5 +1,3 @@
-* Recycler la vue levels.lua pour revenir à la bonne position du scroll après un niveau
-  Demande à travailler les images des niveaux et les étoiles dans la fonction show
 * Travailler des images de meilleure résolution
 * Refactoring de la navigation pour avoir une gestion des effets à un seul endroit ?
 * Au fil des niveaux, les étoiles permettent de gagner des points et de débloquer les fonctionnalités de
