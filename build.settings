@@ -4,6 +4,10 @@ settings = {
     supported = { "portrait" },
   },
 
+  splashScreen = {
+    enable = false,
+  },
+
   android = {
     usesPermissions = {
       "android.permission.CAMERA",
@@ -36,11 +40,13 @@ settings = {
       "*.xcf",
       "Icon.png",
       "Icon-1024.png",
+      "Icon-1024-rounded.png",
       "Icon-*dpi.png",
       "Images.xcassets",
     },
     android = {
       "LaunchScreen.storyboardc",
+      "Launch*.png"
     },
     ios = {
       "AndroidResources",
