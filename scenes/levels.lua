@@ -1,5 +1,6 @@
 local components = require "components"
 local composer = require "composer"
+local i18n = require "i18n"
 local lfs = require "lfs"
 local navigation = require "navigation"
 local utils = require "utils"
@@ -56,6 +57,17 @@ function scene:create(event)
   })
 
   self.view:insert(scrollview)
+
+  local gameTitle = display.newText({
+    align = "center",
+    text = i18n("title"),
+    font = native.systemFontBold,
+    fontSize = 40,
+    x = scrollview.width * 0.5,
+    y = 20,
+  })
+
+  scrollview:insert(gameTitle)
 end
 
 function scene:show(event)
@@ -63,7 +75,7 @@ function scene:show(event)
     local centerX = scrollview.width * 0.5
     local content = components.newGroup(scrollview)
     local scores = utils.loadScores()
-    local y = 0
+    local y = 80
 
     for index, levelName in ipairs(levelNames) do
       local isEven = index % 2 == 0
