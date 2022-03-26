@@ -194,13 +194,13 @@ function scene:show(event)
   if event.phase == "will" then
     levelName = event.params.levelName
     self:createElements()
-  elseif event.phase == "did" then
   end
 end
 
 function scene:hide(event)
   if event.phase == "did" then
     transition.cancel()
+    scrollview:scrollTo("top", { time = 0 })
     display.remove(elements)
     elements = nil
   end
