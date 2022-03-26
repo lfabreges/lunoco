@@ -64,7 +64,7 @@ function scene:create(event)
     left = display.screenOriginX,
     top = goBackButton.contentBounds.yMax + 20,
     width = display.actualContentWidth,
-    height = display.actualContentHeight,
+    height = display.actualContentHeight - goBackButton.height - 40,
     hideBackground = true,
     hideScrollBar = true,
     horizontalScrollDisabled = true,
