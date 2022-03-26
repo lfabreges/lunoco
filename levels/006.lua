@@ -64,9 +64,9 @@ return {
     },
   },
   stars = {
-    one = 4,
-    two = 3,
-    three = 2,
+    one = 3,
+    two = 2,
+    three = 1,
   },
   targets = {
     {
@@ -77,7 +77,7 @@ return {
       height = 40,
     },
     {
-      type = "hard",
+      type = "easy",
       x = 130,
       y = 250,
       width = 40,
