@@ -97,7 +97,7 @@ function scene:show(event)
     content:insert(backPhoto)
     backPhoto.x = display.contentCenterX
     backPhoto.y = display.contentCenterY
-    backPhoto.alpha = 0.5
+    backPhoto.alpha = 0.1
 
     frontContainer = display.newContainer(content, element.width, element.height)
     frontContainer.x = display.contentCenterX
