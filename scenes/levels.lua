@@ -34,7 +34,7 @@ function scene:create(event)
   self.view:insert(scrollview)
 
   local levelNames = {}
-  local numberOfLevels = 4
+  local numberOfLevels = 5
 
   if utils.isSimulator() then
     local levelsPath = system.pathForFile("levels", system.ResourceDirectory)
