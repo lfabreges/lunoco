@@ -29,7 +29,8 @@ local function createEventListener(listener)
       })
 
     elseif event.phase == "moved" then
-      for index, touchEvent in ipairs(touchEvents) do
+      for index = 1, #touchEvents do
+        local touchEvent = touchEvents[index]
         if event.id == touchEvent.id then
           touchEvents[index] = event
           isHandled = listener({
@@ -43,7 +44,8 @@ local function createEventListener(listener)
       end
 
     elseif event.phase == "ended" or event.phase == "cancelled" then
-      for index, touchEvent in ipairs(touchEvents) do
+      for index = 1, #touchEvents do
+        local touchEvent = touchEvents[index]
         if event.id == touchEvent.id then
           touchEvents[index] = event
           isHandled = listener({
