@@ -13,8 +13,24 @@ navigation.gotoCustomizeLevel = function(levelName)
   })
 end
 
+navigation.gotoElementImage = function(levelName, elementType, photo)
+  composer.gotoScene("scenes.element-image", {
+    effect = defaultEffect,
+    time = defaultTime,
+    params = { elementType = elementType, levelName = levelName, photo = photo },
+  })
+end
+
 navigation.gotoLevels = function()
   composer.gotoScene("scenes.levels", { effect = defaultEffect, time = defaultTime })
+end
+
+navigation.gotoGame = function(levelName)
+  composer.gotoScene("scenes.game", {
+    effect = defaultEffect,
+    time = defaultTime,
+    params = { levelName = levelName },
+  })
 end
 
 navigation.reloadGame = function(levelName)

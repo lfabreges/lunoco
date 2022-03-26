@@ -6,9 +6,9 @@ local components = {}
 local function elementImage(levelName, elementType, defaultImageName)
   local imageName = "level." .. levelName .. "." .. elementType .. ".png"
   if utils.fileExists(imageName, system.DocumentsDirectory) then
-    return imageName, system.DocumentsDirectory
+    return imageName, system.DocumentsDirectory, false
   else
-    return defaultImageName, system.ResourceDirectory
+    return defaultImageName, system.ResourceDirectory, true
   end
 end
 
@@ -25,12 +25,13 @@ components.newBackground = function(parent)
 end
 
 components.newBall = function(parent, levelName, width, height)
-  local imageName, imageBaseDir = elementImage(levelName, "ball", "images/ball.png")
+  local imageName, imageBaseDir, isDefault = elementImage(levelName, "ball", "images/ball.png")
   local ball = display.newImageRect(parent, imageName, imageBaseDir, width, height)
   local ballMask = graphics.newMask("images/ball-mask.png")
   ball:setMask(ballMask)
   ball.maskScaleX = ball.width / 394
   ball.maskScaleY = ball.height / 394
+  ball.isDefault = isDefault
   return ball
 end
 
@@ -62,22 +63,24 @@ components.newGroup = function(parent)
 end
 
 components.newObstacleBarrier = function(parent, levelName, barrierType, width, height)
-  local imageName, imageBaseDir = elementImage(
+  local imageName, imageBaseDir, isDefault = elementImage(
     levelName,
     "obstacle-" .. barrierType,
     "images/" .. barrierType .. ".png"
   )
   local barrier = display.newImageRect(parent, imageName, imageBaseDir, width, height)
+  barrier.isDefault = isDefault
   return barrier
 end
 
 components.newObstacleCorner = function(parent, levelName, width, height)
-  local imageName, imageBaseDir = elementImage(levelName, "obstacle-corner", "images/corner.png")
+  local imageName, imageBaseDir, isDefault = elementImage(levelName, "obstacle-corner", "images/corner.png")
   local corner = display.newImageRect(parent, imageName, imageBaseDir, width, height)
   local cornerMask = graphics.newMask("images/corner-mask.png")
   corner:setMask(cornerMask)
   corner.maskScaleX = corner.width / 394
   corner.maskScaleY = corner.height / 394
+  corner.isDefault = isDefault
   return corner
 end
 
@@ -88,12 +91,13 @@ components.newOverlayBackground = function(parent)
 end
 
 components.newTarget = function(parent, levelName, targetType, width, height)
-  local imageName, imageBaseDir = elementImage(
+  local imageName, imageBaseDir, isDefault = elementImage(
     levelName,
     "target-" .. targetType,
     "images/target-" .. targetType .. ".png"
   )
   local target = display.newImageRect(parent, imageName, imageBaseDir, width, height)
+  target.isDefault = isDefault
   return target
 end
 

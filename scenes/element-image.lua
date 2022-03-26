@@ -1,8 +1,17 @@
 local components = require "components"
 local composer = require "composer"
+local i18n = require "i18n"
 local multitouch = require "libraries.multitouch"
 local navigation = require "navigation"
+local utils = require "utils"
 
+local backPhoto = nil
+local background = nil
+local content = nil
+local elementType = nil
+local frontContainer = nil
+local frontPhoto = nil
+local levelName = nil
 local scene = composer.newScene()
 
 local elements = {
@@ -16,53 +25,90 @@ local elements = {
   ["target-hard"] = { width = 200, height = 200 },
 }
 
+local function goBack()
+  navigation.gotoCustomizeLevel(levelName)
+end
+
+local function onMove(deltaX, deltaY)
+  local containerBounds = frontContainer.contentBounds
+  local photoBounds = backPhoto.contentBounds
+
+  deltaX = photoBounds.xMax + deltaX < containerBounds.xMax and containerBounds.xMax - photoBounds.xMax or deltaX
+  deltaX = photoBounds.xMin + deltaX > containerBounds.xMin and containerBounds.xMin - photoBounds.xMin or deltaX
+  deltaY = photoBounds.yMax + deltaY < containerBounds.yMax and containerBounds.yMax - photoBounds.yMax or deltaY
+  deltaY = photoBounds.yMin + deltaY > containerBounds.yMin and containerBounds.yMin - photoBounds.yMin or deltaY
+
+  backPhoto.x = backPhoto.x + deltaX
+  backPhoto.y = backPhoto.y + deltaY
+  frontPhoto.x = frontPhoto.x + deltaX
+  frontPhoto.y = frontPhoto.y + deltaY
+end
+
+local function onPinch(deltaDistanceX, deltaDistanceY)
+  local minXScale = frontContainer.width / backPhoto.width
+  local minYScale = frontContainer.height / backPhoto.height
+  local xScale = math.min(4, math.max(minXScale, frontPhoto.xScale + deltaDistanceX / 400))
+  local yScale = math.min(4, math.max(minYScale, frontPhoto.yScale + deltaDistanceY / 400))
+  frontPhoto.xScale, backPhoto.xScale = xScale, xScale
+  frontPhoto.yScale, backPhoto.yScale = yScale, yScale
+end
+
+local function saveImage()
+  display.save(frontContainer, {
+    filename = "level." .. levelName .. "." .. elementType .. ".png",
+    baseDir = system.DocumentsDirectory,
+  })
+  navigation.gotoCustomizeLevel(levelName)
+end
+
 function scene:create(event)
-  components.newBackground(self.view)
+  background = components.newBackground(self.view)
+  content = components.newGroup(self.view)
+
+  local topInset, leftInset, bottomInset, rightInset = display.getSafeAreaInsets()
+
+  local goBackButton = components.newButton(self.view, { label = i18n("back"), width = 40, onRelease = goBack })
+  goBackButton.anchorX = 0
+  goBackButton.anchorY = 0
+  goBackButton.x = background.contentBounds.xMin + leftInset + 20
+  goBackButton.y = background.contentBounds.yMin + topInset + 20
+
+  local saveButton = components.newButton(self.view, { label = i18n("save"), width = 120, onRelease = saveImage })
+  saveButton.anchorX = 1
+  saveButton.anchorY = 0
+  saveButton.x = background.contentBounds.xMax - rightInset - 20
+  saveButton.y = background.contentBounds.yMin + topInset + 20
 end
 
 function scene:show(event)
-  if event.phase == "did" then
-    system.activate("multitouch")
+  if event.phase == "will" then
+    backPhoto = event.params.photo
+    elementType = event.params.elementType
+    levelName = event.params.levelName
 
-    local elementType = event.params.elementType
     local element = elements[elementType]
-    local levelName = event.params.levelName
-    local photo = event.params.photo
-    local screenX = display.screenOriginX
-    local screenY = display.screenOriginY
-    local screenWidth = display.actualContentWidth
-    local screenHeight = display.actualContentHeight
 
-    display.save(photo, {
+    display.save(backPhoto, {
       filename = "element-image.png",
       baseDir = system.TemporaryDirectory,
       captureOffscreenArea = true,
     })
 
-    local width = photo.width
-    local height = photo.height
-
-    display.remove(photo)
-
-    local backPhoto = display.newImageRect(self.view, "element-image.png", system.TemporaryDirectory, width, height)
+    content:insert(backPhoto)
     backPhoto.x = display.contentCenterX
     backPhoto.y = display.contentCenterY
+    backPhoto.alpha = 0.5
 
-    local overlay = display.newRect(self.view, screenX, screenY, screenWidth, screenHeight)
-    overlay.anchorX = 0
-    overlay.anchorY = 0
-    overlay:setFillColor(0, 0, 0, 0.5)
-
-    local frontContainer = display.newContainer(self.view, element.width, element.height)
+    frontContainer = display.newContainer(content, element.width, element.height)
     frontContainer.x = display.contentCenterX
     frontContainer.y = display.contentCenterY
 
-    local frontPhoto = display.newImageRect(
+    frontPhoto = display.newImageRect(
       frontContainer,
       "element-image.png",
       system.TemporaryDirectory,
-      width,
-      height
+      backPhoto.width,
+      backPhoto.height
     )
 
     if element.mask then
@@ -72,55 +118,28 @@ function scene:show(event)
       frontContainer.maskScaleY = frontContainer.height / 394
     end
 
-    local minX = frontContainer.x - frontContainer.width / 2
-    local minY = frontContainer.y - frontContainer.height / 2
-    local maxX = frontContainer.x + frontContainer.width / 2
-    local maxY = frontContainer.y + frontContainer.height / 2
-    local minXScale = frontContainer.width / width
-    local minYScale = frontContainer.height / height
-    local maxScale = 4
-
-    local function onMove(deltaX, deltaY)
-      local bounds = backPhoto.contentBounds
-      deltaX = bounds.xMax + deltaX < maxX and maxX - bounds.xMax or deltaX
-      deltaX = bounds.xMin + deltaX > minX and minX - bounds.xMin or deltaX
-      deltaY = bounds.yMax + deltaY < maxY and maxY - bounds.yMax or deltaY
-      deltaY = bounds.yMin + deltaY > minY and minY - bounds.yMin or deltaY
-      backPhoto.x, backPhoto.y = backPhoto.x + deltaX, backPhoto.y + deltaY
-      frontPhoto.x, frontPhoto.y = frontPhoto.x + deltaX, frontPhoto.y + deltaY
-    end
-
-    local function onPinch(deltaDistanceX, deltaDistanceY)
-      local xScale = math.min(maxScale, math.max(minXScale, frontPhoto.xScale + deltaDistanceX / 200))
-      local yScale = math.min(maxScale, math.max(minYScale, frontPhoto.yScale + deltaDistanceY / 200))
-      frontPhoto.xScale, backPhoto.xScale = xScale, xScale
-      frontPhoto.yScale, backPhoto.yScale = yScale, yScale
-    end
-
     onPinch(0, 0)
 
-    multitouch.addMoveAndPinchListener(overlay, onMove, onPinch)
-
-    -- TODO Mettre ça bien
-
-    local saveButton = components.newButton(self.view, { label = "💾", width = 100, onRelease = function()
-      display.save(frontContainer, {
-        filename = "level." .. levelName .. "." .. elementType .. ".png",
-        baseDir = system.DocumentsDirectory,
-      })
-      navigation.gotoCustomizeLevel(levelName)
-    end })
-
-    saveButton.anchorX = 1
-    saveButton.anchorY = 0
-    saveButton.x = 120
-    saveButton.y = 20
+  elseif event.phase == "did" then
+    if not utils.isSimulator() then
+      system.activate("multitouch")
+    end
+    multitouch.addMoveAndPinchListener(background, onMove, onPinch)
   end
 end
 
 function scene:hide(event)
   if event.phase == "will" then
-    system.deactivate("multitouch")
+    multitouch.removeMoveAndPinchListener(background)
+    if not utils.isSimulator() then
+      system.deactivate("multitouch")
+    end
+  elseif event.phase == "did" then
+    display.remove(backPhoto)
+    display.remove(frontContainer)
+    backPhoto = nil
+    frontContainer = nil
+    frontPhoto = nil
   end
 end
 

@@ -1,11 +1,31 @@
 local components = require "components"
 local composer = require "composer"
+local i18n = require "i18n"
+local navigation = require "navigation"
 local widget = require "widget"
 
 local elements = nil
 local levelName = nil
 local scene = composer.newScene()
 local scrollview = nil
+
+local function newElement(parent, elementType)
+  local element = nil
+
+  if elementType == "ball" then
+    element = components.newBall(parent, levelName, 50, 50)
+  elseif elementType == "obstacle-corner" then
+    element = components.newObstacleCorner(parent, levelName, 50, 50)
+  elseif elementType:starts("obstacle-horizontal-barrier") then
+    element = components.newObstacleBarrier(parent, levelName, elementType:sub(10), 50, 20)
+  elseif elementType:starts("obstacle-vertical-barrier") then
+    element = components.newObstacleBarrier(parent, levelName, elementType:sub(10), 20, 50)
+  elseif elementType:starts("target-") then
+    element = components.newTarget(parent, levelName, elementType:sub(8), 50, 50)
+  end
+
+  return element
+end
 
 local function elementsTypesFromLevelConfig()
   local config = require ("levels." .. levelName)
@@ -26,20 +46,29 @@ local function elementsTypesFromLevelConfig()
   return elementsTypes
 end
 
+local function goBack()
+  navigation.gotoGame(levelName)
+end
+
 function scene:create(event)
+  local background = components.newBackground(self.view)
   local topInset, leftInset, bottomInset, rightInset = display.getSafeAreaInsets()
 
-  components.newBackground(self.view)
+  local goBackButton = components.newButton(self.view, { label = i18n("back"), width = 40, onRelease = goBack })
+  goBackButton.anchorX = 0
+  goBackButton.anchorY = 0
+  goBackButton.x = background.contentBounds.xMin + leftInset + 20
+  goBackButton.y = background.contentBounds.yMin + topInset + 20
 
   scrollview = widget.newScrollView({
     left = display.screenOriginX,
-    top = display.screenOriginY,
+    top = goBackButton.contentBounds.yMax + 20,
     width = display.actualContentWidth,
     height = display.actualContentHeight,
     hideBackground = true,
     hideScrollBar = true,
     horizontalScrollDisabled = true,
-    topPadding = topInset + 20,
+    topPadding = 0,
     bottomPadding = bottomInset + 20,
     leftPadding = leftInset,
     rightPadding = rightInset,
@@ -55,64 +84,110 @@ function scene:createElements()
   elements = components.newGroup(scrollview)
 
   for _, elementType in ipairs(elementsTypes) do
-    local element = nil
     local row = components.newGroup(elements)
-
     row.anchorX, row.anchorY = 0, 0
-    row.x, row.y = 20, y
+    row.x, row.y = 15, y
 
-    if elementType == "ball" then
-      element = components.newBall(row, levelName, 50, 50)
-    elseif elementType == "obstacle-corner" then
-      element = components.newObstacleCorner(row, levelName, 50, 50)
-    elseif elementType:starts("obstacle-horizontal-barrier") then
-      element = components.newObstacleBarrier(row, levelName, elementType:sub(10), 50, 20)
-    elseif elementType:starts("obstacle-vertical-barrier") then
-      element = components.newObstacleBarrier(row, levelName, elementType:sub(10), 20, 50)
-    elseif elementType:starts("target-") then
-      element = components.newTarget(row, levelName, elementType:sub(8), 50, 50)
-    end
+    local element = newElement(row, elementType)
 
     if element then
-      element.x = 25
-      element.y = 25
+      element.x, element.y = 25, 25
 
-      local selectPhotoButton = components.newButton(row, {
-        label = "TODO",
-        width = 100,
-        onRelease = function()
-          if media.hasSource(media.PhotoLibrary) then
+      local x = 70
+
+      if media.hasSource(media.PhotoLibrary) then
+        local function onSelectPhotoButton(event)
+          if event.phase == "ended" then
             media.selectPhoto({ mediaSource = media.PhotoLibrary, listener = function(event)
-              local photo = event.target
-              composer.gotoScene("scenes.element-image", {
-                params = {
-                  elementType = elementType,
-                  levelName = levelName,
-                  photo = photo
-                } })
+              if event.target then
+                navigation.gotoElementImage(levelName, elementType, event.target)
+              end
             end })
-          else
-            -- TODO
-            native.showAlert( "TODO", "This device does not have a photo library.", { "OK" } )
+          elseif event.phase == "moved" then
+            if math.abs(event.y - event.yStart) > 5 then
+              scrollview:takeFocus(event)
+            end
           end
         end
-      })
 
-      selectPhotoButton.x = 120
-      selectPhotoButton.y = 25
+        local selectPhotoButton = components.newButton(row, {
+          label = i18n("select_photo"),
+          width = 80,
+          onEvent = onSelectPhotoButton,
+        })
+
+        selectPhotoButton.anchorX = 0
+        selectPhotoButton.x = x
+        selectPhotoButton.y = 25
+
+        x = x + selectPhotoButton.width + 10
+      end
+
+      if media.hasSource(media.Camera) then
+        local function onTakePhotoButton(event)
+          if event.phase == "ended" then
+            media.capturePhoto({ listener = function(event)
+              if event.target then
+                navigation.gotoElementImage(levelName, elementType, event.target)
+              end
+            end })
+          elseif event.phase == "moved" then
+            if math.abs(event.y - event.yStart) > 5 then
+              scrollview:takeFocus(event)
+            end
+          end
+        end
+
+        local takePhotoButton = components.newButton(row, {
+          label = i18n("take_photo"),
+          width = 80,
+          onEvent = onTakePhotoButton,
+        })
+
+        takePhotoButton.anchorX = 0
+        takePhotoButton.x = x
+        takePhotoButton.y = 25
+
+        x = x + takePhotoButton.width + 10
+      end
+
+      if not element.isDefault then
+        local removeCustomizationButton
+
+        local function onRemoveCustomizationButton(event)
+          if event.phase == "ended" then
+            local filename = "level." .. levelName .. "." .. elementType .. ".png"
+            local filepath = system.pathForFile(filename, system.DocumentsDirectory)
+            os.remove(filepath)
+            local defaultElement = newElement(row, elementType)
+            defaultElement.x, defaultElement.y = element.x, element.y
+            defaultElement.alpha = 0
+            transition.to(defaultElement, { time = 500, alpha = 1 } )
+            transition.to(element, { time = 500, alpha = 0, onComplete = function() display.remove(element) end } )
+            display.remove(removeCustomizationButton)
+          elseif event.phase == "moved" then
+            if math.abs(event.y - event.yStart) > 5 then
+              scrollview:takeFocus(event)
+            end
+          end
+        end
+
+        removeCustomizationButton = components.newButton(row, {
+          label = i18n("cancel"),
+          width = 40,
+          onEvent = onRemoveCustomizationButton,
+        })
+
+        removeCustomizationButton.anchorX = 0
+        removeCustomizationButton.x = x
+        removeCustomizationButton.y = 25
+
+        x = x + removeCustomizationButton.width + 10
+      end
 
       y = y + 70
     end
   end
-
-  -- Les infos à récupérer pour chaque élément :
-  -- Taille de l'objet (carré, rectangle, etc.)
-  -- Forme de l'objet (peut remplacer la taille, j'ai directement les éléments avec la forme)
-  -- Masque à appliquer s'il y en a un
-
-  -- Afficher les éléments à partir des images de l'utilisateur
-  -- Afficher un bouton pour sélectionner l'image par défaut, sélectionner une image, un pour prendre une photo
-  -- Envoyer cela vers la scène de sélection de l'image, puis la sauvegarder
 end
 
 function scene:show(event)

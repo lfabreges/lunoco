@@ -1,18 +1,14 @@
 local components = require "components"
 local composer = require "composer"
 local lfs = require "lfs"
+local navigation = require "navigation"
 local utils = require "utils"
 local widget = require "widget"
 
 local scene = composer.newScene()
 
 local function startLevel(levelName)
-  composer.gotoScene("scenes.game", {
-    effect = "crossFade",
-    time = 500,
-    params = { levelName = levelName },
-  })
-  return true
+  navigation.gotoGame(levelName)
 end
 
 function scene:create(event)

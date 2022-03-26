@@ -10,23 +10,19 @@ local shouldResumeGame = false
 
 local function gotoCustomizeLevel()
   navigation.gotoCustomizeLevel(levelName)
-  return true
 end
 
 local function gotoLevels()
   navigation.gotoLevels()
-  return true
 end
 
 local function resumeGame()
   shouldResumeGame = true
   composer.hideOverlay()
-  return true
 end
 
 local function retryLevel()
   navigation.reloadGame(levelName)
-  return true
 end
 
 function scene:create(event)

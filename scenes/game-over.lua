@@ -36,12 +36,10 @@ end
 
 local function gotoLevels()
   navigation.gotoLevels()
-  return true
 end
 
 local function retryLevel()
   navigation.reloadGame(levelName)
-  return true
 end
 
 function scene:create(event)

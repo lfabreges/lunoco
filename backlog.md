@@ -8,6 +8,6 @@
   sons.
 * Personnaliser le spash screen : https://docs.coronalabs.com/plugin/CoronaSplashControl/index.html
 * Personnaliser les icones
-* components / utils / fusionner ?
 * Gérer le pluriel dans la localisation
 * Supprimer vertical-barrier et ajouter simplement une rotation ?
+* Mettre les bons settings android et ios pour appareil photo, etc.
