@@ -18,6 +18,7 @@ settings = {
       CFBundleDisplayName = "Lunoco",
       CFBundleLocalizations = { "fr" },
       CFBundleName = "Lunoco",
+      ITSAppUsesNonExemptEncryption = false,
       NSCameraUsageDescription = "Lunoco would like to access the camera",
       NSPhotoLibraryUsageDescription = "Lunoco would like to access the photo library",
       UIStatusBarHidden = false,
