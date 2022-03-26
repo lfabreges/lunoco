@@ -6,6 +6,8 @@ local utils = require "utils"
 local ball = nil
 local ballImpulseForce = nil
 local config = nil
+local gravityX = 0
+local gravityY = 9.8
 local level = nil
 local levelName = nil
 local numberOfShots = nil
@@ -77,16 +79,15 @@ local function predictBallPathOnLateUpdate()
     return false
   end
 
-  local timeStepInterval = 0.1
-  local gravityX, gravityY = physics.getGravity()
-
   display.remove(predictedBallPath)
   predictedBallPath = components.newGroup(level)
 
+  local timeStepInterval = 0.05
+  local numberOfSteps = 1 / timeStepInterval
   local prevStepX = nil
   local prevStepY = nil
 
-  for step = 0, 10, 1 do
+  for step = 0, numberOfSteps, 1 do
     local time = step * timeStepInterval
     local stepX = ball.x + time * ballImpulseForce.x + 0.5 * gravityX * scale * (time * time)
     local stepY = ball.y + time * ballImpulseForce.y + 0.5 * gravityY * scale * (time * time)
@@ -142,7 +143,7 @@ function scene:createLevel()
   physics.start()
   physics.pause()
   physics.setScale(scale)
-  physics.setGravity(0, 9.8)
+  physics.setGravity(gravityX, gravityY)
 
   level = components.newGroup(self.view)
 

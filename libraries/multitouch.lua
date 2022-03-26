@@ -19,7 +19,7 @@ local function createEventListener(listener)
     local isHandled = false
 
     if event.phase == "began" then
-      table.insert(touchEvents, event)
+      touchEvents[#touchEvents + 1] = event
       numberOfEvents = numberOfEvents + 1
       isHandled = listener({
         phase = "began",
