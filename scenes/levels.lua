@@ -62,7 +62,7 @@ function scene:create(event)
 
   for index, levelName in ipairs(levelNames) do
     local group = display.newGroup()
-    local isEven = math.fmod(index, 2) == 0
+    local isEven = index % 2 == 0
     local levelImage = nil
 
     if utils.fileExists("level." .. levelName .. ".png", system.DocumentsDirectory) then

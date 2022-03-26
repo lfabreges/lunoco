@@ -82,19 +82,27 @@ end
 
 function scene:show(event)
   if event.phase == "will" then
-    backPhoto = event.params.photo
     elementType = event.params.elementType
     levelName = event.params.levelName
 
     local element = elements[elementType]
+    local photo = event.params.photo
+    local photoScale = display.actualContentWidth / display.pixelWidth
+    local photoWidth = photo.width
+    local photoHeight = photo.height
 
-    display.save(backPhoto, {
+    photo.xScale = photoScale
+    photo.yScale = photoScale
+
+    display.save(photo, {
       filename = "element-image.png",
       baseDir = system.TemporaryDirectory,
       captureOffscreenArea = true,
     })
 
-    content:insert(backPhoto)
+    display.remove(photo)
+
+    backPhoto = display.newImageRect(content, "element-image.png", system.TemporaryDirectory, photoWidth, photoHeight)
     backPhoto.x = display.contentCenterX
     backPhoto.y = display.contentCenterY
     backPhoto.alpha = 0.1
