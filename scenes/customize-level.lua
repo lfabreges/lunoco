@@ -54,7 +54,7 @@ function scene:create(event)
   local background = components.newBackground(self.view)
   local topInset, leftInset, bottomInset, rightInset = display.getSafeAreaInsets()
 
-  local goBackButton = components.newButton(self.view, { label = i18n.t("back"), width = 40, onRelease = goBack })
+  local goBackButton = components.newImageButton(self.view, "images/back.png", 40, 40, { onRelease = goBack })
   goBackButton.anchorX = 0
   goBackButton.anchorY = 0
   goBackButton.x = background.contentBounds.xMin + leftInset + 20
@@ -97,24 +97,20 @@ function scene:createElements()
 
       if media.hasSource(media.PhotoLibrary) then
         local function onSelectPhotoButton(event)
-          if event.phase == "ended" then
-            media.selectPhoto({ mediaSource = media.PhotoLibrary, listener = function(event)
-              if event.completed then
-                navigation.gotoElementImage(levelName, elementType, event.target)
-              end
-            end })
-          elseif event.phase == "moved" then
-            if math.abs(event.y - event.yStart) > 5 then
-              scrollview:takeFocus(event)
+          media.selectPhoto({ mediaSource = media.PhotoLibrary, listener = function(event)
+            if event.completed then
+              navigation.gotoElementImage(levelName, elementType, event.target)
             end
-          end
+          end })
         end
 
-        local selectPhotoButton = components.newButton(row, {
-          label = i18n.t("select_photo"),
-          width = 80,
-          onEvent = onSelectPhotoButton,
-        })
+        local selectPhotoButton = components.newImageButton(
+          row,
+          "images/select-photo.png",
+          40,
+          40,
+          { onRelease = onSelectPhotoButton, scrollview = scrollview }
+        )
 
         selectPhotoButton.anchorX = 0
         selectPhotoButton.x = x
@@ -125,24 +121,20 @@ function scene:createElements()
 
       if media.hasSource(media.Camera) then
         local function onTakePhotoButton(event)
-          if event.phase == "ended" then
-            media.capturePhoto({ listener = function(event)
-              if event.completed then
-                navigation.gotoElementImage(levelName, elementType, event.target)
-              end
-            end })
-          elseif event.phase == "moved" then
-            if math.abs(event.y - event.yStart) > 5 then
-              scrollview:takeFocus(event)
+          media.capturePhoto({ listener = function(event)
+            if event.completed then
+              navigation.gotoElementImage(levelName, elementType, event.target)
             end
-          end
+          end })
         end
 
-        local takePhotoButton = components.newButton(row, {
-          label = i18n.t("take_photo"),
-          width = 80,
-          onEvent = onTakePhotoButton,
-        })
+        local takePhotoButton = components.newImageButton(
+          row,
+          "images/take-photo.png",
+          40,
+          40,
+          { onRelease = onTakePhotoButton, scrollview = scrollview }
+        )
 
         takePhotoButton.anchorX = 0
         takePhotoButton.x = x
@@ -155,28 +147,24 @@ function scene:createElements()
         local removeCustomizationButton
 
         local function onRemoveCustomizationButton(event)
-          if event.phase == "ended" then
-            local filename = "level." .. levelName .. "." .. elementType .. ".png"
-            local filepath = system.pathForFile(filename, system.DocumentsDirectory)
-            os.remove(filepath)
-            local defaultElement = newElement(row, elementType)
-            defaultElement.x, defaultElement.y = element.x, element.y
-            defaultElement.alpha = 0
-            transition.to(defaultElement, { time = 500, alpha = 1 } )
-            transition.to(element, { time = 500, alpha = 0, onComplete = function() display.remove(element) end } )
-            display.remove(removeCustomizationButton)
-          elseif event.phase == "moved" then
-            if math.abs(event.y - event.yStart) > 5 then
-              scrollview:takeFocus(event)
-            end
-          end
+          local filename = "level." .. levelName .. "." .. elementType .. ".png"
+          local filepath = system.pathForFile(filename, system.DocumentsDirectory)
+          os.remove(filepath)
+          local defaultElement = newElement(row, elementType)
+          defaultElement.x, defaultElement.y = element.x, element.y
+          defaultElement.alpha = 0
+          transition.to(defaultElement, { time = 500, alpha = 1 } )
+          transition.to(element, { time = 500, alpha = 0, onComplete = function() display.remove(element) end } )
+          display.remove(removeCustomizationButton)
         end
 
-        removeCustomizationButton = components.newButton(row, {
-          label = i18n.t("cancel"),
-          width = 40,
-          onEvent = onRemoveCustomizationButton,
-        })
+        removeCustomizationButton = components.newImageButton(
+          row,
+          "images/cancel.png",
+          40,
+          40,
+          { onRelease = onRemoveCustomizationButton, scrollview = scrollview }
+        )
 
         removeCustomizationButton.anchorX = 0
         removeCustomizationButton.x = x

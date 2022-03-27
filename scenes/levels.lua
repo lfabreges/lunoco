@@ -81,44 +81,25 @@ function scene:show(event)
       local isEven = index % 2 == 0
       local levelImage = nil
       local levelImageName = "level." .. levelName .. ".png"
+      local levelImageBaseDir = system.DocumentsDirectory
 
-      if utils.fileExists(levelImageName, system.DocumentsDirectory) then
-        levelImage = display.newImageRect(content, levelImageName, system.DocumentsDirectory, 120, 180)
-      else
-        levelImage = display.newImageRect(content, "images/level-unknown.png", 120, 180)
+      if not utils.fileExists(levelImageName, levelImageBaseDir) then
+        levelImage = "images/level-unknown.png"
+        levelImageBaseDir = system.ResourceDirectory
       end
 
-      levelImage.anchorY = 0
-      levelImage.y = y
-
-      if isEven then
-        levelImage.x = centerX + 60 + spaceWidth / 2
-      else
-        levelImage.x = centerX - 60 - spaceWidth / 2
-      end
-
-      local function onLevelButtonEvent(event)
-        if event.phase == "ended" then
-          startLevel(levelName)
-        elseif event.phase == "moved" then
-          if math.abs(event.y - event.yStart) > 5 then
-            scrollview:takeFocus(event)
-          end
-        end
-      end
-
-      local levelButton = widget.newButton({
-        shape = "rect",
-        width = 120,
-        height = 180,
-        fillColor = { default = { 0, 0, 0, 0.01 }, over = { 0, 0, 0, 0.5 } },
-        onEvent = onLevelButtonEvent,
-      })
+      local levelButton = components.newImageButton(
+        content,
+        levelImageName,
+        levelImageBaseDir,
+        120,
+        180,
+        { onRelease = function() startLevel(levelName) end, scrollview = scrollview }
+      )
 
       levelButton.anchorY = 0
-      levelButton.x = levelImage.x
-      levelButton.y = levelImage.y
-      content:insert(levelButton)
+      levelButton.y = y
+      levelButton.x = isEven and centerX + 60 + spaceWidth / 2 or centerX - 60 - spaceWidth / 2
 
       if scores[levelName] then
         local numberOfStars = scores[levelName].numberOfStars
@@ -130,7 +111,7 @@ function scene:show(event)
           local starMask = graphics.newMask("images/star-mask.png")
 
           star.anchorY = 0
-          star.x = levelImage.x + (starCount - 2) * 25
+          star.x = levelButton.x + (starCount - 2) * 25
           star.y = y + 190
           star:setMask(starMask)
           star.maskScaleX = star.width / 394

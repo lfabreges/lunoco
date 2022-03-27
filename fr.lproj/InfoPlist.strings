@@ -1,2 +1,2 @@
-NSCameraUsageDescription = "Votre appareil photo servira à personnaliser le jeu";
-NSPhotoLibraryUsageDescription = "Votre bibliothèque de photos servira à personnaliser le jeu";
+NSCameraUsageDescription = "Votre appareil photo servira à personnaliser les images jeu";
+NSPhotoLibraryUsageDescription = "Votre bibliothèque de photos servira à personnaliser les images jeu";

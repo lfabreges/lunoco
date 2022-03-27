@@ -1,4 +1,12 @@
 # Next
+* Récupérer dynamiquement les images modifiées par le joueur sans passer par le cache
+  Potentiellement en stockant l'image dans le dossier temporaire en plus du document ?
+* Réorganiser les images dans des sous-dossiers
+* Construire un nouveau fichier outlines avec un export PDF pour permettre de dessiner dessus
+* Barre de menu permettant de revenir en arrière, sauvegarder, etc.
+* Tuiles dans le menu de personnalisation
+* Personnalisation des sons (load et dispose à chaque chargement)
+* Personnalisation des images et des sons par défaut
 
 # Idées
 * Au fil des niveaux, les étoiles permettent de gagner des points et de débloquer les fonctionnalités de
