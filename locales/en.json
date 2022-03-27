@@ -1,6 +1,4 @@
 {
-  "back": "<",
-  "cancel" : "X",
   "customize": "Customize",
   "finished_in": {
     "one": "Finished in 1 shot !",
@@ -9,8 +7,5 @@
   "levels": "Levels",
   "resume": "Resume",
   "retry": "Retry",
-  "save": "Save",
-  "select_photo": "Select",
-  "take_photo": "Take",
   "title": "Lunoco"
 }
