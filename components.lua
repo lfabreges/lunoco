@@ -5,8 +5,10 @@ local components = {}
 
 local function elementImage(levelName, elementType, defaultImageName)
   local imageName = "level." .. levelName .. "." .. elementType .. ".png"
-  if utils.fileExists(imageName, system.DocumentsDirectory) then
-    return imageName, system.DocumentsDirectory, false
+  local imageBaseDir = system.DocumentsDirectory
+  if utils.fileExists(imageName, imageBaseDir) then
+    imageName, imageBaseDir = utils.imagePath(imageName)
+    return imageName, imageBaseDir, false
   else
     return defaultImageName, system.ResourceDirectory, true
   end

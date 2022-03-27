@@ -88,6 +88,8 @@ function scene:show(event)
       if not utils.fileExists(levelImageName, levelImageBaseDir) then
         levelImage = "images/level-unknown.png"
         levelImageBaseDir = system.ResourceDirectory
+      else
+        levelImageName, levelImageBaseDir = utils.imagePath(levelImageName, levelImageBaseDir)
       end
 
       local levelButton = components.newImageButton(

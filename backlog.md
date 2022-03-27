@@ -1,6 +1,4 @@
 # Next
-* Récupérer dynamiquement les images modifiées par le joueur sans passer par le cache
-  Potentiellement en stockant l'image dans le dossier temporaire en plus du document ?
 * Réorganiser les images dans des sous-dossiers
 * Construire un nouveau fichier outlines avec un export PDF pour permettre de dessiner dessus
 * Barre de menu permettant de revenir en arrière, sauvegarder, etc.

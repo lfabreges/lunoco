@@ -54,10 +54,7 @@ local function onPinch(deltaDistanceX, deltaDistanceY)
 end
 
 local function saveImage()
-  display.save(frontContainer, {
-    filename = "level." .. levelName .. "." .. elementType .. ".png",
-    baseDir = system.DocumentsDirectory,
-  })
+  utils.saveImage(frontContainer, { filename = "level." .. levelName .. "." .. elementType .. ".png" })
   navigation.gotoCustomizeLevel(levelName)
 end
 
@@ -94,15 +91,11 @@ function scene:show(event)
     photo.xScale = photoScale
     photo.yScale = photoScale
 
-    display.save(photo, {
-      filename = "element-image.png",
-      baseDir = system.TemporaryDirectory,
-      captureOffscreenArea = true,
-    })
-
+    local photoName = "element-image." .. math.random() .. ".png"
+    display.save(photo, { filename = photoName, baseDir = system.TemporaryDirectory, captureOffscreenArea = true })
     display.remove(photo)
 
-    backPhoto = display.newImageRect(content, "element-image.png", system.TemporaryDirectory, photoWidth, photoHeight)
+    backPhoto = display.newImageRect(content, photoName, system.TemporaryDirectory, photoWidth, photoHeight)
     backPhoto.x = display.contentCenterX
     backPhoto.y = display.contentCenterY
     backPhoto.alpha = 0.1
@@ -113,7 +106,7 @@ function scene:show(event)
 
     frontPhoto = display.newImageRect(
       frontContainer,
-      "element-image.png",
+      photoName,
       system.TemporaryDirectory,
       backPhoto.width,
       backPhoto.height

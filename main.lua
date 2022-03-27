@@ -1,8 +1,8 @@
 local composer = require "composer"
 local utils = require "utils"
 
+math.randomseed(os.time())
 display.setStatusBar(display.HiddenStatusBar)
-
 composer.gotoScene("scenes.levels")
 
 if utils.isSimulator() then
