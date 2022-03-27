@@ -4,7 +4,6 @@
 * Réorganiser les images dans des sous-dossiers
 * Construire un nouveau fichier outlines avec un export PDF pour permettre de dessiner dessus
 * Barre de menu permettant de revenir en arrière, sauvegarder, etc.
-* Tuiles dans le menu de personnalisation
 * Personnalisation des sons (load et dispose à chaque chargement)
 * Personnalisation des images et des sons par défaut
 

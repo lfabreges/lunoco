@@ -7,6 +7,7 @@ local utils = require "utils"
 local widget = require "widget"
 
 local content = nil
+local gameTitle = nil
 local levelNames = {}
 local numberOfLevels = 6
 local scene = composer.newScene()
@@ -58,15 +59,16 @@ function scene:create(event)
 
   self.view:insert(scrollview)
 
-  local gameTitle = display.newText({
+  gameTitle = display.newText({
     align = "center",
     text = i18n.t("title"),
     font = native.systemFontBold,
     fontSize = 40,
     x = scrollview.width * 0.5,
-    y = 30,
+    y = 0,
   })
 
+  gameTitle.anchorY = 0
   scrollview:insert(gameTitle)
 end
 
@@ -75,7 +77,7 @@ function scene:show(event)
     local centerX = scrollview.width * 0.5
     local content = components.newGroup(scrollview)
     local scores = utils.loadScores()
-    local y = 90
+    local y = gameTitle.contentHeight + spaceWidth
 
     for index, levelName in ipairs(levelNames) do
       local isEven = index % 2 == 0
