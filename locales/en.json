@@ -1,11 +1,19 @@
 {
+  "ball": "Ball",
   "customize": "Customize",
   "finished_in": {
     "one": "Finished in 1 shot !",
     "other": "Finished in {count} shots !"
   },
   "levels": "Levels",
+  "obstacle-corner": "Corner",
+  "obstacle-horizontal-barrier": "Horizontal barrier",
+  "obstacle-horizontal-barrier-large": "Large horizontal barrier",
+  "obstacle-vertical-barrier": "Vertical barrier",
   "resume": "Resume",
   "retry": "Retry",
+  "target-easy": "Easy target",
+  "target-hard": "Hard target",
+  "target-normal": "Normal target",
   "title": "Lunoco"
 }

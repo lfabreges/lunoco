@@ -67,11 +67,11 @@ function scene:create(event)
 
   local topInset, leftInset, bottomInset, rightInset = display.getSafeAreaInsets()
 
-  local goBackButton = components.newImageButton(self.view, "images/back.png", 40, 40, { onRelease = goBack })
-  goBackButton.anchorX = 0
-  goBackButton.anchorY = 0
-  goBackButton.x = background.contentBounds.xMin + leftInset + 20
-  goBackButton.y = background.contentBounds.yMin + topInset + 20
+  local cancelButton = components.newImageButton(self.view, "images/cancel.png", 40, 40, { onRelease = goBack })
+  cancelButton.anchorX = 0
+  cancelButton.anchorY = 0
+  cancelButton.x = background.contentBounds.xMin + leftInset + 20
+  cancelButton.y = background.contentBounds.yMin + topInset + 20
 
   local saveButton = components.newImageButton(self.view, "images/accept.png", 40, 40, { onRelease = saveImage })
   saveButton.anchorX = 1

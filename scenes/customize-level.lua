@@ -84,16 +84,30 @@ function scene:createElements()
   elements = components.newGroup(scrollview)
 
   for _, elementType in ipairs(elementsTypes) do
-    local row = components.newGroup(elements)
-    row.anchorX, row.anchorY = 0, 0
-    row.x, row.y = 15, y
+    local elementGroup = components.newGroup(elements)
 
-    local element = newElement(row, elementType)
+    local elementText = display.newText({
+      text = i18n.t(elementType),
+      font = native.systemFont,
+      fontSize = 20,
+      parent = elementGroup,
+      x = 20,
+      y = 0,
+    })
 
-    if element then
-      element.x, element.y = 25, 25
+    elementText.anchorX, elementText.anchorY = 0, 0
 
-      local x = 70
+    local elementFrame = display.newRoundedRect(elementGroup, 60, elementText.height + 50, 80, 80, 10)
+    local element = newElement(elementGroup, elementType)
+
+    if not element then
+      display.remove(elementGroup)
+    else
+      elementGroup.y = y
+      elementFrame:setFillColor(0.5)
+      element.x, element.y = elementFrame.x, elementFrame.y
+
+      local x = elementFrame.x + elementFrame.width / 2 + 20
 
       if media.hasSource(media.PhotoLibrary) then
         local function onSelectPhotoButton(event)
@@ -105,7 +119,7 @@ function scene:createElements()
         end
 
         local selectPhotoButton = components.newImageButton(
-          row,
+          elementGroup,
           "images/select-photo.png",
           40,
           40,
@@ -114,9 +128,9 @@ function scene:createElements()
 
         selectPhotoButton.anchorX = 0
         selectPhotoButton.x = x
-        selectPhotoButton.y = 25
+        selectPhotoButton.y = element.y
 
-        x = x + selectPhotoButton.width + 10
+        x = x + selectPhotoButton.width + 20
       end
 
       if media.hasSource(media.Camera) then
@@ -129,7 +143,7 @@ function scene:createElements()
         end
 
         local takePhotoButton = components.newImageButton(
-          row,
+          elementGroup,
           "images/take-photo.png",
           40,
           40,
@@ -138,9 +152,9 @@ function scene:createElements()
 
         takePhotoButton.anchorX = 0
         takePhotoButton.x = x
-        takePhotoButton.y = 25
+        takePhotoButton.y = element.y
 
-        x = x + takePhotoButton.width + 10
+        x = x + takePhotoButton.width + 20
       end
 
       if not element.isDefault then
@@ -150,7 +164,7 @@ function scene:createElements()
           local filename = "level." .. levelName .. "." .. elementType .. ".png"
           local filepath = system.pathForFile(filename, system.DocumentsDirectory)
           os.remove(filepath)
-          local defaultElement = newElement(row, elementType)
+          local defaultElement = newElement(elementGroup, elementType)
           defaultElement.x, defaultElement.y = element.x, element.y
           defaultElement.alpha = 0
           transition.to(defaultElement, { time = 500, alpha = 1 } )
@@ -159,7 +173,7 @@ function scene:createElements()
         end
 
         removeCustomizationButton = components.newImageButton(
-          row,
+          elementGroup,
           "images/cancel.png",
           40,
           40,
@@ -168,12 +182,12 @@ function scene:createElements()
 
         removeCustomizationButton.anchorX = 0
         removeCustomizationButton.x = x
-        removeCustomizationButton.y = 25
+        removeCustomizationButton.y = element.y
 
-        x = x + removeCustomizationButton.width + 10
+        x = x + removeCustomizationButton.width + 20
       end
 
-      y = y + 70
+      y = y + elementGroup.height + 20
     end
   end
 end

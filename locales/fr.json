@@ -1,11 +1,19 @@
 {
+  "ball": "Balle",
   "customize": "Personnaliser",
   "finished_in": {
     "one": "Terminé en 1 tir !",
     "other": "Terminé en {count} tirs !"
   },
   "levels": "Niveaux",
+  "obstacle-corner": "Coin",
+  "obstacle-horizontal-barrier": "Barrière horizontale",
+  "obstacle-horizontal-barrier-large": "Large barrière horizontale",
+  "obstacle-vertical-barrier": "Barrière verticale",
   "resume": "Reprendre",
   "retry": "Réessayer",
+  "target-easy": "Cible facile",
+  "target-hard": "Cible difficile",
+  "target-normal": "Cible normale",
   "title": "Lunoco"
 }
