@@ -2,6 +2,7 @@ local components = require "components"
 local composer = require "composer"
 local i18n = require "i18n"
 local navigation = require "navigation"
+local utils = require "utils"
 local widget = require "widget"
 
 local elements = nil
@@ -161,9 +162,7 @@ function scene:createElements()
         local removeCustomizationButton
 
         local function onRemoveCustomizationButton(event)
-          local filename = "level." .. levelName .. "." .. elementType .. ".png"
-          local filepath = system.pathForFile(filename, system.DocumentsDirectory)
-          os.remove(filepath)
+          utils.removeLevelImage(levelName, elementType)
           local defaultElement = newElement(elementGroup, elementType)
           defaultElement.x, defaultElement.y = element.x, element.y
           defaultElement.alpha = 0

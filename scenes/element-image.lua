@@ -54,7 +54,7 @@ local function onPinch(deltaDistanceX, deltaDistanceY)
 end
 
 local function saveImage()
-  utils.saveImage(frontContainer, { filename = "level." .. levelName .. "." .. elementType .. ".png" })
+  utils.saveLevelImage(frontContainer, levelName, elementType)
   navigation.gotoCustomizeLevel(levelName)
 end
 
@@ -95,10 +95,16 @@ function scene:show(event)
     display.save(photo, { filename = photoName, baseDir = system.TemporaryDirectory, captureOffscreenArea = true })
     display.remove(photo)
 
+    local function removeTemporaryPhoto()
+      local filepath = system.pathForFile(photoName, system.TemporaryDirectory)
+      os.remove(filepath)
+    end
+
     backPhoto = display.newImageRect(content, photoName, system.TemporaryDirectory, photoWidth, photoHeight)
     backPhoto.x = display.contentCenterX
     backPhoto.y = display.contentCenterY
     backPhoto.alpha = 0.1
+    backPhoto:addEventListener("finalize", removeTemporaryPhoto)
 
     frontContainer = display.newContainer(content, element.width, element.height)
     frontContainer.x = display.contentCenterX

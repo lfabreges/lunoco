@@ -82,14 +82,12 @@ function scene:show(event)
     for index, levelName in ipairs(levelNames) do
       local isEven = index % 2 == 0
       local levelImage = nil
-      local levelImageName = "level." .. levelName .. ".png"
+      local levelImageName = utils.levelImageName(levelName, "screenshot")
       local levelImageBaseDir = system.DocumentsDirectory
 
-      if not utils.fileExists(levelImageName, levelImageBaseDir) then
-        levelImage = "images/level-unknown.png"
+      if not levelImageName then
+        levelImageName = "images/level-unknown.png"
         levelImageBaseDir = system.ResourceDirectory
-      else
-        levelImageName, levelImageBaseDir = utils.imagePath(levelImageName, levelImageBaseDir)
       end
 
       local levelButton = components.newImageButton(

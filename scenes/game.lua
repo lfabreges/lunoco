@@ -107,7 +107,7 @@ local function takeLevelScreenshot()
   local screenshot = display.captureBounds(display.currentStage.contentBounds)
   local screenshotScale = screenshot.xScale * 0.33
   screenshot.xScale, screenshot.yScale = screenshotScale, screenshotScale
-  utils.saveImage(screenshot, { filename = "level." .. levelName .. ".png", captureOffscreenArea = true })
+  utils.saveLevelImage(screenshot, levelName, "screenshot")
   display.remove(screenshot)
 end
 

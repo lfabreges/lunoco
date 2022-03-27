@@ -4,11 +4,9 @@ local widget = require "widget"
 local components = {}
 
 local function elementImage(levelName, elementType, defaultImageName)
-  local imageName = "level." .. levelName .. "." .. elementType .. ".png"
-  local imageBaseDir = system.DocumentsDirectory
-  if utils.fileExists(imageName, imageBaseDir) then
-    imageName, imageBaseDir = utils.imagePath(imageName)
-    return imageName, imageBaseDir, false
+  local imageName = utils.levelImageName(levelName, elementType)
+  if imageName then
+    return imageName, system.DocumentsDirectory, false
   else
     return defaultImageName, system.ResourceDirectory, true
   end

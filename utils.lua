@@ -1,32 +1,31 @@
+local lfs = require "lfs"
 local json = require "json"
 
 local utils = {}
 
 local environment = system.getInfo("environment")
-local imagePaths = {}
+local levelsImageNames = {}
 
-utils.fileExists = function(filename, baseDirectory)
-  baseDirectory = baseDirectory or system.ResourceDirectory
-  local filepath = system.pathForFile(filename, baseDirectory)
-  local file = io.open(filepath)
-  if file then
-    file:close()
-    return true
-  else
-    return false
+local function loadLevelImageNames(levelName)
+  if levelsImageNames[levelName] then
+    return levelsImageNames[levelName]
   end
-end
-
-utils.imagePath = function(imageName, imageBaseDir)
-  imageBaseDir = imageBaseDir or system.DocumentsDirectory
-  if imagePaths[imageBaseDir] then
-    local basedirPaths = imagePaths[imageBaseDir]
-    if basedirPaths[imageName] then
-      local imagePath = basedirPaths[imageName]
-      return imagePath.imageName, imagePath.imageBaseDir
+  levelsImageNames[levelName] = {}
+  if utils.fileExists(levelName, system.DocumentsDirectory) then
+    local path = system.pathForFile(levelName, system.DocumentsDirectory)
+    for filename in lfs.dir(path) do
+      local noCacheName, imageName = filename:match("^((.+)%.nocache%..+%.png)$")
+      if noCacheName then
+        levelsImageNames[levelName][imageName] = noCacheName
+      end
     end
   end
-  return imageName, imageBaseDir
+  return levelsImageNames[levelName]
+end
+
+utils.fileExists = function(filename, baseDirectory)
+  local filepath = system.pathForFile(filename, baseDirectory)
+  return os.rename(filepath, filepath) and true or false
 end
 
 utils.isSimulator = function()
@@ -44,10 +43,22 @@ utils.loadJson = function(filename, baseDirectory)
   return {}
 end
 
+utils.saveJson = function(content, filename, baseDirectory)
+  local filepath = system.pathForFile(filename, baseDirectory or system.ResourceDirectory)
+  local file = io.open(filepath, "w")
+  if file then
+    file:write(json.encode(content))
+    io.close(file)
+  end
+end
+
 utils.loadScores = function()
   return utils.loadJson("scores.json", system.DocumentsDirectory)
 end
 
+utils.saveScores = function(scores)
+  utils.saveJson(scores, "scores.json", system.DocumentsDirectory)
+end
 
 utils.playAudio = function(handle, volume)
   local freeChannel = audio.findFreeChannel()
@@ -62,29 +73,30 @@ utils.printMemoryUsage = function()
   print("Texture", "Memory Used:", string.format("%.03f", textureMemoryUsed), "Mb")
 end
 
-utils.saveImage = function(object, options)
-  local imageName = options.filename
-  local imageBaseDir = options.baseDir or system.DocumentsDirectory
-  display.save(object, options)
-  local noCacheImageName = "nocache." .. math.random() .. "." .. imageName
-  options.filename = noCacheImageName
-  options.baseDir = system.TemporaryDirectory
-  display.save(object, options)
-  imagePaths[imageBaseDir] = imagePaths[imageBaseDir] or {}
-  imagePaths[imageBaseDir][imageName] = { imageName = options.filename, imageBaseDir = options.baseDir }
+utils.levelImageName = function(levelName, imageName)
+  local levelImageNames = loadLevelImageNames(levelName)
+  local levelImageName = levelImageNames[imageName] and levelName .. "/" .. levelImageNames[imageName] or nil
+  return levelImageName
 end
 
-utils.saveJson = function(content, filename, baseDirectory)
-  local filepath = system.pathForFile(filename, baseDirectory or system.ResourceDirectory)
-  local file = io.open(filepath, "w")
-  if file then
-    file:write(json.encode(content))
-    io.close(file)
+utils.removeLevelImage = function(levelName, imageName)
+  local levelImageName = utils.levelImageName(levelName, imageName)
+  if levelImageName then
+    local levelImageNames = loadLevelImageNames(levelName)
+    local filepath = system.pathForFile(levelImageName, system.DocumentsDirectory)
+    os.remove(filepath)
+    levelImageNames[imageName] = nil
   end
 end
 
-utils.saveScores = function(scores)
-  utils.saveJson(scores, "scores.json", system.DocumentsDirectory)
+utils.saveLevelImage = function(object, levelName, imageName)
+  local levelImageNames = loadLevelImageNames(levelName)
+  local filename = imageName .. ".nocache." .. math.random() .. ".png"
+  local levelDirectory = system.pathForFile(levelName, system.DocumentsDirectory)
+  lfs.mkdir(levelDirectory)
+  display.save(object, { filename = levelName .. "/" .. filename, captureOffscreenArea = true })
+  utils.removeLevelImage(levelName, imageName)
+  levelImageNames[imageName] = filename
 end
 
 return utils
