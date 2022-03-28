@@ -15,6 +15,8 @@ local function newElement(parent, elementType)
 
   if elementType == "ball" then
     element = components.newBall(parent, levelName, 50, 50)
+  elseif elementType == "frame" then
+    element = components.newFrame(parent, levelName, 50, 50)
   elseif elementType == "obstacle-corner" then
     element = components.newObstacleCorner(parent, levelName, 50, 50)
   elseif elementType:starts("obstacle-horizontal-barrier") then
@@ -30,7 +32,7 @@ end
 
 local function elementsTypesFromLevelConfig()
   local config = require ("levels." .. levelName)
-  local elementsTypes = { "ball" }
+  local elementsTypes = { "ball", "frame" }
   local hashset = {}
 
   for _, obstacle in pairs(config.obstacles) do

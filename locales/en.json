@@ -5,6 +5,7 @@
     "one": "Finished in 1 shot !",
     "other": "Finished in {count} shots !"
   },
+  "frame": "Frame",
   "levels": "Levels",
   "obstacle-corner": "Corner",
   "obstacle-horizontal-barrier": "Horizontal barrier",

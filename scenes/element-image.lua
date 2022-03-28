@@ -16,6 +16,7 @@ local scene = composer.newScene()
 
 local elements = {
   ["ball"] = { width = 200, height = 200, mask = "images/elements/ball-mask.png" },
+  ["frame"] = { width = 200, height = 200 },
   ["obstacle-corner"] = { width = 200, height = 200, mask = "images/elements/corner-mask.png" },
   ["obstacle-horizontal-barrier"] = { width = 200, height = 50 },
   ["obstacle-horizontal-barrier-large"] = { width = 200, height = 50 },
@@ -45,8 +46,8 @@ local function onPinch(deltaDistanceX, deltaDistanceY)
   local minYScale = frontContainer.height / backPhoto.height
   local xScale = math.min(4, math.max(minXScale, frontPhoto.xScale + deltaDistanceX / 400))
   local yScale = math.min(4, math.max(minYScale, frontPhoto.yScale + deltaDistanceY / 400))
-  frontPhoto.xScale, backPhoto.xScale = xScale, xScale
-  frontPhoto.yScale, backPhoto.yScale = yScale, yScale
+  backPhoto:scale(xScale, yScale)
+  frontPhoto:scale(xScale, yScale)
 end
 
 local function saveImage()
@@ -84,9 +85,7 @@ function scene:show(event)
     local photoWidth = photo.width
     local photoHeight = photo.height
 
-    photo.xScale = photoScale
-    photo.yScale = photoScale
-
+    photo:scale(photoScale, photoScale)
     local photoName = "element-image." .. math.random() .. ".png"
     display.save(photo, { filename = photoName, baseDir = system.TemporaryDirectory, captureOffscreenArea = true })
     display.remove(photo)

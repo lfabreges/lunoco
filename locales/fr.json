@@ -5,6 +5,7 @@
     "one": "Terminé en 1 tir !",
     "other": "Terminé en {count} tirs !"
   },
+  "frame": "Cadre",
   "levels": "Niveaux",
   "obstacle-corner": "Coin",
   "obstacle-horizontal-barrier": "Barrière horizontale",

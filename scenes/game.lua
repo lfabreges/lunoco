@@ -106,7 +106,7 @@ end
 local function takeLevelScreenshot()
   local screenshot = display.captureBounds(display.currentStage.contentBounds)
   local screenshotScale = screenshot.xScale * 0.33
-  screenshot.xScale, screenshot.yScale = screenshotScale, screenshotScale
+  screenshot:scale(screenshotScale, screenshotScale)
   utils.saveLevelImage(screenshot, levelName, "screenshot")
   display.remove(screenshot)
 end
@@ -167,30 +167,18 @@ function scene:createBall()
 end
 
 function scene:createFrame()
-  local screenX = display.screenOriginX
-  local screenY = display.screenOriginY
-  local screenWidth = display.actualContentWidth
-  local screenHeight = display.actualContentHeight
-
-  display.setDefault("textureWrapX", "mirroredRepeat")
-  display.setDefault("textureWrapY", "mirroredRepeat")
-
-  local frame = display.newRect(level, screenX, screenY, screenWidth, screenHeight)
+  local frame = components.newFrame(level, levelName, display.actualContentWidth, display.actualContentHeight)
   frame.anchorX = 0
   frame.anchorY = 0
-  frame.fill = { type="image", filename="images/frame.png" }
-  frame.fill.scaleX = 128 / frame.width
-  frame.fill.scaleY = 128 / frame.height
-
-  display.setDefault("textureWrapX", "clampToEdge")
-  display.setDefault("textureWrapY", "clampToEdge")
+  frame.x = display.screenOriginX
+  frame.y = display.screenOriginY
 
   local background = display.newRect(level, 10, 10, 300, 460)
   background.anchorX = 0
   background.anchorY = 0
   background:setFillColor(0.5)
 
-  physics.addBody(frame, "static", {
+  physics.addBody(background, "static", {
     density = 1.0,
     friction = 0.5,
     bounce = 0.5,
