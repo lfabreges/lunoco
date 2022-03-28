@@ -55,7 +55,7 @@ function scene:create(event)
   local background = components.newBackground(self.view)
   local topInset, leftInset, bottomInset, rightInset = display.getSafeAreaInsets()
 
-  local goBackButton = components.newImageButton(self.view, "images/back.png", 40, 40, { onRelease = goBack })
+  local goBackButton = components.newImageButton(self.view, "images/icons/back.png", 40, 40, { onRelease = goBack })
   goBackButton.anchorX = 0
   goBackButton.anchorY = 0
   goBackButton.x = background.contentBounds.xMin + leftInset + 20
@@ -121,7 +121,7 @@ function scene:createElements()
 
         local selectPhotoButton = components.newImageButton(
           elementGroup,
-          "images/select-photo.png",
+          "images/icons/select-photo.png",
           40,
           40,
           { onRelease = onSelectPhotoButton, scrollview = scrollview }
@@ -145,7 +145,7 @@ function scene:createElements()
 
         local takePhotoButton = components.newImageButton(
           elementGroup,
-          "images/take-photo.png",
+          "images/icons/take-photo.png",
           40,
           40,
           { onRelease = onTakePhotoButton, scrollview = scrollview }
@@ -173,7 +173,7 @@ function scene:createElements()
 
         removeCustomizationButton = components.newImageButton(
           elementGroup,
-          "images/cancel.png",
+          "images/icons/cancel.png",
           40,
           40,
           { onRelease = onRemoveCustomizationButton, scrollview = scrollview }

@@ -32,9 +32,9 @@ components.newBackground = function(parent)
 end
 
 components.newBall = function(parent, levelName, width, height)
-  local imageName, imageBaseDir, isDefault = elementImage(levelName, "ball", "images/ball.png")
+  local imageName, imageBaseDir, isDefault = elementImage(levelName, "ball", "images/elements/ball.png")
   local ball = display.newImageRect(parent, imageName, imageBaseDir, width, height)
-  local ballMask = graphics.newMask("images/ball-mask.png")
+  local ballMask = graphics.newMask("images/elements/ball-mask.png")
   ball:setMask(ballMask)
   ball.maskScaleX = ball.width / 394
   ball.maskScaleY = ball.height / 394
@@ -131,7 +131,7 @@ components.newObstacleBarrier = function(parent, levelName, barrierType, width, 
   local imageName, imageBaseDir, isDefault = elementImage(
     levelName,
     "obstacle-" .. barrierType,
-    "images/" .. barrierType .. ".png"
+    "images/elements/" .. barrierType .. ".png"
   )
   local barrier = display.newImageRect(parent, imageName, imageBaseDir, width, height)
   barrier.isDefault = isDefault
@@ -139,9 +139,9 @@ components.newObstacleBarrier = function(parent, levelName, barrierType, width, 
 end
 
 components.newObstacleCorner = function(parent, levelName, width, height)
-  local imageName, imageBaseDir, isDefault = elementImage(levelName, "obstacle-corner", "images/corner.png")
+  local imageName, imageBaseDir, isDefault = elementImage(levelName, "obstacle-corner", "images/elements/corner.png")
   local corner = display.newImageRect(parent, imageName, imageBaseDir, width, height)
-  local cornerMask = graphics.newMask("images/corner-mask.png")
+  local cornerMask = graphics.newMask("images/elements/corner-mask.png")
   corner:setMask(cornerMask)
   corner.maskScaleX = corner.width / 394
   corner.maskScaleY = corner.height / 394
@@ -159,7 +159,7 @@ components.newTarget = function(parent, levelName, targetType, width, height)
   local imageName, imageBaseDir, isDefault = elementImage(
     levelName,
     "target-" .. targetType,
-    "images/target-" .. targetType .. ".png"
+    "images/elements/target-" .. targetType .. ".png"
   )
   local target = display.newImageRect(parent, imageName, imageBaseDir, width, height)
   target.isDefault = isDefault

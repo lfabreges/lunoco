@@ -15,8 +15,8 @@ local levelName = nil
 local scene = composer.newScene()
 
 local elements = {
-  ["ball"] = { width = 200, height = 200, mask = "images/ball-mask.png" },
-  ["obstacle-corner"] = { width = 200, height = 200, mask = "images/corner-mask.png" },
+  ["ball"] = { width = 200, height = 200, mask = "images/elements/ball-mask.png" },
+  ["obstacle-corner"] = { width = 200, height = 200, mask = "images/elements/corner-mask.png" },
   ["obstacle-horizontal-barrier"] = { width = 200, height = 50 },
   ["obstacle-horizontal-barrier-large"] = { width = 200, height = 50 },
   ["obstacle-vertical-barrier"] = { width = 75, height = 300 },
@@ -64,13 +64,13 @@ function scene:create(event)
 
   local topInset, leftInset, bottomInset, rightInset = display.getSafeAreaInsets()
 
-  local cancelButton = components.newImageButton(self.view, "images/cancel.png", 40, 40, { onRelease = goBack })
+  local cancelButton = components.newImageButton(self.view, "images/icons/cancel.png", 40, 40, { onRelease = goBack })
   cancelButton.anchorX = 0
   cancelButton.anchorY = 0
   cancelButton.x = background.contentBounds.xMin + leftInset + 20
   cancelButton.y = background.contentBounds.yMin + topInset + 20
 
-  local saveButton = components.newImageButton(self.view, "images/accept.png", 40, 40, { onRelease = saveImage })
+  local saveButton = components.newImageButton(self.view, "images/icons/accept.png", 40, 40, { onRelease = saveImage })
   saveButton.anchorX = 1
   saveButton.anchorY = 0
   saveButton.x = background.contentBounds.xMax - rightInset - 20
