@@ -87,7 +87,7 @@ local function createMoveAndPinchListener(object, onMove, onPinch)
 
     if phase == "began" then
       if index == 1 then
-        display.getCurrentStage():setFocus(object, event.id)
+        display.getCurrentStage():setFocus(object)
         previousX, previousY = firstEvent.x, firstEvent.y
       elseif index == 2 then
         previousX, previousY = calculateMiddle(firstEvent, secondEvent)
@@ -120,7 +120,7 @@ local function createMoveAndPinchListener(object, onMove, onPinch)
 
     elseif phase == "ended" or phase == "cancelled" then
       if numberOfEvents == 1 then
-        display.getCurrentStage():setFocus(object, nil)
+        display.getCurrentStage():setFocus(nil)
       elseif numberOfEvents == 2 then
         local remainingEvent = index == 1 and secondEvent or firstEvent
         previousX, previousY = remainingEvent.x, remainingEvent.y

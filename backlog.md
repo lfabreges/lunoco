@@ -1,5 +1,4 @@
 # Next
-* Réorganiser les images dans des sous-dossiers
 * Construire un nouveau fichier outlines avec un export PDF pour permettre de dessiner dessus
 * Barre de menu avec titre et look & feel différent du reste
 * Personnalisation des sons (load et dispose à chaque chargement)

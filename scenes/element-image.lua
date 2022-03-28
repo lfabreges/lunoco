@@ -32,16 +32,12 @@ end
 local function onMove(deltaX, deltaY)
   local containerBounds = frontContainer.contentBounds
   local photoBounds = backPhoto.contentBounds
-
   deltaX = photoBounds.xMax + deltaX < containerBounds.xMax and containerBounds.xMax - photoBounds.xMax or deltaX
   deltaX = photoBounds.xMin + deltaX > containerBounds.xMin and containerBounds.xMin - photoBounds.xMin or deltaX
   deltaY = photoBounds.yMax + deltaY < containerBounds.yMax and containerBounds.yMax - photoBounds.yMax or deltaY
   deltaY = photoBounds.yMin + deltaY > containerBounds.yMin and containerBounds.yMin - photoBounds.yMin or deltaY
-
-  backPhoto.x = backPhoto.x + deltaX
-  backPhoto.y = backPhoto.y + deltaY
-  frontPhoto.x = frontPhoto.x + deltaX
-  frontPhoto.y = frontPhoto.y + deltaY
+  backPhoto:translate(deltaX, deltaY)
+  frontPhoto:translate(deltaX, deltaY)
 end
 
 local function onPinch(deltaDistanceX, deltaDistanceY)
