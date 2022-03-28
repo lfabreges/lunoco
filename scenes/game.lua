@@ -117,17 +117,14 @@ function scene:create(event)
   local screenWidth = display.actualContentWidth
   local screenHeight = display.actualContentHeight
 
-  local background = components.newBackground(self.view)
-  background:setFillColor(0.5)
-
-  local tapRectangle = display.newRect(self.view, screenX, screenY, screenWidth, screenHeight * 0.3)
+  local tapRectangle = display.newRect(self.view, screenX, screenY, screenWidth, screenHeight * 0.25)
   tapRectangle.anchorX = 0
   tapRectangle.anchorY = 0
   tapRectangle.alpha = 0
   tapRectangle.isHitTestable = true
   tapRectangle:addEventListener("tap", scene.pauseOnTap)
 
-  local touchRectangle = display.newRect(self.view, screenX, screenY + screenHeight, screenWidth, screenHeight * 0.7)
+  local touchRectangle = display.newRect(self.view, screenX, screenY + screenHeight, screenWidth, screenHeight * 0.75)
   touchRectangle.anchorX = 0
   touchRectangle.anchorY = 1
   touchRectangle.alpha = 0
@@ -170,10 +167,28 @@ function scene:createBall()
 end
 
 function scene:createFrame()
-  local frame = display.newImageRect(level, "images/frame.png", 480, 720)
+  local screenX = display.screenOriginX
+  local screenY = display.screenOriginY
+  local screenWidth = display.actualContentWidth
+  local screenHeight = display.actualContentHeight
 
-  frame.x = display.contentCenterX
-  frame.y = display.contentCenterY
+  display.setDefault("textureWrapX", "mirroredRepeat")
+  display.setDefault("textureWrapY", "mirroredRepeat")
+
+  local frame = display.newRect(level, screenX, screenY, screenWidth, screenHeight)
+  frame.anchorX = 0
+  frame.anchorY = 0
+  frame.fill = { type="image", filename="images/frame.png" }
+  frame.fill.scaleX = 128 / frame.width
+  frame.fill.scaleY = 128 / frame.height
+
+  display.setDefault("textureWrapX", "clampToEdge")
+  display.setDefault("textureWrapY", "clampToEdge")
+
+  local background = display.newRect(level, 10, 10, 300, 460)
+  background.anchorX = 0
+  background.anchorY = 0
+  background:setFillColor(0.5)
 
   physics.addBody(frame, "static", {
     density = 1.0,
