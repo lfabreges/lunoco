@@ -65,19 +65,18 @@ end
 
 components.newFrame = function(parent, levelName, width, height)
   local imageName, imageBaseDir, isDefault = elementImage(levelName, "frame", "images/elements/frame.png")
-  local frame = components.newGroup(parent)
+  local frame = display.newContainer(parent, width, height)
   local imageWidth = math.min(128, width)
   local imageHeight = math.min(128, height)
 
   for x = 0, width, 128 do
     for y = 0, height, 128 do
       local frameImage = display.newImageRect(frame, imageName, imageBaseDir, imageWidth, imageHeight)
-      frameImage.x, frameImage.y = x, y
+      frameImage:translate(-width / 2 + x + imageWidth / 2, -height / 2 + y + imageHeight / 2)
       frameImage:scale(x % 256 == 0 and 1 or -1, y % 256 == 0 and 1 or -1)
     end
   end
 
-  frame.anchorChildren = true
   frame.isDefault = isDefault
 
   return frame

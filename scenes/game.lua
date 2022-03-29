@@ -178,7 +178,7 @@ function scene:createFrame()
   background.anchorY = 0
   background:setFillColor(0.5)
 
-  physics.addBody(background, "static", {
+  physics.addBody(frame, "static", {
     density = 1.0,
     friction = 0.5,
     bounce = 0.5,
