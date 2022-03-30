@@ -51,7 +51,10 @@ local function onPinch(deltaDistanceX, deltaDistanceY)
 end
 
 local function saveImage()
-  utils.saveLevelImage(frontContainer, levelName, elementType)
+  local b = frontContainer.contentBounds
+  local elementCapture = display.captureBounds({ xMin = b.xMin, xMax = b.xMax - 1, yMin = b.yMin, yMax = b.yMax - 1 })
+  utils.saveLevelImage(elementCapture, levelName, elementType)
+  display.remove(elementCapture)
   navigation.gotoCustomizeLevel(levelName)
 end
 
