@@ -52,17 +52,21 @@ local function gameOver()
 end
 
 local function handleBallImpulseOnScreenTouch(event)
-  local _ballImpulseForce = { x = (event.xStart - event.x) * 4, y = (event.yStart - event.y) * 4 }
+  local distanceX = event.xStart - event.x
+  local distanceY = event.yStart - event.y
+  local totalDistance = math.sqrt(distanceX * distanceX + distanceY * distanceY)
+  local _ballImpulseForce = { x = distanceX * 4, y = distanceY * 4, hasEnoughForce = totalDistance > 10 }
+
   ballImpulseForce = nil
 
   if event.phase == "began" then
     display.getCurrentStage():setFocus(event.target)
   elseif event.phase == "ended" or event.phase == "cancelled" then
+    display.getCurrentStage():setFocus(nil)
     display.remove(predictedBallPath)
     predictedBallPath = nil
-    display.getCurrentStage():setFocus(nil)
 
-    if event.phase == "ended" then
+    if event.phase == "ended" and _ballImpulseForce.hasEnoughForce then
       ball:setLinearVelocity(_ballImpulseForce.x, _ballImpulseForce.y)
       numberOfShots = numberOfShots + 1
       utils.playAudio(sounds.ball, 0.4)
@@ -80,6 +84,11 @@ local function predictBallPathOnLateUpdate()
   end
 
   display.remove(predictedBallPath)
+
+  if not ballImpulseForce.hasEnoughForce then
+    return false
+  end
+
   predictedBallPath = components.newGroup(level)
 
   local timeStepInterval = 0.05
