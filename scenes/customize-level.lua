@@ -54,24 +54,33 @@ local function goBack()
 end
 
 function scene:create(event)
-  local background = components.newBackground(self.view)
+  local screenX = display.screenOriginX
+  local screenY = display.screenOriginY
+  local screenWidth = display.actualContentWidth
+  local screenHeight = display.actualContentHeight
   local topInset, leftInset, bottomInset, rightInset = display.getSafeAreaInsets()
+
+  components.newBackground(self.view)
+
+  local topBar = display.newRect(self.view, screenX, screenY, screenWidth, topInset + 60)
+  topBar.anchorX, topBar.anchorY = 0, 0
+  topBar:setFillColor(0.15)
 
   local goBackButton = components.newImageButton(self.view, "images/icons/back.png", 40, 40, { onRelease = goBack })
   goBackButton.anchorX = 0
   goBackButton.anchorY = 0
-  goBackButton.x = background.contentBounds.xMin + leftInset + 20
-  goBackButton.y = background.contentBounds.yMin + topInset + 20
+  goBackButton.x = screenX + leftInset + 20
+  goBackButton.y = screenY + topInset + 10
 
   scrollview = widget.newScrollView({
-    left = display.screenOriginX,
-    top = goBackButton.contentBounds.yMax + 20,
-    width = display.actualContentWidth,
-    height = display.actualContentHeight - goBackButton.height - 40,
+    left = screenX,
+    top = topBar.y + topBar.height,
+    width = screenWidth,
+    height = screenHeight - topBar.height,
     hideBackground = true,
     hideScrollBar = true,
     horizontalScrollDisabled = true,
-    topPadding = 0,
+    topPadding = 20,
     bottomPadding = bottomInset + 20,
     leftPadding = leftInset,
     rightPadding = rightInset,
