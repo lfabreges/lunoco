@@ -10,6 +10,7 @@ local levelName = nil
 local scene = composer.newScene()
 local scrollviews = {}
 local selectedTab = 1
+local sounds = nil
 local tabBar = nil
 local tabButtons = {}
 local tabGroup = nil
@@ -92,7 +93,7 @@ function scene:create(event)
 
   tabButtons[1] = components.newImageButton(
     self.view,
-    "images/icons/select-photo.png",
+    "images/icons/photo.png",
     40,
     40,
     { onRelease = function() selectTab(1) end }
@@ -100,10 +101,9 @@ function scene:create(event)
   tabButtons[1].x = screenX + screenWidth / 4
   tabButtons[1].y = tabBar.y - bottomInset - (tabBar.height - bottomInset) / 2
 
-  -- TODO Changer l'icone du tab
   tabButtons[2] = components.newImageButton(
     self.view,
-    "images/icons/take-photo.png",
+    "images/icons/sound.png",
     40,
     40,
     { onRelease = function() selectTab(2) end }
@@ -175,7 +175,7 @@ function scene:createElements()
 
         local selectPhotoButton = components.newImageButton(
           elementGroup,
-          "images/icons/select-photo.png",
+          "images/icons/photo.png",
           40,
           40,
           { onRelease = onSelectPhotoButton, scrollview = scrollviews[1] }
@@ -245,14 +245,22 @@ function scene:createElements()
   end
 end
 
+function scene:createSounds()
+  sounds = components.newGroup(scrollviews[2])
+end
+
 function scene:show(event)
   if event.phase == "will" then
     local isNewLevel = levelName and levelName ~= event.params.levelName
     levelName = event.params.levelName
+
     self:createElements()
+    self:createSounds()
+
     if isNewLevel then
       local scrollSoundsTabToTop = function() scrollviews[2]:scrollTo("top", { time = 0 }) end
       scrollviews[1]:scrollTo("top", { time = 0, onComplete = scrollSoundsTabToTop })
+
       if selectedTab ~= 1 then
         tabButtons[selectedTab].fill.effect = "filter.grayscale"
         tabButtons[1].fill.effect = nil
@@ -267,7 +275,9 @@ function scene:hide(event)
   if event.phase == "did" then
     transition.cancel()
     display.remove(elements)
+    display.remove(sounds)
     elements = nil
+    sounds = nil
   end
 end
 

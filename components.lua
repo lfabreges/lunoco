@@ -146,6 +146,19 @@ components.newGroup = function(parent)
   return group
 end
 
+components.newLevelBackground = function(parent, levelName, width, height)
+  local imageName, imageBaseDir, imageName = elementImage(levelName, "background", nil)
+  local background = nil
+  if imageName then
+    background = display.newRect(parent, 0, 0, width, height)
+    background:setFillColor(0.5)
+  else
+    background = display.newImageRect(parent, imageName, imageBaseDir, width, height)
+  end
+  background.isDefault = isDefault
+  return background
+end
+
 components.newObstacleBarrier = function(parent, levelName, barrierType, width, height)
   local imageName, imageBaseDir, isDefault = elementImage(
     levelName,

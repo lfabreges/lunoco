@@ -150,11 +150,18 @@ function scene:createLevel()
   level = components.newGroup(self.view)
 
   self:createFrame()
+  self:createBackground()
   self:createObstacles()
   self:createTargets()
   self:createBall()
 
   numberOfShots = 0
+end
+
+function scene:createBackground()
+  local background = components.newLevelBackground(level, levelName, 300, 460)
+  background.anchorX, background.anchorY = 0, 0
+  background:translate(10, 10)
 end
 
 function scene:createBall()
@@ -181,11 +188,6 @@ function scene:createFrame()
   frame.anchorY = 0
   frame.x = display.screenOriginX
   frame.y = display.screenOriginY
-
-  local background = display.newRect(level, 10, 10, 300, 460)
-  background.anchorX = 0
-  background.anchorY = 0
-  background:setFillColor(0.5)
 
   physics.addBody(frame, "static", {
     density = 1.0,
