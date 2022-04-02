@@ -15,6 +15,7 @@ local levelName = nil
 local scene = composer.newScene()
 
 local elements = {
+  ["background"] = { width = 200, height = 306 },
   ["ball"] = { width = 200, height = 200, mask = "images/elements/ball-mask.png" },
   ["frame"] = { width = 200, height = 200 },
   ["obstacle-corner"] = { width = 200, height = 200, mask = "images/elements/corner-mask.png" },

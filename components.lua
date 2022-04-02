@@ -147,9 +147,9 @@ components.newGroup = function(parent)
 end
 
 components.newLevelBackground = function(parent, levelName, width, height)
-  local imageName, imageBaseDir, imageName = elementImage(levelName, "background", nil)
+  local imageName, imageBaseDir, isDefault = elementImage(levelName, "background", nil)
   local background = nil
-  if imageName then
+  if isDefault then
     background = display.newRect(parent, 0, 0, width, height)
     background:setFillColor(0.5)
   else

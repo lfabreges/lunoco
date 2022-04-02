@@ -18,7 +18,9 @@ local tabGroup = nil
 local function newElement(parent, elementType)
   local element = nil
 
-  if elementType == "ball" then
+  if elementType == "background" then
+    element = components.newLevelBackground(parent, levelName, 32, 50)
+  elseif elementType == "ball" then
     element = components.newBall(parent, levelName, 50, 50)
   elseif elementType == "frame" then
     element = components.newFrame(parent, levelName, 50, 50)
@@ -37,7 +39,7 @@ end
 
 local function elementsTypesFromLevelConfig()
   local config = require ("levels." .. levelName)
-  local elementsTypes = { "ball", "frame" }
+  local elementsTypes = { "background", "ball", "frame" }
   local hashset = {}
 
   for _, obstacle in pairs(config.obstacles) do
