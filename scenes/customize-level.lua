@@ -8,7 +8,11 @@ local widget = require "widget"
 local elements = nil
 local levelName = nil
 local scene = composer.newScene()
-local scrollview = nil
+local scrollviews = {}
+local selectedTab = 1
+local tabBar = nil
+local tabButtons = {}
+local tabGroup = nil
 
 local function newElement(parent, elementType)
   local element = nil
@@ -53,6 +57,17 @@ local function goBack()
   navigation.gotoGame(levelName)
 end
 
+local function selectTab(index)
+  if index ~= selectedTab then
+    transition.to(tabGroup, { time = 100, x = (index - 1) * -display.actualContentWidth })
+    tabButtons[selectedTab].fill.effect = "filter.grayscale"
+    tabButtons[index].fill.effect = nil
+    selectedTab = index
+  else
+    scrollviews[index]:scrollTo("top", {})
+  end
+end
+
 function scene:create(event)
   local screenX = display.screenOriginX
   local screenY = display.screenOriginY
@@ -67,33 +82,61 @@ function scene:create(event)
   topBar:setFillColor(0.15)
 
   local goBackButton = components.newImageButton(self.view, "images/icons/back.png", 40, 40, { onRelease = goBack })
-  goBackButton.anchorX = 0
-  goBackButton.anchorY = 0
+  goBackButton.anchorX, goBackButton.anchorY = 0, 0
   goBackButton.x = screenX + leftInset + 20
   goBackButton.y = screenY + topInset + 10
 
-  scrollview = widget.newScrollView({
-    left = screenX,
-    top = topBar.y + topBar.height,
-    width = screenWidth,
-    height = screenHeight - topBar.height,
-    hideBackground = true,
-    hideScrollBar = true,
-    horizontalScrollDisabled = true,
-    topPadding = 20,
-    bottomPadding = bottomInset + 20,
-    leftPadding = leftInset,
-    rightPadding = rightInset,
-  })
+  tabBar = display.newRect(self.view, screenX, screenY + screenHeight, screenWidth, bottomInset + 60)
+  tabBar.anchorX, tabBar.anchorY = 0, 1
+  tabBar:setFillColor(0.15)
 
-  self.view:insert(scrollview)
+  tabButtons[1] = components.newImageButton(
+    self.view,
+    "images/icons/select-photo.png",
+    40,
+    40,
+    { onRelease = function() selectTab(1) end }
+  )
+  tabButtons[1].x = screenX + screenWidth / 4
+  tabButtons[1].y = tabBar.y - bottomInset - (tabBar.height - bottomInset) / 2
+
+  -- TODO Changer l'icone du tab
+  tabButtons[2] = components.newImageButton(
+    self.view,
+    "images/icons/take-photo.png",
+    40,
+    40,
+    { onRelease = function() selectTab(2) end }
+  )
+  tabButtons[2].x = screenX + screenWidth - screenWidth / 4
+  tabButtons[2].y = tabButtons[1].y
+  tabButtons[2].fill.effect = "filter.grayscale"
+
+  tabGroup = components.newGroup(self.view)
+
+  for index = 1, 2 do
+    scrollviews[index] = widget.newScrollView({
+      left = screenX + (index - 1) * screenWidth,
+      top = topBar.y + topBar.height,
+      width = screenWidth,
+      height = screenHeight - topBar.height - tabBar.height,
+      hideBackground = true,
+      hideScrollBar = true,
+      horizontalScrollDisabled = true,
+      topPadding = 20,
+      bottomPadding = 20,
+      leftPadding = leftInset,
+      rightPadding = rightInset,
+    })
+    tabGroup:insert(scrollviews[index])
+  end
 end
 
 function scene:createElements()
   local elementsTypes = elementsTypesFromLevelConfig()
   local y = 0
 
-  elements = components.newGroup(scrollview)
+  elements = components.newGroup(scrollviews[1])
 
   for _, elementType in ipairs(elementsTypes) do
     local elementGroup = components.newGroup(elements)
@@ -135,7 +178,7 @@ function scene:createElements()
           "images/icons/select-photo.png",
           40,
           40,
-          { onRelease = onSelectPhotoButton, scrollview = scrollview }
+          { onRelease = onSelectPhotoButton, scrollview = scrollviews[1] }
         )
 
         selectPhotoButton.anchorX = 0
@@ -159,7 +202,7 @@ function scene:createElements()
           "images/icons/take-photo.png",
           40,
           40,
-          { onRelease = onTakePhotoButton, scrollview = scrollview }
+          { onRelease = onTakePhotoButton, scrollview = scrollviews[1] }
         )
 
         takePhotoButton.anchorX = 0
@@ -187,7 +230,7 @@ function scene:createElements()
           "images/icons/cancel.png",
           40,
           40,
-          { onRelease = onRemoveCustomizationButton, scrollview = scrollview }
+          { onRelease = onRemoveCustomizationButton, scrollview = scrollviews[1] }
         )
 
         removeCustomizationButton.anchorX = 0
@@ -208,7 +251,14 @@ function scene:show(event)
     levelName = event.params.levelName
     self:createElements()
     if isNewLevel then
-      scrollview:scrollTo("top", { time = 0 })
+      local scrollSoundsTabToTop = function() scrollviews[2]:scrollTo("top", { time = 0 }) end
+      scrollviews[1]:scrollTo("top", { time = 0, onComplete = scrollSoundsTabToTop })
+      if selectedTab ~= 1 then
+        tabButtons[selectedTab].fill.effect = "filter.grayscale"
+        tabButtons[1].fill.effect = nil
+        selectedTab = 1
+        tabGroup.x = 0
+      end
     end
   end
 end
