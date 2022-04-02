@@ -69,6 +69,8 @@ function scene:hide(event)
     if shouldResumeGame then
       event.parent:resume()
     end
+  elseif event.phase == "did" then
+    transition.cancel()
   end
 end
 

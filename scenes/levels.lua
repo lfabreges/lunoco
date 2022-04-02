@@ -75,9 +75,10 @@ end
 function scene:show(event)
   if event.phase == "will" then
     local centerX = scrollview.width * 0.5
-    local content = components.newGroup(scrollview)
     local scores = utils.loadScores()
     local y = gameTitle.contentHeight + spaceWidth
+
+    content = components.newGroup(scrollview)
 
     for index, levelName in ipairs(levelNames) do
       local isEven = index % 2 == 0
@@ -130,6 +131,7 @@ end
 
 function scene:hide(event)
   if event.phase == "did" then
+    transition.cancel()
     display.remove(content)
     content = nil
   end
