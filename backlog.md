@@ -1,6 +1,5 @@
 # Next
 * Changer l'icone musique
-* Ordre des éléments à revoir dans la partie customization
 * Vignettes à revoir pour les éléments, le background par défaut est invisible
 * Afficher les photos à la taille de l'écran par défaut lors de la personnalisation
 * Permettre de redimenssionner les photos sans les déformer (avec option)

@@ -16,6 +16,19 @@ local tabBar = nil
 local tabButtons = {}
 local tabGroup = nil
 
+local elementTypes = {
+  "background",
+  "frame",
+  "ball",
+  "obstacle-corner",
+  "obstacle-horizontal-barrier",
+  "obstacle-horizontal-barrier-large",
+  "obstacle-vertical-barrier",
+  "target-easy",
+  "target-normal",
+  "target-hard",
+}
+
 local function newElement(parent, elementType)
   local element = nil
 
@@ -40,21 +53,31 @@ end
 
 local function elementTypesFromLevelConfig()
   local config = require ("levels." .. levelName)
-  local elementTypes = { "background", "ball", "frame" }
-  local hashset = {}
+  local hashSet = { ["background"] = true, ["frame"] = true, ["ball"] = true }
+  local levelElementTypes = {}
 
-  for _, obstacle in pairs(config.obstacles) do
-    hashset["obstacle-" .. obstacle.type] = true
-  end
-  for _, target in pairs(config.targets) do
-    hashset["target-" .. target.type] = true
-  end
-  for elementType, _ in pairs(hashset) do
-    table.insert(elementTypes, elementType)
+  if config.obstacles then
+    for index = 1, #config.obstacles do
+      local obstacle = config.obstacles[index]
+      hashSet["obstacle-" .. obstacle.type] = true
+    end
   end
 
-  table.sort(elementTypes)
-  return elementTypes
+  if config.targets then
+    for index = 1, #config.targets do
+      local target = config.targets[index]
+      hashSet["target-" .. target.type] = true
+    end
+  end
+
+  for index = 1, #elementTypes do
+    local elementType = elementTypes[index]
+    if hashSet[elementType] then
+      levelElementTypes[#levelElementTypes + 1] = elementType
+    end
+  end
+
+  return levelElementTypes
 end
 
 local function goBack()
