@@ -39,7 +39,8 @@ elements.newFrame = function(parent, levelName, width, height)
     for y = 0, height, 128 do
       local frameImage = display.newImageRect(frame, imageName, imageBaseDir, imageWidth, imageHeight)
       frameImage:translate(-width / 2 + x + imageWidth / 2, -height / 2 + y + imageHeight / 2)
-      frameImage.xScale, frameImage.yScale = x % 256 == 0 and 1 or -1, y % 256 == 0 and 1 or -1
+      frameImage.xScale = x % 256 == 0 and 1 or -1
+      frameImage.yScale = y % 256 == 0 and 1 or -1
     end
   end
 

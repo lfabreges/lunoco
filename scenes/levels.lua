@@ -113,9 +113,11 @@ function scene:show(event)
           local starMask = graphics.newMask("images/star-mask.png")
 
           star:setMask(starMask)
-          star.maskScaleX, star.maskScaleY = star.width / 394, star.height / 394
+          star.maskScaleX = star.width / 394
+          star.maskScaleY = star.height / 394
           star.anchorY = 0
-          star.x, star.y = levelButton.x + (starCount - 2) * 25, y + 190
+          star.x = levelButton.x + (starCount - 2) * 25
+          star.y = y + 190
           star.fill.effect = not isFullStar and "filter.grayscale" or nil
         end
       end

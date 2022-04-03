@@ -5,7 +5,8 @@ local components = {}
 
 local function isWithinBounds(object, event)
   local bounds = object.contentBounds
-  local x, y = event.x, event.y
+  local x = event.x
+  local y = event.y
 	local isWithinBounds = true
 	return bounds.xMin <= x and bounds.xMax >= x and bounds.yMin <= y and bounds.yMax >= y
 end

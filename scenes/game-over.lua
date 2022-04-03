@@ -22,8 +22,10 @@ local function displayStars(event)
   local starMask = graphics.newMask("images/star-mask.png")
 
   star:setMask(starMask)
-  star.maskScaleX, star.maskScaleY = star.width / 394, star.height / 394
-  star.x, star.y = display.contentCenterX + (event.count - 2) * 90, display.contentCenterY
+  star.maskScaleX = star.width / 394
+  star.maskScaleY = star.height / 394
+  star.x = display.contentCenterX + (event.count - 2) * 90
+  star.y = display.contentCenterY
   star.fill.effect = not isFullStar and "filter.grayscale" or nil
 
   utils.playAudio(isFullStar and sounds.starFull or sounds.starEmpty, 1.0)

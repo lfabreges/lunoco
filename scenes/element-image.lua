@@ -47,8 +47,10 @@ local function onPinch(deltaDistanceX, deltaDistanceY)
   local minYScale = frontContainer.height / backPhoto.height
   local xScale = math.min(4, math.max(minXScale, frontPhoto.xScale + deltaDistanceX / 400))
   local yScale = math.min(4, math.max(minYScale, frontPhoto.yScale + deltaDistanceY / 400))
-  backPhoto.xScale, backPhoto.yScale = xScale, yScale
-  frontPhoto.xScale, frontPhoto.yScale = xScale, yScale
+  backPhoto.xScale = xScale
+  backPhoto.yScale = yScale
+  frontPhoto.xScale = xScale
+  frontPhoto.yScale = yScale
 end
 
 local function saveImage()
@@ -89,7 +91,8 @@ function scene:show(event)
     local photoHeight = photo.height
     local screenScale = display.actualContentWidth / display.pixelWidth
 
-    photo.xScale, photo.yScale = screenScale, screenScale
+    photo.xScale = screenScale
+    photo.yScale = screenScale
     local photoName = "element-image." .. math.random() .. ".png"
     display.save(photo, { filename = photoName, baseDir = system.TemporaryDirectory, captureOffscreenArea = true })
     display.remove(photo)
@@ -104,15 +107,20 @@ function scene:show(event)
     local photoScale = math.max(xScale, yScale)
 
     backPhoto = display.newImageRect(content, photoName, system.TemporaryDirectory, photoWidth, photoHeight)
-    backPhoto.x, backPhoto.y = display.contentCenterX, display.contentCenterY
-    backPhoto.xScale, backPhoto.yScale = photoScale, photoScale
+    backPhoto.x = display.contentCenterX
+    backPhoto.y = display.contentCenterY
+    backPhoto.xScale = photoScale
+    backPhoto.yScale = photoScale
     backPhoto.alpha = 0.1
     backPhoto:addEventListener("finalize", removeTemporaryPhoto)
 
     frontContainer = display.newContainer(content, element.width, element.height)
-    frontContainer.x, frontContainer.y = display.contentCenterX, display.contentCenterY
+    frontContainer.x = display.contentCenterX
+    frontContainer.y = display.contentCenterY
+
     frontPhoto = display.newImageRect(frontContainer, photoName, system.TemporaryDirectory, photoWidth, photoHeight)
-    frontPhoto.xScale, frontPhoto.yScale = photoScale, photoScale
+    frontPhoto.xScale = photoScale
+    frontPhoto.yScale = photoScale
 
     if element.mask then
       local frontPhotoMask = graphics.newMask(element.mask)

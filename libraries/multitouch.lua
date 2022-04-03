@@ -88,7 +88,8 @@ local function createMoveAndPinchListener(object, onMove, onPinch)
     if phase == "began" then
       if index == 1 then
         display.getCurrentStage():setFocus(object)
-        previousX, previousY = firstEvent.x, firstEvent.y
+        previousX = firstEvent.x
+        previousY = firstEvent.y
       elseif index == 2 then
         previousX, previousY = calculateMiddle(firstEvent, secondEvent)
         previousDistanceX, previousDistanceY, previousTotalDistance = calculateDistances(firstEvent, secondEvent)
@@ -97,12 +98,15 @@ local function createMoveAndPinchListener(object, onMove, onPinch)
     elseif phase == "moved" then
       local x, y
       if numberOfEvents == 1 then
-        x, y = firstEvent.x, firstEvent.y
+        x = firstEvent.x
+        y = firstEvent.y
       else
         x, y = calculateMiddle(firstEvent, secondEvent)
       end
-      local deltaX, deltaY = x - previousX, y - previousY
-      previousX, previousY = x, y
+      local deltaX = x - previousX
+      local deltaY = y - previousY
+      previousX = x
+      previousY = y
       if onMove then
         onMove(deltaX, deltaY)
       end
@@ -112,7 +116,9 @@ local function createMoveAndPinchListener(object, onMove, onPinch)
         local deltaDistanceX = distanceX - previousDistanceX
         local deltaDistanceY = distanceY - previousDistanceY
         local deltaTotalDistance = totalDistance - previousTotalDistance
-        previousDistanceX, previousDistanceY, previousTotalDistance = distanceX, distanceY, totalDistance
+        previousDistanceX = distanceX
+        previousDistanceY = distanceY
+        previousTotalDistance = totalDistance
         if onPinch then
           onPinch(deltaDistanceX, deltaDistanceY, deltaTotalDistance)
         end
@@ -123,7 +129,8 @@ local function createMoveAndPinchListener(object, onMove, onPinch)
         display.getCurrentStage():setFocus(nil)
       elseif numberOfEvents == 2 then
         local remainingEvent = index == 1 and secondEvent or firstEvent
-        previousX, previousY = remainingEvent.x, remainingEvent.y
+        previousX = remainingEvent.x
+        previousY = remainingEvent.y
       else
         local remainingEvent = index == 1 and secondEvent or firstEvent
         local thirdEvent = event.events[3]

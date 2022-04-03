@@ -118,7 +118,8 @@ end
 local function takeLevelScreenshot()
   local screenshot = display.captureBounds(display.currentStage.contentBounds)
   local screenshotScale = screenshot.xScale * 0.33
-  screenshot.xScale, screenshot.yScale = screenshotScale, screenshotScale
+  screenshot.xScale = screenshotScale
+  screenshot.yScale = screenshotScale
   utils.saveLevelImage(screenshot, levelName, "screenshot")
   display.remove(screenshot)
 end
@@ -163,7 +164,8 @@ end
 
 function scene:createBackground()
   local background = elements.newBackground(level, levelName, 300, 460)
-  background.anchorX, background.anchorY = 0, 0
+  background.anchorX = 0
+  background.anchorY = 0
   background:translate(10, 10)
 end
 
@@ -206,7 +208,6 @@ function scene:createObstacles()
     if config.type == "corner" then
       local corner = elements.newObstacleCorner(level, levelName, config.width, config.height)
 
-      corner.type = "corner"
       corner.x = 10 + config.x + corner.width / 2
       corner.y = 10 + config.y + corner.height / 2
       corner.rotation = config.rotation
@@ -228,7 +229,6 @@ function scene:createObstacles()
     elseif config.type:starts("horizontal-barrier") or config.type:starts("vertical-barrier") then
       local barrier = elements.newObstacleBarrier(level, levelName, config.type, config.width, config.height)
 
-      barrier.type = "barrier"
       barrier.anchorChildren = true
       barrier.anchorX = 0
       barrier.anchorY = 0
@@ -246,7 +246,6 @@ function scene:createTargets()
   for _, config in ipairs(config.targets) do
     local target = elements.newTarget(level, levelName, config.type, config.width, config.height)
 
-    target.type = "target"
     target.anchorChildren = true
     target.anchorX = 0
     target.anchorY = 0

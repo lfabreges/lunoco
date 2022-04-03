@@ -105,16 +105,19 @@ function scene:create(event)
   components.newBackground(self.view)
 
   local topBar = display.newRect(self.view, screenX, screenY, screenWidth, topInset + 60)
-  topBar.anchorX, topBar.anchorY = 0, 0
+  topBar.anchorX = 0
+  topBar.anchorY = 0
   topBar:setFillColor(0.15)
 
   local goBackButton = components.newImageButton(self.view, "images/icons/back.png", 40, 40, { onRelease = goBack })
-  goBackButton.anchorX, goBackButton.anchorY = 0, 0
+  goBackButton.anchorX = 0
+  goBackButton.anchorY = 0
   goBackButton.x = screenX + leftInset + 20
   goBackButton.y = screenY + topInset + 10
 
   tabBar = display.newRect(self.view, screenX, screenY + screenHeight, screenWidth, bottomInset + 60)
-  tabBar.anchorX, tabBar.anchorY = 0, 1
+  tabBar.anchorX = 0
+  tabBar.anchorY = 1
   tabBar:setFillColor(0.15)
 
   tabButtons[1] = components.newImageButton(
@@ -176,7 +179,8 @@ function scene:createElementView()
       y = 0,
     })
 
-    elementText.anchorX, elementText.anchorY = 0, 0
+    elementText.anchorX = 0
+    elementText.anchorY = 0
 
     local elementFrame = display.newRoundedRect(elementGroup, 60, elementText.height + 50, 80, 80, 10)
     local element = newElement(elementGroup, elementType)
@@ -186,7 +190,8 @@ function scene:createElementView()
     else
       elementGroup.y = y
       elementFrame:setFillColor(0.5)
-      element.x, element.y = elementFrame.x, elementFrame.y
+      element.x = elementFrame.x
+      element.y = elementFrame.y
 
       local x = elementFrame.x + elementFrame.width / 2 + 20
 
@@ -244,7 +249,8 @@ function scene:createElementView()
         local function onRemoveCustomizationButton(event)
           utils.removeLevelImage(levelName, elementType)
           local defaultElement = newElement(elementGroup, elementType)
-          defaultElement.x, defaultElement.y = element.x, element.y
+          defaultElement.x = element.x
+          defaultElement.y = element.y
           defaultElement.alpha = 0
           transition.to(defaultElement, { time = 500, alpha = 1 } )
           transition.to(element, { time = 500, alpha = 0, onComplete = function() display.remove(element) end } )
