@@ -1,6 +1,5 @@
 # Next
 * Changer l'icone musique
-* Afficher les photos à la taille de l'écran par défaut lors de la personnalisation
 * Permettre de redimenssionner les photos sans les déformer (avec option)
 * Construire un nouveau fichier outlines avec un export PDF pour permettre de dessiner dessus
 * Barre de menu avec titre et look & feel différent du reste
