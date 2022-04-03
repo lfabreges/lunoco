@@ -109,16 +109,14 @@ function scene:show(event)
 
         for starCount = 1, 3 do
           local isFullStar = numberOfStars >= starCount
-          local starImage = "images/star-" .. (isFullStar and "full" or "empty") .. ".png"
-          local star = display.newImageRect(content, starImage, 20, 20)
+          local star = display.newImageRect(content, "images/star.png", 20, 20)
           local starMask = graphics.newMask("images/star-mask.png")
 
-          star.anchorY = 0
-          star.x = levelButton.x + (starCount - 2) * 25
-          star.y = y + 190
           star:setMask(starMask)
-          star.maskScaleX = star.width / 394
-          star.maskScaleY = star.height / 394
+          star.maskScaleX, star.maskScaleY = star.width / 394, star.height / 394
+          star.anchorY = 0
+          star.x, star.y = levelButton.x + (starCount - 2) * 25, y + 190
+          star.fill.effect = not isFullStar and "filter.grayscale" or nil
         end
       end
 

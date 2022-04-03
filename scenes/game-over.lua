@@ -18,15 +18,13 @@ local sounds = {
 
 local function displayStars(event)
   local isFullStar = numberOfStars >= event.count
-  local starImage = "images/star-" .. (isFullStar and "full" or "empty") .. ".png"
-  local star = display.newImageRect(stars, starImage, 75, 75)
+  local star = display.newImageRect(stars, "images/star.png", 75, 75)
   local starMask = graphics.newMask("images/star-mask.png")
 
-  star.x = display.contentCenterX + (event.count - 2) * 90
-  star.y = display.contentCenterY
   star:setMask(starMask)
-  star.maskScaleX = star.width / 394
-  star.maskScaleY = star.height / 394
+  star.maskScaleX, star.maskScaleY = star.width / 394, star.height / 394
+  star.x, star.y = display.contentCenterX + (event.count - 2) * 90, display.contentCenterY
+  star.fill.effect = not isFullStar and "filter.grayscale" or nil
 
   utils.playAudio(isFullStar and sounds.starFull or sounds.starEmpty, 1.0)
 end
