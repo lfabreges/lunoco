@@ -109,7 +109,9 @@ local function predictBallPathOnLateUpdate()
     prevStepX = stepX
     prevStepY = stepY
 
-    display.newCircle(predictedBallPath, stepX, stepY, 2)
+    local circle = display.newCircle(predictedBallPath, stepX, stepY, 2)
+    circle.strokeWidth = 1
+    circle:setStrokeColor(0.25, 0.25, 0.25)
   end
 end
 
