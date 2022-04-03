@@ -1,7 +1,7 @@
-local components = require "components"
+local components = require "modules.components"
 local composer = require "composer"
-local i18n = require "i18n"
-local navigation = require "navigation"
+local i18n = require "modules.i18n"
+local navigation = require "modules.navigation"
 
 local scene = composer.newScene()
 

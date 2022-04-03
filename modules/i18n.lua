@@ -1,6 +1,6 @@
 local json = require "json"
 local lfs = require "lfs"
-local utils = require "utils"
+local utils = require "modules.utils"
 
 local i18n = {}
 

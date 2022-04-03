@@ -1,8 +1,8 @@
-local components = require "components"
+local components = require "modules.components"
 local composer = require "composer"
-local elements = require "elements"
-local navigation = require "navigation"
-local utils = require "utils"
+local elements = require "modules.elements"
+local navigation = require "modules.navigation"
+local utils = require "modules.utils"
 
 local ball = nil
 local ballImpulseForce = nil

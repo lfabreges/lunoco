@@ -1,8 +1,8 @@
-local components = require "components"
+local components = require "modules.components"
 local composer = require "composer"
-local i18n = require "i18n"
-local navigation = require "navigation"
-local utils = require "utils"
+local i18n = require "modules.i18n"
+local navigation = require "modules.navigation"
+local utils = require "modules.utils"
 
 local finishedInText = nil
 local levelName = nil

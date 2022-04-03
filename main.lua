@@ -1,5 +1,5 @@
 local composer = require "composer"
-local utils = require "utils"
+local utils = require "modules.utils"
 
 math.randomseed(os.time())
 
