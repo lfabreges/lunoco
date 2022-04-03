@@ -89,7 +89,7 @@ function scene:show(event)
     local photoWidth = photo.width
     local photoHeight = photo.height
 
-    photo:scale(photoScale, photoScale)
+    photo.xScale, photo.yScale = photoScale, photoScale
     local photoName = "element-image." .. math.random() .. ".png"
     display.save(photo, { filename = photoName, baseDir = system.TemporaryDirectory, captureOffscreenArea = true })
     display.remove(photo)
