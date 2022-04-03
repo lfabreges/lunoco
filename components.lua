@@ -3,15 +3,6 @@ local widget = require "widget"
 
 local components = {}
 
-local function elementImage(levelName, elementType, defaultImageName)
-  local imageName = utils.levelImageName(levelName, elementType)
-  if imageName then
-    return imageName, system.DocumentsDirectory, false
-  else
-    return defaultImageName, system.ResourceDirectory, true
-  end
-end
-
 local function isWithinBounds(object, event)
   local bounds = object.contentBounds
   local x, y = event.x, event.y
@@ -29,17 +20,6 @@ components.newBackground = function(parent)
   background.anchorY = 0
   background:setFillColor(0.25)
   return background
-end
-
-components.newBall = function(parent, levelName, width, height)
-  local imageName, imageBaseDir, isDefault = elementImage(levelName, "ball", "images/elements/ball.png")
-  local ball = display.newImageRect(parent, imageName, imageBaseDir, width, height)
-  local ballMask = graphics.newMask("images/elements/ball-mask.png")
-  ball:setMask(ballMask)
-  ball.maskScaleX = ball.width / 394
-  ball.maskScaleY = ball.height / 394
-  ball.isDefault = isDefault
-  return ball
 end
 
 components.newButton = function(parent, options)
@@ -63,25 +43,6 @@ components.newButton = function(parent, options)
   return button
 end
 
-components.newFrame = function(parent, levelName, width, height)
-  local imageName, imageBaseDir, isDefault = elementImage(levelName, "frame", "images/elements/frame.png")
-  local frame = display.newContainer(parent, width, height)
-  local imageWidth = math.min(128, width)
-  local imageHeight = math.min(128, height)
-
-  for x = 0, width, 128 do
-    for y = 0, height, 128 do
-      local frameImage = display.newImageRect(frame, imageName, imageBaseDir, imageWidth, imageHeight)
-      frameImage:translate(-width / 2 + x + imageWidth / 2, -height / 2 + y + imageHeight / 2)
-      frameImage:scale(x % 256 == 0 and 1 or -1, y % 256 == 0 and 1 or -1)
-    end
-  end
-
-  frame.isDefault = isDefault
-
-  return frame
-end
-
 components.newImageButton = function(parent, imageName, imageBaseDir, width, height, options)
   if not options then
     options = height
@@ -93,13 +54,17 @@ components.newImageButton = function(parent, imageName, imageBaseDir, width, hei
   local imageButton = display.newImageRect(parent, imageName, imageBaseDir, width, height)
 
   local function setDefaultState()
-    imageButton.isOver = false
-    transition.to(imageButton, { alpha = 1.0, time = 50 })
+    if imageButton.isOver then
+      imageButton.isOver = false
+      transition.to(imageButton, { alpha = 1.0, time = 50 })
+    end
   end
 
   local function setOverState()
-    imageButton.isOver = true
-    transition.to(imageButton, { alpha = 0.2, time = 50 })
+    if not imageButton.isOver then
+      imageButton.isOver = true
+      transition.to(imageButton, { alpha = 0.2, time = 50 })
+    end
   end
 
   local function onButtonTouch(event)
@@ -146,56 +111,10 @@ components.newGroup = function(parent)
   return group
 end
 
-components.newLevelBackground = function(parent, levelName, width, height)
-  local imageName, imageBaseDir, isDefault = elementImage(levelName, "background", nil)
-  local background = nil
-  if isDefault then
-    background = display.newRect(parent, 0, 0, width, height)
-    background:setFillColor(0.5)
-  else
-    background = display.newImageRect(parent, imageName, imageBaseDir, width, height)
-  end
-  background.isDefault = isDefault
-  return background
-end
-
-components.newObstacleBarrier = function(parent, levelName, barrierType, width, height)
-  local imageName, imageBaseDir, isDefault = elementImage(
-    levelName,
-    "obstacle-" .. barrierType,
-    "images/elements/" .. barrierType .. ".png"
-  )
-  local barrier = display.newImageRect(parent, imageName, imageBaseDir, width, height)
-  barrier.isDefault = isDefault
-  return barrier
-end
-
-components.newObstacleCorner = function(parent, levelName, width, height)
-  local imageName, imageBaseDir, isDefault = elementImage(levelName, "obstacle-corner", "images/elements/corner.png")
-  local corner = display.newImageRect(parent, imageName, imageBaseDir, width, height)
-  local cornerMask = graphics.newMask("images/elements/corner-mask.png")
-  corner:setMask(cornerMask)
-  corner.maskScaleX = corner.width / 394
-  corner.maskScaleY = corner.height / 394
-  corner.isDefault = isDefault
-  return corner
-end
-
 components.newOverlayBackground = function(parent)
   local background = components.newBackground(parent)
   background:setFillColor(0, 0, 0, 0.9)
   return background
-end
-
-components.newTarget = function(parent, levelName, targetType, width, height)
-  local imageName, imageBaseDir, isDefault = elementImage(
-    levelName,
-    "target-" .. targetType,
-    "images/elements/target-" .. targetType .. ".png"
-  )
-  local target = display.newImageRect(parent, imageName, imageBaseDir, width, height)
-  target.isDefault = isDefault
-  return target
 end
 
 return components

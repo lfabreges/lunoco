@@ -1,5 +1,6 @@
 local components = require "components"
 local composer = require "composer"
+local elements = require "elements"
 local navigation = require "navigation"
 local utils = require "utils"
 
@@ -159,13 +160,13 @@ function scene:createLevel()
 end
 
 function scene:createBackground()
-  local background = components.newLevelBackground(level, levelName, 300, 460)
+  local background = elements.newBackground(level, levelName, 300, 460)
   background.anchorX, background.anchorY = 0, 0
   background:translate(10, 10)
 end
 
 function scene:createBall()
-  ball = components.newBall(level, levelName, 30, 30)
+  ball = elements.newBall(level, levelName, 30, 30)
 
   ball.x = 10 + config.ball.x
   ball.y = 10 + config.ball.y - 15
@@ -183,7 +184,7 @@ function scene:createBall()
 end
 
 function scene:createFrame()
-  local frame = components.newFrame(level, levelName, display.actualContentWidth, display.actualContentHeight)
+  local frame = elements.newFrame(level, levelName, display.actualContentWidth, display.actualContentHeight)
   frame.anchorX = 0
   frame.anchorY = 0
   frame.x = display.screenOriginX
@@ -201,7 +202,7 @@ end
 function scene:createObstacles()
   for _, config in ipairs(config.obstacles) do
     if config.type == "corner" then
-      local corner = components.newObstacleCorner(level, levelName, config.width, config.height)
+      local corner = elements.newObstacleCorner(level, levelName, config.width, config.height)
 
       corner.type = "corner"
       corner.x = 10 + config.x + corner.width / 2
@@ -223,7 +224,7 @@ function scene:createObstacles()
       physics.addBody(corner, "static", { density = 1.0, friction = 0.3, bounce = 0.5, chain = scaledChain })
 
     elseif config.type:starts("horizontal-barrier") or config.type:starts("vertical-barrier") then
-      local barrier = components.newObstacleBarrier(level, levelName, config.type, config.width, config.height)
+      local barrier = elements.newObstacleBarrier(level, levelName, config.type, config.width, config.height)
 
       barrier.type = "barrier"
       barrier.anchorChildren = true
@@ -241,7 +242,7 @@ function scene:createTargets()
   local numberOfTargets = 0
 
   for _, config in ipairs(config.targets) do
-    local target = components.newTarget(level, levelName, config.type, config.width, config.height)
+    local target = elements.newTarget(level, levelName, config.type, config.width, config.height)
 
     target.type = "target"
     target.anchorChildren = true

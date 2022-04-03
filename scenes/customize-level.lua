@@ -1,16 +1,17 @@
 local components = require "components"
 local composer = require "composer"
+local elements = require "elements"
 local i18n = require "i18n"
 local navigation = require "navigation"
 local utils = require "utils"
 local widget = require "widget"
 
-local elements = nil
+local elementView = nil
 local levelName = nil
 local scene = composer.newScene()
 local scrollviews = {}
 local selectedTab = 1
-local sounds = nil
+local soundView = nil
 local tabBar = nil
 local tabButtons = {}
 local tabGroup = nil
@@ -19,27 +20,27 @@ local function newElement(parent, elementType)
   local element = nil
 
   if elementType == "background" then
-    element = components.newLevelBackground(parent, levelName, 32, 50)
+    element = elements.newBackground(parent, levelName, 32, 50)
   elseif elementType == "ball" then
-    element = components.newBall(parent, levelName, 50, 50)
+    element = elements.newBall(parent, levelName, 50, 50)
   elseif elementType == "frame" then
-    element = components.newFrame(parent, levelName, 50, 50)
+    element = elements.newFrame(parent, levelName, 50, 50)
   elseif elementType == "obstacle-corner" then
-    element = components.newObstacleCorner(parent, levelName, 50, 50)
+    element = elements.newObstacleCorner(parent, levelName, 50, 50)
   elseif elementType:starts("obstacle-horizontal-barrier") then
-    element = components.newObstacleBarrier(parent, levelName, elementType:sub(10), 50, 20)
+    element = elements.newObstacleBarrier(parent, levelName, elementType:sub(10), 50, 20)
   elseif elementType:starts("obstacle-vertical-barrier") then
-    element = components.newObstacleBarrier(parent, levelName, elementType:sub(10), 20, 50)
+    element = elements.newObstacleBarrier(parent, levelName, elementType:sub(10), 20, 50)
   elseif elementType:starts("target-") then
-    element = components.newTarget(parent, levelName, elementType:sub(8), 50, 50)
+    element = elements.newTarget(parent, levelName, elementType:sub(8), 50, 50)
   end
 
   return element
 end
 
-local function elementsTypesFromLevelConfig()
+local function elementTypesFromLevelConfig()
   local config = require ("levels." .. levelName)
-  local elementsTypes = { "background", "ball", "frame" }
+  local elementTypes = { "background", "ball", "frame" }
   local hashset = {}
 
   for _, obstacle in pairs(config.obstacles) do
@@ -49,11 +50,11 @@ local function elementsTypesFromLevelConfig()
     hashset["target-" .. target.type] = true
   end
   for elementType, _ in pairs(hashset) do
-    table.insert(elementsTypes, elementType)
+    table.insert(elementTypes, elementType)
   end
 
-  table.sort(elementsTypes)
-  return elementsTypes
+  table.sort(elementTypes)
+  return elementTypes
 end
 
 local function goBack()
@@ -134,14 +135,14 @@ function scene:create(event)
   end
 end
 
-function scene:createElements()
-  local elementsTypes = elementsTypesFromLevelConfig()
+function scene:createElementView()
+  local elementTypes = elementTypesFromLevelConfig()
   local y = 0
 
-  elements = components.newGroup(scrollviews[1])
+  elementView = components.newGroup(scrollviews[1])
 
-  for _, elementType in ipairs(elementsTypes) do
-    local elementGroup = components.newGroup(elements)
+  for _, elementType in ipairs(elementTypes) do
+    local elementGroup = components.newGroup(elementView)
 
     local elementText = display.newText({
       text = i18n.t(elementType),
@@ -247,8 +248,8 @@ function scene:createElements()
   end
 end
 
-function scene:createSounds()
-  sounds = components.newGroup(scrollviews[2])
+function scene:createSoundView()
+  soundView = components.newGroup(scrollviews[2])
 end
 
 function scene:show(event)
@@ -256,8 +257,8 @@ function scene:show(event)
     local isNewLevel = levelName and levelName ~= event.params.levelName
     levelName = event.params.levelName
 
-    self:createElements()
-    self:createSounds()
+    self:createElementView()
+    self:createSoundView()
 
     if isNewLevel then
       local scrollSoundsTabToTop = function() scrollviews[2]:scrollTo("top", { time = 0 }) end
@@ -276,10 +277,10 @@ end
 function scene:hide(event)
   if event.phase == "did" then
     transition.cancel()
-    display.remove(elements)
-    display.remove(sounds)
-    elements = nil
-    sounds = nil
+    display.remove(elementView)
+    display.remove(soundView)
+    elementView = nil
+    soundView = nil
   end
 end
 
