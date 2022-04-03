@@ -56,14 +56,14 @@ components.newImageButton = function(parent, imageName, imageBaseDir, width, hei
   local function setDefaultState()
     if imageButton.isOver then
       imageButton.isOver = false
-      transition.to(imageButton, { alpha = 1.0, time = 50 })
+      transition.to(imageButton, { alpha = 1.0, time = 100 })
     end
   end
 
   local function setOverState()
     if not imageButton.isOver then
       imageButton.isOver = true
-      transition.to(imageButton, { alpha = 0.2, time = 50 })
+      transition.to(imageButton, { alpha = 0.2, time = 100 })
     end
   end
 
