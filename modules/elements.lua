@@ -11,6 +11,13 @@ local function elementImage(levelName, elementType, defaultImageName)
   end
 end
 
+elements.newBackground = function(parent, levelName, width, height)
+  local imageName, imageBaseDir, isDefault = elementImage(levelName, "background", "images/elements/background.png")
+  local background = display.newImageRect(parent, imageName, imageBaseDir, width, height)
+  background.isDefault = isDefault
+  return background
+end
+
 elements.newBall = function(parent, levelName, width, height)
   local imageName, imageBaseDir, isDefault = elementImage(levelName, "ball", "images/elements/ball.png")
   local ball = display.newImageRect(parent, imageName, imageBaseDir, width, height)
@@ -39,19 +46,6 @@ elements.newFrame = function(parent, levelName, width, height)
   frame.isDefault = isDefault
 
   return frame
-end
-
-elements.newBackground = function(parent, levelName, width, height)
-  local imageName, imageBaseDir, isDefault = elementImage(levelName, "background", nil)
-  local background = nil
-  if isDefault then
-    background = display.newRect(parent, 0, 0, width, height)
-    background:setFillColor(0.5)
-  else
-    background = display.newImageRect(parent, imageName, imageBaseDir, width, height)
-  end
-  background.isDefault = isDefault
-  return background
 end
 
 elements.newObstacleBarrier = function(parent, levelName, barrierType, width, height)

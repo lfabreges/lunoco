@@ -1,5 +1,5 @@
-local lfs = require "lfs"
 local json = require "json"
+local lfs = require "lfs"
 
 local utils = {}
 

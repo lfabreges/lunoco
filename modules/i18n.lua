@@ -1,4 +1,3 @@
-local json = require "json"
 local lfs = require "lfs"
 local utils = require "modules.utils"
 
