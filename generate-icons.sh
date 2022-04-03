@@ -25,3 +25,5 @@ convert "${base}.png" \
 convert "${base}-rounded.png" -resize '256x256' -unsharp 1x4 "Launch.png"
 convert "${base}-rounded.png" -resize '512x512' -unsharp 1x4 "Launch@2x.png"
 convert "${base}-rounded.png" -resize '768x768' -unsharp 1x4 "Launch@3x.png"
+
+rm -f "${base}-rounded.png"
