@@ -207,7 +207,6 @@ function scene:createObstacles()
   for _, config in ipairs(config.obstacles) do
     if config.type == "corner" then
       local corner = elements.newObstacleCorner(level, levelName, config.width, config.height)
-
       corner.x = 10 + config.x + corner.width / 2
       corner.y = 10 + config.y + corner.height / 2
       corner.rotation = config.rotation
@@ -228,7 +227,6 @@ function scene:createObstacles()
 
     elseif config.type:starts("horizontal-barrier") or config.type:starts("vertical-barrier") then
       local barrier = elements.newObstacleBarrier(level, levelName, config.type, config.width, config.height)
-
       barrier.anchorChildren = true
       barrier.anchorX = 0
       barrier.anchorY = 0
@@ -245,7 +243,6 @@ function scene:createTargets()
 
   for _, config in ipairs(config.targets) do
     local target = elements.newTarget(level, levelName, config.type, config.width, config.height)
-
     target.anchorChildren = true
     target.anchorX = 0
     target.anchorY = 0

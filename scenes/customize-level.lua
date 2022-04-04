@@ -115,6 +115,7 @@ function scene:create(event)
   goBackButton.x = screenX + leftInset + 20
   goBackButton.y = screenY + topInset + 10
 
+  --[[
   tabBar = display.newRect(self.view, screenX, screenY + screenHeight, screenWidth, bottomInset + 60)
   tabBar.anchorX = 0
   tabBar.anchorY = 1
@@ -140,15 +141,17 @@ function scene:create(event)
   tabButtons[2].x = screenX + screenWidth - screenWidth / 4
   tabButtons[2].y = tabButtons[1].y
   tabButtons[2].fill.effect = "filter.grayscale"
+  ]]
 
   tabGroup = components.newGroup(self.view)
 
-  for index = 1, 2 do
+  -- TODO passer à deux pour intégrer l'onglet sons
+  for index = 1, 1 do
     scrollviews[index] = widget.newScrollView({
       left = screenX + (index - 1) * screenWidth,
       top = topBar.y + topBar.height,
       width = screenWidth,
-      height = screenHeight - topBar.height - tabBar.height,
+      height = screenHeight - topBar.height, -- - tabBar.height,
       hideBackground = true,
       hideScrollBar = true,
       horizontalScrollDisabled = true,
@@ -279,6 +282,39 @@ end
 
 function scene:createSoundView()
   soundView = components.newGroup(scrollviews[2])
+  --[[
+  local playButton = components.newImageButton(
+    soundView,
+    "images/icons/sound.png",
+    40,
+    40,
+    { onRelease = function()
+      media.playSound("newRecording.aif", system.DocumentsDirectory)
+    end }
+  )
+  playButton.x = 40
+  playButton.y = 100
+
+  local filePath = system.pathForFile("newRecording.aif", system.DocumentsDirectory)
+  local recording = media.newRecording(filePath)
+
+  local recordButton = components.newImageButton(
+    soundView,
+    "images/icons/accept.png",
+    40,
+    40,
+    { onEvent = function(event)
+        if event.phase == "began" then
+          recording:startRecording()
+        elseif event.phase == "ended" or event.phase == "cancelled" then
+          recording:stopRecording()
+        end
+      end
+    }
+  )
+  recordButton.x = 100
+  recordButton.y = 100
+  ]]
 end
 
 function scene:show(event)
@@ -287,9 +323,11 @@ function scene:show(event)
     levelName = event.params.levelName
 
     self:createElementView()
-    self:createSoundView()
+    -- self:createSoundView()
 
     if isNewLevel then
+      scrollviews[1]:scrollTo("top", { time = 0 })
+      --[[
       local scrollSoundsTabToTop = function() scrollviews[2]:scrollTo("top", { time = 0 }) end
       scrollviews[1]:scrollTo("top", { time = 0, onComplete = scrollSoundsTabToTop })
 
@@ -299,6 +337,7 @@ function scene:show(event)
         selectedTab = 1
         tabGroup.x = 0
       end
+      ]]
     end
   end
 end
