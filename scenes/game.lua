@@ -182,7 +182,7 @@ function scene:createBall()
   end
 
   physics.addBody(ball, { radius = ball.width / 2 - 1, density = 1.0, friction = 0.3, bounce = 0.5 })
-  ball.angularDamping = 1.5
+  ball.angularDamping = 3.0
 
   ball:addEventListener("postCollision")
 end
