@@ -33,14 +33,14 @@ return {
       height = 40,
     },
     {
-      type = "normal",
+      type = "easy",
       x = 75,
       y = 350,
       width = 40,
       height = 40,
     },
     {
-      type = "normal",
+      type = "easy",
       x = 185,
       y = 350,
       width = 40,
