@@ -108,7 +108,7 @@ function scene:create(event)
   local topBar = display.newRect(self.view, screenX, screenY, screenWidth, topInset + 60)
   topBar.anchorX = 0
   topBar.anchorY = 0
-  topBar:setFillColor(0.15)
+  topBar:setFillColor(0, 0, 0, 0.33)
 
   local goBackButton = components.newImageButton(self.view, "images/icons/back.png", 40, 40, { onRelease = goBack })
   goBackButton.anchorX = 0

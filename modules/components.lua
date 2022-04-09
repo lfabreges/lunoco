@@ -19,7 +19,11 @@ components.newBackground = function(parent)
   local background = display.newRect(parent, screenX, screenY, screenWidth, screenHeight)
   background.anchorX = 0
   background.anchorY = 0
-  background:setFillColor(0.25)
+  display.setDefault("textureWrapX", "repeat")
+  display.setDefault("textureWrapY", "repeat")
+  background.fill = { type = "image", filename = "images/background.png" }
+  display.setDefault("textureWrapX", "clampToEdge")
+  display.setDefault("textureWrapY", "clampToEdge")
   return background
 end
 
