@@ -5,7 +5,7 @@ return {
   },
   obstacles = {
     {
-      type = "vertical-barrier",
+      type = "vertical-barrier-large",
       x = 50,
       y = 150,
       width = 30,
@@ -19,7 +19,7 @@ return {
       height = 30,
     },
     {
-      type = "vertical-barrier",
+      type = "vertical-barrier-large",
       x = 220,
       y = 150,
       width = 30,

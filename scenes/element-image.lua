@@ -22,6 +22,7 @@ local elements = {
   ["obstacle-horizontal-barrier"] = { width = 200, height = 50 },
   ["obstacle-horizontal-barrier-large"] = { width = 200, height = 50 },
   ["obstacle-vertical-barrier"] = { width = 75, height = 300 },
+  ["obstacle-vertical-barrier-large"] = { width = 75, height = 300 },
   ["target-easy"] = { width = 200, height = 200 },
   ["target-normal"] = { width = 200, height = 200 },
   ["target-hard"] = { width = 200, height = 200 },

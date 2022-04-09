@@ -24,6 +24,7 @@ local elementTypes = {
   "obstacle-horizontal-barrier",
   "obstacle-horizontal-barrier-large",
   "obstacle-vertical-barrier",
+  "obstacle-vertical-barrier-large",
   "target-easy",
   "target-normal",
   "target-hard",

@@ -28,7 +28,7 @@ return {
       rotation = 180,
     },
     {
-      type = "vertical-barrier",
+      type = "vertical-barrier-large",
       x = 50,
       y = 80,
       width = 30,
@@ -42,7 +42,7 @@ return {
       height = 30,
     },
     {
-      type = "vertical-barrier",
+      type = "vertical-barrier-large",
       x = 220,
       y = 80,
       width = 30,

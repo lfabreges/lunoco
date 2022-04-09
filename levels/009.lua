@@ -21,14 +21,14 @@ return {
       rotation = 90,
     },
     {
-      type = "vertical-barrier",
+      type = "vertical-barrier-large",
       x = 60,
       y = 100,
       width = 40,
       height = 250,
     },
     {
-      type = "vertical-barrier",
+      type = "vertical-barrier-large",
       x = 200,
       y = 100,
       width = 40,
