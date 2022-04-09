@@ -285,7 +285,7 @@ function scene:createElementView()
 
         removeCustomizationButton = components.newImageButton(
           elementGroup,
-          "images/icons/cancel.png",
+          "images/icons/trash.png",
           40,
           40,
           { onRelease = onRemoveCustomizationButton, scrollview = scrollviews[1] }
