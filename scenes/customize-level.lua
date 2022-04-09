@@ -193,7 +193,9 @@ function scene:createElementView()
       display.remove(elementGroup)
     else
       elementGroup.y = y
-      elementFrame:setFillColor(0.5, 0.5, 0.5, 0.4)
+      elementFrame:setFillColor(0.5, 0.5, 0.5, 0.25)
+      elementFrame:setStrokeColor(0.5, 0.5, 0.5, 0.75)
+      elementFrame.strokeWidth = 1
       element.x = elementFrame.x
       element.y = elementFrame.y
 
@@ -206,7 +208,9 @@ function scene:createElementView()
         5
       )
       customizeButtonsFrame.anchorX = 0
-      customizeButtonsFrame:setFillColor(0.5, 0.5, 0.5, 0.4)
+      customizeButtonsFrame:setFillColor(0.5, 0.5, 0.5, 0.25)
+      customizeButtonsFrame:setStrokeColor(0.5, 0.5, 0.5, 0.75)
+      customizeButtonsFrame.strokeWidth = 1
 
       local function onSelectPhotoButton(event)
         if media.hasSource(media.PhotoLibrary) then
@@ -267,7 +271,9 @@ function scene:createElementView()
           5
         )
         removeCustomizationButtonFrame.anchorX = 0
-        removeCustomizationButtonFrame:setFillColor(0.5, 0.5, 0.5, 0.4)
+        removeCustomizationButtonFrame:setFillColor(0.5, 0.5, 0.5, 0.25)
+        removeCustomizationButtonFrame:setStrokeColor(0.5, 0.5, 0.5, 0.75)
+        removeCustomizationButtonFrame.strokeWidth = 1
 
         local removeCustomizationButton
 
