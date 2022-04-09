@@ -120,7 +120,7 @@ function scene:create(event)
   tabBar = display.newRect(self.view, screenX, screenY + screenHeight, screenWidth, bottomInset + 60)
   tabBar.anchorX = 0
   tabBar.anchorY = 1
-  tabBar:setFillColor(0.15)
+  tabBar:setFillColor(0, 0, 0, 0.33)
 
   tabButtons[1] = components.newImageButton(
     self.view,
@@ -186,68 +186,89 @@ function scene:createElementView()
     elementText.anchorX = 0
     elementText.anchorY = 0
 
-    local elementFrame = display.newRoundedRect(elementGroup, 60, elementText.height + 50, 80, 80, 10)
+    local elementFrame = display.newRoundedRect(elementGroup, 60, elementText.height + 50, 80, 80, 5)
     local element = newElement(elementGroup, elementType)
 
     if not element then
       display.remove(elementGroup)
     else
       elementGroup.y = y
-      elementFrame:setFillColor(0.5)
+      elementFrame:setFillColor(0.5, 0.5, 0.5, 0.4)
       element.x = elementFrame.x
       element.y = elementFrame.y
 
-      local x = elementFrame.x + elementFrame.width / 2 + 20
+      local customizeButtonsFrame = display.newRoundedRect(
+        elementGroup,
+        elementFrame.x + elementFrame.width / 2 + 5,
+        element.y,
+        122,
+        80,
+        5
+      )
+      customizeButtonsFrame.anchorX = 0
+      customizeButtonsFrame:setFillColor(0.5, 0.5, 0.5, 0.4)
 
-      if media.hasSource(media.PhotoLibrary) then
-        local function onSelectPhotoButton(event)
+      local function onSelectPhotoButton(event)
+        if media.hasSource(media.PhotoLibrary) then
           media.selectPhoto({ mediaSource = media.PhotoLibrary, listener = function(event)
             if event.completed then
               navigation.gotoElementImage(levelName, elementType, event.target)
             end
           end })
+        else
+          native.showAlert(i18n.t("permission-denied"), i18n.t("permission-denied-photo-library"), { i18n.t("ok") })
         end
-
-        local selectPhotoButton = components.newImageButton(
-          elementGroup,
-          "images/icons/photo.png",
-          40,
-          40,
-          { onRelease = onSelectPhotoButton, scrollview = scrollviews[1] }
-        )
-
-        selectPhotoButton.anchorX = 0
-        selectPhotoButton.x = x
-        selectPhotoButton.y = element.y
-
-        x = x + selectPhotoButton.width + 20
       end
 
-      if media.hasSource(media.Camera) then
-        local function onTakePhotoButton(event)
+      local selectPhotoButton = components.newImageButton(
+        elementGroup,
+        "images/icons/photo.png",
+        40,
+        40,
+        { onRelease = onSelectPhotoButton, scrollview = scrollviews[1] }
+      )
+      selectPhotoButton.anchorX = 0
+      selectPhotoButton.x = customizeButtonsFrame.x + 14
+      selectPhotoButton.y = element.y
+
+      local function onTakePhotoButton(event)
+        local hasAccessToCamera, hasCamera = media.hasSource(media.Camera)
+        if hasAccessToCamera then
           media.capturePhoto({ listener = function(event)
             if event.completed then
               navigation.gotoElementImage(levelName, elementType, event.target)
             end
           end })
+        elseif hasCamera and native.canShowPopup("requestAppPermission") then
+          native.showPopup("requestAppPermission", { appPermission = "Camera" })
+        else
+          native.showAlert(i18n.t("permission-denied"), i18n.t("permission-denied-camera"), { i18n.t("ok") })
         end
-
-        local takePhotoButton = components.newImageButton(
-          elementGroup,
-          "images/icons/take-photo.png",
-          40,
-          40,
-          { onRelease = onTakePhotoButton, scrollview = scrollviews[1] }
-        )
-
-        takePhotoButton.anchorX = 0
-        takePhotoButton.x = x
-        takePhotoButton.y = element.y
-
-        x = x + takePhotoButton.width + 20
       end
 
+      local takePhotoButton = components.newImageButton(
+        elementGroup,
+        "images/icons/take-photo.png",
+        40,
+        40,
+        { onRelease = onTakePhotoButton, scrollview = scrollviews[1] }
+      )
+      takePhotoButton.anchorX = 0
+      takePhotoButton.x = selectPhotoButton.x + selectPhotoButton.width + 14
+      takePhotoButton.y = element.y
+
       if not element.isDefault then
+        local removeCustomizationButtonFrame = display.newRoundedRect(
+          elementGroup,
+          customizeButtonsFrame.x + customizeButtonsFrame.width + 5,
+          element.y,
+          68,
+          80,
+          5
+        )
+        removeCustomizationButtonFrame.anchorX = 0
+        removeCustomizationButtonFrame:setFillColor(0.5, 0.5, 0.5, 0.4)
+
         local removeCustomizationButton
 
         local function onRemoveCustomizationButton(event)
@@ -258,6 +279,7 @@ function scene:createElementView()
           defaultElement.alpha = 0
           transition.to(defaultElement, { time = 500, alpha = 1 } )
           transition.to(element, { time = 500, alpha = 0, onComplete = function() display.remove(element) end } )
+          display.remove(removeCustomizationButtonFrame)
           display.remove(removeCustomizationButton)
         end
 
@@ -268,12 +290,9 @@ function scene:createElementView()
           40,
           { onRelease = onRemoveCustomizationButton, scrollview = scrollviews[1] }
         )
-
         removeCustomizationButton.anchorX = 0
-        removeCustomizationButton.x = x
+        removeCustomizationButton.x = removeCustomizationButtonFrame.x + 14
         removeCustomizationButton.y = element.y
-
-        x = x + removeCustomizationButton.width + 20
       end
 
       y = y + elementGroup.height + 20

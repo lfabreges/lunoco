@@ -11,4 +11,3 @@
 # Android
 * Personnaliser le spash screen : raf android
 * Personnaliser les icones : raf android
-* requestAppPermission si ça n'est pas bon plutôt que masque l'icone (native.showPopup et native.canShowPopup)
