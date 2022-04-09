@@ -137,9 +137,9 @@ function scene:create(event)
   tapRectangle.isHitTestable = true
   tapRectangle:addEventListener("tap", scene.pauseOnTap)
 
-  local touchRectangle = display.newRect(self.view, screenX, screenY + screenHeight, screenWidth, screenHeight * 0.75)
+  local touchRectangle = display.newRect(self.view, screenX, screenY, screenWidth, screenHeight)
   touchRectangle.anchorX = 0
-  touchRectangle.anchorY = 1
+  touchRectangle.anchorY = 0
   touchRectangle.alpha = 0
   touchRectangle.isHitTestable = true
   touchRectangle:addEventListener("touch", handleBallImpulseOnScreenTouch)
