@@ -1,8 +1,6 @@
 #!/bin/sh
 
-base="Icon-1024"
-
-convert "${base}.png" -resize '57x57' -unsharp 1x4 "Icon.png"
+base="icon"
 
 convert "${base}.png" -resize '40x40' -unsharp 1x4 "Images.xcassets/AppIcon.appiconset/Icon-40.png"
 convert "${base}.png" -resize '58x58' -unsharp 1x4 "Images.xcassets/AppIcon.appiconset/Icon-58.png"
@@ -22,8 +20,9 @@ convert "${base}.png" \
     \( +clone -flop \) -compose Multiply -composite \
   \) -alpha off -compose CopyOpacity -composite "${base}-rounded.png"
 
-convert "${base}-rounded.png" -resize '256x256' -unsharp 1x4 "Launch.png"
-convert "${base}-rounded.png" -resize '512x512' -unsharp 1x4 "Launch@2x.png"
-convert "${base}-rounded.png" -resize '768x768' -unsharp 1x4 "Launch@3x.png"
+convert "${base}-rounded.png" -resize '256x256' -unsharp 1x4 "images/icon.png"
+convert "${base}-rounded.png" -resize '512x512' -unsharp 1x4 "images/icon@2x.png"
+convert "${base}-rounded.png" -resize '768x768' -unsharp 1x4 "images/icon@3x.png"
+convert "${base}-rounded.png" -resize '1024x1024' -unsharp 1x4 "images/icon@4x.png"
 
 rm -f "${base}-rounded.png"

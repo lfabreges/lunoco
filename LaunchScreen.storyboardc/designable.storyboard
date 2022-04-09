@@ -20,10 +20,10 @@
                         <rect key="frame" x="0.0" y="0.0" width="414" height="736"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                         <subviews>
-                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="redraw" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="Background" translatesAutoresizingMaskIntoConstraints="NO" id="vWJ-RN-6aE">
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="redraw" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="images/background" translatesAutoresizingMaskIntoConstraints="NO" id="vWJ-RN-6aE">
                                 <rect key="frame" x="0.0" y="0.0" width="414" height="736"/>
                             </imageView>
-                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="Launch" translatesAutoresizingMaskIntoConstraints="NO" id="I3N-Tn-cmL">
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="images/icon" translatesAutoresizingMaskIntoConstraints="NO" id="I3N-Tn-cmL">
                                 <rect key="frame" x="103.66666666666669" y="264.66666666666669" width="207" height="207"/>
                                 <constraints>
                                     <constraint firstAttribute="width" secondItem="I3N-Tn-cmL" secondAttribute="height" multiplier="1:1" id="KBX-Ik-UrV"/>
@@ -49,8 +49,8 @@
         </scene>
     </scenes>
     <resources>
-        <image name="Background" width="256" height="256"/>
-        <image name="Launch" width="256" height="256"/>
+        <image name="images/background" width="256" height="256"/>
+        <image name="images/icon" width="256" height="256"/>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>
