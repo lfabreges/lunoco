@@ -50,9 +50,9 @@ return {
     },
     {
       type = "horizontal-barrier",
-      x = 140,
+      x = 150,
       y = 80,
-      width = 80,
+      width = 70,
       height = 30,
     },
     {
