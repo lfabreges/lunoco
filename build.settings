@@ -35,17 +35,17 @@ settings = {
 
   excludeFiles = {
     all = {
+      ".gitignore",
       "*.md",
       "*.sh",
       "*.xcf",
-      "Icon.png",
-      "Icon-1024*.png",
+      "icon.png",
       "Icon-*dpi.png",
       "Images.xcassets",
     },
     android = {
+      "*.lproj",
       "LaunchScreen.storyboardc",
-      "Launch*.png"
     },
     ios = {
       "AndroidResources",
