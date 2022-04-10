@@ -239,6 +239,7 @@ function scene:createElementView()
         local hasAccessToCamera, hasCamera = media.hasSource(media.Camera)
         if hasAccessToCamera then
           media.capturePhoto({ listener = function(event)
+            -- TODO Avec un back android ça envoit quand même ensuite mais sans photo ..
             if event.completed then
               navigation.gotoElementImage(levelName, elementType, event.target)
             end

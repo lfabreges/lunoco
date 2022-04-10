@@ -2,6 +2,37 @@
 
 base="icon"
 
+##
+# Android
+##
+
+convert "${base}.png" -resize '48x48' -unsharp 1x4 "AndroidResources/res/mipmap-mdpi/ic_launcher.png"
+convert "${base}.png" -resize '72x72' -unsharp 1x4 "AndroidResources/res/mipmap-hdpi/ic_launcher.png"
+convert "${base}.png" -resize '96x96' -unsharp 1x4 "AndroidResources/res/mipmap-xhdpi/ic_launcher.png"
+convert "${base}.png" -resize '144x144' -unsharp 1x4 "AndroidResources/res/mipmap-xxhdpi/ic_launcher.png"
+convert "${base}.png" -resize '192x192' -unsharp 1x4 "AndroidResources/res/mipmap-xxxhdpi/ic_launcher.png"
+
+convert "AndroidResources/res/mipmap-xxxhdpi/ic_launcher_background.png" -resize '108x108' \
+  -unsharp 1x4 "AndroidResources/res/mipmap-mdpi/ic_launcher_background.png"
+convert "AndroidResources/res/mipmap-xxxhdpi/ic_launcher_foreground.png" -resize '108x108' \
+  -unsharp 1x4 "AndroidResources/res/mipmap-mdpi/ic_launcher_foreground.png"
+convert "AndroidResources/res/mipmap-xxxhdpi/ic_launcher_background.png" -resize '162x162' \
+  -unsharp 1x4 "AndroidResources/res/mipmap-hdpi/ic_launcher_background.png"
+convert "AndroidResources/res/mipmap-xxxhdpi/ic_launcher_foreground.png" -resize '162x162' \
+  -unsharp 1x4 "AndroidResources/res/mipmap-hdpi/ic_launcher_foreground.png"
+convert "AndroidResources/res/mipmap-xxxhdpi/ic_launcher_background.png" -resize '216x216' \
+  -unsharp 1x4 "AndroidResources/res/mipmap-xhdpi/ic_launcher_background.png"
+convert "AndroidResources/res/mipmap-xxxhdpi/ic_launcher_foreground.png" -resize '216x216' \
+  -unsharp 1x4 "AndroidResources/res/mipmap-xhdpi/ic_launcher_foreground.png"
+convert "AndroidResources/res/mipmap-xxxhdpi/ic_launcher_background.png" -resize '324x324' \
+  -unsharp 1x4 "AndroidResources/res/mipmap-xxhdpi/ic_launcher_background.png"
+convert "AndroidResources/res/mipmap-xxxhdpi/ic_launcher_foreground.png" -resize '324x324' \
+  -unsharp 1x4 "AndroidResources/res/mipmap-xxhdpi/ic_launcher_foreground.png"
+
+##
+# iOS
+##
+
 convert "${base}.png" -resize '40x40' -unsharp 1x4 "Images.xcassets/AppIcon.appiconset/Icon-40.png"
 convert "${base}.png" -resize '58x58' -unsharp 1x4 "Images.xcassets/AppIcon.appiconset/Icon-58.png"
 convert "${base}.png" -resize '76x76' -unsharp 1x4 "Images.xcassets/AppIcon.appiconset/Icon-76.png"
