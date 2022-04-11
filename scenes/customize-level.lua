@@ -30,26 +30,27 @@ local elementTypes = {
   "target-hard",
 }
 
-local function newElement(parent, elementType)
-  local element = nil
+local function capturePhoto(onComplete, shouldRequestAppPermission)
+  local hasAccessToCamera, hasCamera = media.hasSource(media.Camera)
+  shouldRequestAppPermission = shouldRequestAppPermission == nil and true or shouldRequestAppPermission
 
-  if elementType == "background" then
-    element = elements.newBackground(parent, levelName, 32, 50)
-  elseif elementType == "ball" then
-    element = elements.newBall(parent, levelName, 50, 50)
-  elseif elementType == "frame" then
-    element = elements.newFrame(parent, levelName, 50, 50)
-  elseif elementType == "obstacle-corner" then
-    element = elements.newObstacleCorner(parent, levelName, 50, 50)
-  elseif elementType:starts("obstacle-horizontal-barrier") then
-    element = elements.newObstacleBarrier(parent, levelName, elementType:sub(10), 50, 20)
-  elseif elementType:starts("obstacle-vertical-barrier") then
-    element = elements.newObstacleBarrier(parent, levelName, elementType:sub(10), 20, 50)
-  elseif elementType:starts("target-") then
-    element = elements.newTarget(parent, levelName, elementType:sub(8), 50, 50)
+  if hasAccessToCamera then
+    media.capturePhoto({ listener = onComplete })
+  elseif shouldRequestAppPermission and hasCamera and native.canShowPopup("requestAppPermission") then
+    native.showPopup("requestAppPermission", {
+      appPermission = "Camera",
+      listener = function(event)
+        for _, appPermission in pairs(event.grantedAppPermissions) do
+          if appPermission == "Camera" then
+            capturePhoto(onComplete, false)
+            break
+          end
+        end
+      end
+    })
+  else
+    native.showAlert(i18n.t("permission-denied"), i18n.t("permission-denied-camera"), { i18n.t("ok") })
   end
-
-  return element
 end
 
 local function elementTypesFromLevelConfig()
@@ -83,6 +84,45 @@ end
 
 local function goBack()
   navigation.gotoGame(levelName)
+end
+
+local function newElement(parent, elementType)
+  local element = nil
+
+  if elementType == "background" then
+    element = elements.newBackground(parent, levelName, 32, 50)
+  elseif elementType == "ball" then
+    element = elements.newBall(parent, levelName, 50, 50)
+  elseif elementType == "frame" then
+    element = elements.newFrame(parent, levelName, 50, 50)
+  elseif elementType == "obstacle-corner" then
+    element = elements.newObstacleCorner(parent, levelName, 50, 50)
+  elseif elementType:starts("obstacle-horizontal-barrier") then
+    element = elements.newObstacleBarrier(parent, levelName, elementType:sub(10), 50, 20)
+  elseif elementType:starts("obstacle-vertical-barrier") then
+    element = elements.newObstacleBarrier(parent, levelName, elementType:sub(10), 20, 50)
+  elseif elementType:starts("target-") then
+    element = elements.newTarget(parent, levelName, elementType:sub(8), 50, 50)
+  end
+
+  return element
+end
+
+local function newFrame(parent, x, y, width, height)
+  local frame = display.newRoundedRect(parent, x, y, width, height, 5)
+  frame.anchorX = 0
+  frame:setFillColor(0.5, 0.5, 0.5, 0.25)
+  frame:setStrokeColor(0.5, 0.5, 0.5, 0.75)
+  frame.strokeWidth = 1
+  return frame
+end
+
+local function selectPhoto(onComplete)
+  if media.hasSource(media.PhotoLibrary) then
+    media.selectPhoto({ mediaSource = media.PhotoLibrary, listener = onComplete })
+  else
+    native.showAlert(i18n.t("permission-denied"), i18n.t("permission-denied-photo-library"), { i18n.t("ok") })
+  end
 end
 
 local function selectTab(index)
@@ -186,116 +226,94 @@ function scene:createElementView()
     elementText.anchorX = 0
     elementText.anchorY = 0
 
-    local elementFrame = display.newRoundedRect(elementGroup, 60, elementText.height + 50, 80, 80, 5)
+    local elementFrame = newFrame(elementGroup, 20, elementText.height + 50, 80, 80)
     local element = newElement(elementGroup, elementType)
 
     if not element then
       display.remove(elementGroup)
     else
       elementGroup.y = y
-      elementFrame:setFillColor(0.5, 0.5, 0.5, 0.25)
-      elementFrame:setStrokeColor(0.5, 0.5, 0.5, 0.75)
-      elementFrame.strokeWidth = 1
-      element.x = elementFrame.x
+      element.x = elementFrame.x + elementFrame.width / 2
       element.y = elementFrame.y
 
-      local customizeButtonsFrame = display.newRoundedRect(
+      local customizeButtonsFrame = newFrame(
         elementGroup,
-        elementFrame.x + elementFrame.width / 2 + 5,
+        elementFrame.x + elementFrame.width + 5,
         element.y,
         122,
-        80,
-        5
+        80
       )
-      customizeButtonsFrame.anchorX = 0
-      customizeButtonsFrame:setFillColor(0.5, 0.5, 0.5, 0.25)
-      customizeButtonsFrame:setStrokeColor(0.5, 0.5, 0.5, 0.75)
-      customizeButtonsFrame.strokeWidth = 1
-
-      local function onSelectPhotoButton(event)
-        if media.hasSource(media.PhotoLibrary) then
-          media.selectPhoto({ mediaSource = media.PhotoLibrary, listener = function(event)
-            if event.completed then
-              navigation.gotoElementImage(levelName, elementType, event.target)
-            end
-          end })
-        else
-          native.showAlert(i18n.t("permission-denied"), i18n.t("permission-denied-photo-library"), { i18n.t("ok") })
-        end
-      end
 
       local selectPhotoButton = components.newImageButton(
         elementGroup,
         "images/icons/photo.png",
         40,
         40,
-        { onRelease = onSelectPhotoButton, scrollview = scrollviews[1] }
+        {
+          onRelease = function()
+            selectPhoto(function(event)
+              if event.completed then
+                navigation.gotoElementImage(levelName, elementType, event.target)
+              end
+            end)
+          end,
+          scrollview = scrollviews[1]
+        }
       )
       selectPhotoButton.anchorX = 0
       selectPhotoButton.x = customizeButtonsFrame.x + 14
       selectPhotoButton.y = element.y
-
-      local function onTakePhotoButton(event)
-        local hasAccessToCamera, hasCamera = media.hasSource(media.Camera)
-        if hasAccessToCamera then
-          media.capturePhoto({ listener = function(event)
-            -- TODO Avec un back android ça envoit quand même ensuite mais sans photo ..
-            if event.completed then
-              navigation.gotoElementImage(levelName, elementType, event.target)
-            end
-          end })
-        elseif hasCamera and native.canShowPopup("requestAppPermission") then
-          native.showPopup("requestAppPermission", { appPermission = "Camera" })
-        else
-          native.showAlert(i18n.t("permission-denied"), i18n.t("permission-denied-camera"), { i18n.t("ok") })
-        end
-      end
 
       local takePhotoButton = components.newImageButton(
         elementGroup,
         "images/icons/take-photo.png",
         40,
         40,
-        { onRelease = onTakePhotoButton, scrollview = scrollviews[1] }
+        {
+          onRelease = function()
+            capturePhoto(function(event)
+              if event.completed and event.target and event.target.width and event.target.width > 0 then
+                navigation.gotoElementImage(levelName, elementType, event.target)
+              end
+            end)
+          end,
+          scrollview = scrollviews[1]
+        }
       )
       takePhotoButton.anchorX = 0
       takePhotoButton.x = selectPhotoButton.x + selectPhotoButton.width + 14
       takePhotoButton.y = element.y
 
       if not element.isDefault then
-        local removeCustomizationButtonFrame = display.newRoundedRect(
+        local removeCustomizationButtonFrame = newFrame(
           elementGroup,
           customizeButtonsFrame.x + customizeButtonsFrame.width + 5,
           element.y,
           68,
-          80,
-          5
+          80
         )
-        removeCustomizationButtonFrame.anchorX = 0
-        removeCustomizationButtonFrame:setFillColor(0.5, 0.5, 0.5, 0.25)
-        removeCustomizationButtonFrame:setStrokeColor(0.5, 0.5, 0.5, 0.75)
-        removeCustomizationButtonFrame.strokeWidth = 1
 
         local removeCustomizationButton
-
-        local function onRemoveCustomizationButton(event)
-          utils.removeLevelImage(levelName, elementType)
-          local defaultElement = newElement(elementGroup, elementType)
-          defaultElement.x = element.x
-          defaultElement.y = element.y
-          defaultElement.alpha = 0
-          transition.to(defaultElement, { time = 500, alpha = 1 } )
-          transition.to(element, { time = 500, alpha = 0, onComplete = function() display.remove(element) end } )
-          display.remove(removeCustomizationButtonFrame)
-          display.remove(removeCustomizationButton)
-        end
 
         removeCustomizationButton = components.newImageButton(
           elementGroup,
           "images/icons/trash.png",
           40,
           40,
-          { onRelease = onRemoveCustomizationButton, scrollview = scrollviews[1] }
+          {
+            onRelease = function()
+              utils.removeLevelImage(levelName, elementType)
+              local defaultElement = newElement(elementGroup, elementType)
+              defaultElement.x = element.x
+              defaultElement.y = element.y
+              defaultElement.alpha = 0
+              transition.to(defaultElement, { time = 500, alpha = 1 } )
+              transition.to(element, { time = 500, alpha = 0, onComplete = function() display.remove(element) end } )
+              display.remove(removeCustomizationButtonFrame)
+              display.remove(removeCustomizationButton)
+            end,
+            scrollview = scrollviews[1]
+          }
         )
         removeCustomizationButton.anchorX = 0
         removeCustomizationButton.x = removeCustomizationButtonFrame.x + 14
@@ -309,39 +327,6 @@ end
 
 function scene:createSoundView()
   soundView = components.newGroup(scrollviews[2])
-  --[[
-  local playButton = components.newImageButton(
-    soundView,
-    "images/icons/sound.png",
-    40,
-    40,
-    { onRelease = function()
-      media.playSound("newRecording.aif", system.DocumentsDirectory)
-    end }
-  )
-  playButton.x = 40
-  playButton.y = 100
-
-  local filePath = system.pathForFile("newRecording.aif", system.DocumentsDirectory)
-  local recording = media.newRecording(filePath)
-
-  local recordButton = components.newImageButton(
-    soundView,
-    "images/icons/accept.png",
-    40,
-    40,
-    { onEvent = function(event)
-        if event.phase == "began" then
-          recording:startRecording()
-        elseif event.phase == "ended" or event.phase == "cancelled" then
-          recording:stopRecording()
-        end
-      end
-    }
-  )
-  recordButton.x = 100
-  recordButton.y = 100
-  ]]
 end
 
 function scene:show(event)
