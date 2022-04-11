@@ -46,8 +46,8 @@ end
 local function onPinch(deltaDistanceX, deltaDistanceY)
   local minXScale = frontContainer.width / backPhoto.width
   local minYScale = frontContainer.height / backPhoto.height
-  local xScale = math.min(4, math.max(minXScale, frontPhoto.xScale + deltaDistanceX / 400))
-  local yScale = math.min(4, math.max(minYScale, frontPhoto.yScale + deltaDistanceY / 400))
+  local xScale = math.min(4, math.max(minXScale, frontPhoto.xScale + deltaDistanceX / backPhoto.width))
+  local yScale = math.min(4, math.max(minYScale, frontPhoto.yScale + deltaDistanceY / backPhoto.height))
   backPhoto.xScale = xScale
   backPhoto.yScale = yScale
   frontPhoto.xScale = xScale
