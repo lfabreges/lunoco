@@ -52,74 +52,6 @@ local function gameOver()
   })
 end
 
-local function handleBallImpulseOnScreenTouch(event)
-  local distanceX = event.xStart - event.x
-  local distanceY = event.yStart - event.y
-  local target = event.target
-  local totalDistance = math.sqrt(distanceX * distanceX + distanceY * distanceY)
-  local _ballImpulseForce = { x = distanceX * 4, y = distanceY * 4, hasEnoughForce = totalDistance > 10 }
-
-  ballImpulseForce = nil
-
-  if event.phase == "began" then
-    display.getCurrentStage():setFocus(target)
-    target.isFocus = true
-  elseif target.isFocus then
-    if event.phase == "ended" or event.phase == "cancelled" then
-      display.getCurrentStage():setFocus(nil)
-      target.isFocus = false
-      display.remove(predictedBallPath)
-      predictedBallPath = nil
-
-      if event.phase == "ended" and _ballImpulseForce.hasEnoughForce then
-        ball:setLinearVelocity(_ballImpulseForce.x, _ballImpulseForce.y)
-        numberOfShots = numberOfShots + 1
-        utils.playAudio(sounds.ball, 0.4)
-      end
-    elseif event.phase == "moved" then
-      ballImpulseForce = _ballImpulseForce
-    end
-  end
-
-  return true
-end
-
-local function predictBallPathOnLateUpdate()
-  if not ballImpulseForce then
-    return false
-  end
-
-  display.remove(predictedBallPath)
-
-  if not ballImpulseForce.hasEnoughForce then
-    return false
-  end
-
-  predictedBallPath = components.newGroup(level)
-
-  local timeStepInterval = 0.05
-  local numberOfSteps = 1 / timeStepInterval
-  local prevStepX = nil
-  local prevStepY = nil
-
-  for step = 0, numberOfSteps, 1 do
-    local time = step * timeStepInterval
-    local stepX = ball.x + time * ballImpulseForce.x + 0.5 * gravityX * scale * (time * time)
-    local stepY = ball.y + time * ballImpulseForce.y + 0.5 * gravityY * scale * (time * time)
-
-    if step > 0 and physics.rayCast(prevStepX, prevStepY, stepX, stepY, "any") then
-      break
-    end
-
-    prevStepX = stepX
-    prevStepY = stepY
-
-    local circle = display.newCircle(predictedBallPath, stepX, stepY, 2)
-    circle.strokeWidth = 1
-    circle:setStrokeColor(0.25, 0.25, 0.25)
-  end
-end
-
 local function takeLevelScreenshot()
   local screenshot = display.captureBounds(display.currentStage.contentBounds)
   local screenshotScale = screenshot.xScale * 0.33
@@ -127,27 +59,6 @@ local function takeLevelScreenshot()
   screenshot.yScale = screenshotScale
   utils.saveLevelImage(screenshot, levelName, "screenshot")
   display.remove(screenshot)
-end
-
-function scene:create(event)
-  local screenX = display.screenOriginX
-  local screenY = display.screenOriginY
-  local screenWidth = display.actualContentWidth
-  local screenHeight = display.actualContentHeight
-
-  local tapRectangle = display.newRect(self.view, screenX, screenY, screenWidth, screenHeight * 0.25)
-  tapRectangle.anchorX = 0
-  tapRectangle.anchorY = 0
-  tapRectangle.alpha = 0
-  tapRectangle.isHitTestable = true
-  tapRectangle:addEventListener("tap", scene.pauseOnTap)
-
-  local touchRectangle = display.newRect(self.view, screenX, screenY, screenWidth, screenHeight)
-  touchRectangle.anchorX = 0
-  touchRectangle.anchorY = 0
-  touchRectangle.alpha = 0
-  touchRectangle.isHitTestable = true
-  touchRectangle:addEventListener("touch", handleBallImpulseOnScreenTouch)
 end
 
 function scene:createLevel()
@@ -283,11 +194,73 @@ function scene:createTargets()
   end
 end
 
-function scene:pauseOnTap()
+function scene:lateUpdate()
+  if not ballImpulseForce then
+    return
+  end
+
+  display.remove(predictedBallPath)
+
+  if not ballImpulseForce.hasEnoughForce then
+    return
+  end
+
+  predictedBallPath = components.newGroup(level)
+
+  local timeStepInterval = 0.05
+  local numberOfSteps = 1 / timeStepInterval
+  local prevStepX = nil
+  local prevStepY = nil
+
+  for step = 0, numberOfSteps, 1 do
+    local time = step * timeStepInterval
+    local stepX = ball.x + time * ballImpulseForce.x + 0.5 * gravityX * scale * (time * time)
+    local stepY = ball.y + time * ballImpulseForce.y + 0.5 * gravityY * scale * (time * time)
+
+    if step > 0 and physics.rayCast(prevStepX, prevStepY, stepX, stepY, "any") then
+      break
+    end
+
+    prevStepX = stepX
+    prevStepY = stepY
+
+    local circle = display.newCircle(predictedBallPath, stepX, stepY, 2)
+    circle.strokeWidth = 1
+    circle:setStrokeColor(0.25, 0.25, 0.25)
+  end
+end
+
+function scene:touch(event)
+  local distanceX = event.xStart - event.x
+  local distanceY = event.yStart - event.y
+  local totalDistance = math.sqrt(distanceX * distanceX + distanceY * distanceY)
+  local _ballImpulseForce = { x = distanceX * 4, y = distanceY * 4, hasEnoughForce = totalDistance > 10 }
+
+  ballImpulseForce = nil
+
+  if event.phase == "ended" or event.phase == "cancelled" then
+    display.remove(predictedBallPath)
+    predictedBallPath = nil
+    if event.phase == "ended" then
+      if _ballImpulseForce.hasEnoughForce then
+        ball:setLinearVelocity(_ballImpulseForce.x, _ballImpulseForce.y)
+        numberOfShots = numberOfShots + 1
+        utils.playAudio(sounds.ball, 0.4)
+      elseif event.y <= display.screenOriginY + display.actualContentHeight * 0.3 then
+        self:pause()
+      end
+    end
+  elseif event.phase == "moved" then
+    ballImpulseForce = _ballImpulseForce
+  end
+
+  return true
+end
+
+function scene:pause()
   audio.pause()
   physics.pause()
   composer.showOverlay("scenes.pause", { isModal = true, params = { levelName = levelName }})
-  return true
 end
 
 function scene:resume()
@@ -301,7 +274,8 @@ function scene:show(event)
     config = require ("levels." .. levelName)
     self:createLevel()
   elseif event.phase == "did" then
-    Runtime:addEventListener("lateUpdate", predictBallPathOnLateUpdate)
+    Runtime:addEventListener("lateUpdate", scene)
+    Runtime:addEventListener("touch", scene)
     physics.start()
     timer.performWithDelay(0, takeLevelScreenshot)
   end
@@ -309,7 +283,8 @@ end
 
 function scene:hide(event)
   if event.phase == "did" then
-    Runtime:removeEventListener("lateUpdate", predictBallPathOnLateUpdate)
+    Runtime:removeEventListener("touch", scene)
+    Runtime:removeEventListener("lateUpdate", scene)
     audio.stop()
     physics.stop()
     transition.cancel()
@@ -327,7 +302,6 @@ function scene:destroy(event)
   end
 end
 
-scene:addEventListener("create", scene)
 scene:addEventListener("show", scene)
 scene:addEventListener("hide", scene)
 scene:addEventListener("destroy", scene)
