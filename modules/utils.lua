@@ -5,6 +5,7 @@ local utils = {}
 
 local environment = system.getInfo("environment")
 local levelsImageNames = {}
+local platform = system.getInfo("platform")
 
 local function loadLevelImageNames(levelName)
   if levelsImageNames[levelName] then
@@ -26,6 +27,10 @@ end
 utils.fileExists = function(filename, baseDirectory)
   local filepath = system.pathForFile(filename, baseDirectory)
   return os.rename(filepath, filepath) and true or false
+end
+
+utils.isAndroid = function()
+  return platform == "android"
 end
 
 utils.isSimulator = function()

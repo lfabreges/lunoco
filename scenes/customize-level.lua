@@ -30,24 +30,32 @@ local elementTypes = {
   "target-hard",
 }
 
+local function androidHasStoragePermission()
+  local grantedAppPermissions = system.getInfo("grantedAppPermissions")
+	if grantedAppPermissions then
+    for _, appPermission in pairs(grantedAppPermissions) do
+      if appPermission == "Storage" then
+        return true
+      end
+    end
+  end
+	return false
+end
+
 local function capturePhoto(onComplete, shouldRequestAppPermission)
   local hasAccessToCamera, hasCamera = media.hasSource(media.Camera)
   shouldRequestAppPermission = shouldRequestAppPermission == nil and true or shouldRequestAppPermission
 
-  if hasAccessToCamera then
+  if hasAccessToCamera and (not utils.isAndroid() or androidHasStoragePermission()) then
     media.capturePhoto({ listener = onComplete })
+
   elseif shouldRequestAppPermission and hasCamera and native.canShowPopup("requestAppPermission") then
+    local neededAppPermissions = utils.isAndroid() and { "Camera", "Storage" } or { "Camera" }
     native.showPopup("requestAppPermission", {
-      appPermission = "Camera",
-      listener = function(event)
-        for _, appPermission in pairs(event.grantedAppPermissions) do
-          if appPermission == "Camera" then
-            capturePhoto(onComplete, false)
-            break
-          end
-        end
-      end
+      appPermission = neededAppPermissions,
+      listener = function() capturePhoto(onComplete, false) end,
     })
+
   else
     native.showAlert(i18n.t("permission-denied"), i18n.t("permission-denied-camera"), { i18n.t("ok") })
   end
