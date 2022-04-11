@@ -1,5 +1,5 @@
 # Next
-* Ajouter un isFocused sur les touch event pour éviter d'en avoir mais sans le began
+* A définir
 
 # Backlog
 * Changer l'icone musique

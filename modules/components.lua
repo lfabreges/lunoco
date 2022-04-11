@@ -75,33 +75,38 @@ components.newImageButton = function(parent, imageName, imageBaseDir, width, hei
   local function onButtonTouch(event)
     if event.phase == "began" then
       display.getCurrentStage():setFocus(imageButton, event.id)
+      imageButton.isFocus = true
       setOverState()
-      if options.onPress and not options.onEvent then
+      if options.onEvent then
+        options.onEvent(event)
+      elseif options.onPress then
         options.onPress(event)
       end
-    elseif event.phase == "moved" then
-      if options.scrollview and math.abs(event.y - event.yStart) > 5 then
-        setDefaultState()
-        options.scrollview:takeFocus(event)
-      elseif not isWithinBounds(imageButton, event) then
-        setDefaultState()
-      elseif not imageButton.isOver then
-        setOverState()
-      end
-    elseif event.phase == "ended" or event.phase == "cancelled" then
-      if isWithinBounds(imageButton, event) then
-        if options.onRelease and not options.onEvent then
-          options.onRelease(event)
+    elseif imageButton.isFocus then
+      if event.phase == "moved" then
+        if options.scrollview and math.abs(event.y - event.yStart) > 5 then
+          setDefaultState()
+          options.scrollview:takeFocus(event)
+        elseif not isWithinBounds(imageButton, event) then
+          setDefaultState()
+        elseif not imageButton.isOver then
+          setOverState()
         end
+      elseif event.phase == "ended" or event.phase == "cancelled" then
+        if isWithinBounds(imageButton, event) then
+          if options.onEvent then
+            options.onEvent(event)
+          elseif options.onRelease then
+            options.onRelease(event)
+          end
+        elseif options.onEvent then
+          event.phase = "cancelled"
+          options.onEvent(event)
+        end
+        setDefaultState()
+        display.getCurrentStage():setFocus(imageButton, nil)
+        imageButton.isFocus = false
       end
-      setDefaultState()
-      display.getCurrentStage():setFocus(nil)
-    end
-    if options.onEvent and not options.onPress and not options.onRelease then
-      if not isWithinBounds(imageButton, event) and event.phase == "ended" then
-        event.phase = "cancelled"
-      end
-      options.onEvent(event)
     end
     return true
   end

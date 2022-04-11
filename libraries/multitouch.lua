@@ -88,6 +88,7 @@ local function createMoveAndPinchListener(object, onMove, onPinch)
     if phase == "began" then
       if index == 1 then
         display.getCurrentStage():setFocus(object)
+        object.isFocus = true
         previousX = firstEvent.x
         previousY = firstEvent.y
       elseif index == 2 then
@@ -95,47 +96,50 @@ local function createMoveAndPinchListener(object, onMove, onPinch)
         previousDistanceX, previousDistanceY, previousTotalDistance = calculateDistances(firstEvent, secondEvent)
       end
 
-    elseif phase == "moved" then
-      local x, y
-      if numberOfEvents == 1 then
-        x = firstEvent.x
-        y = firstEvent.y
-      else
-        x, y = calculateMiddle(firstEvent, secondEvent)
-      end
-      local deltaX = x - previousX
-      local deltaY = y - previousY
-      previousX = x
-      previousY = y
-      if onMove then
-        onMove(deltaX, deltaY)
-      end
-
-      if numberOfEvents > 1 then
-        local distanceX, distanceY, totalDistance = calculateDistances(firstEvent, secondEvent)
-        local deltaDistanceX = distanceX - previousDistanceX
-        local deltaDistanceY = distanceY - previousDistanceY
-        local deltaTotalDistance = totalDistance - previousTotalDistance
-        previousDistanceX = distanceX
-        previousDistanceY = distanceY
-        previousTotalDistance = totalDistance
-        if onPinch then
-          onPinch(deltaDistanceX, deltaDistanceY, deltaTotalDistance)
+    elseif object.isFocus then
+      if phase == "moved" then
+        local x, y
+        if numberOfEvents == 1 then
+          x = firstEvent.x
+          y = firstEvent.y
+        else
+          x, y = calculateMiddle(firstEvent, secondEvent)
         end
-      end
+        local deltaX = x - previousX
+        local deltaY = y - previousY
+        previousX = x
+        previousY = y
+        if onMove then
+          onMove(deltaX, deltaY)
+        end
 
-    elseif phase == "ended" or phase == "cancelled" then
-      if numberOfEvents == 1 then
-        display.getCurrentStage():setFocus(nil)
-      elseif numberOfEvents == 2 then
-        local remainingEvent = index == 1 and secondEvent or firstEvent
-        previousX = remainingEvent.x
-        previousY = remainingEvent.y
-      else
-        local remainingEvent = index == 1 and secondEvent or firstEvent
-        local thirdEvent = event.events[3]
-        previousX, previousY = calculateMiddle(remainingEvent, thirdEvent)
-        previousDistanceX, previousDistanceY, previousTotalDistance = calculateDistances(remainingEvent, thirdEvent)
+        if numberOfEvents > 1 then
+          local distanceX, distanceY, totalDistance = calculateDistances(firstEvent, secondEvent)
+          local deltaDistanceX = distanceX - previousDistanceX
+          local deltaDistanceY = distanceY - previousDistanceY
+          local deltaTotalDistance = totalDistance - previousTotalDistance
+          previousDistanceX = distanceX
+          previousDistanceY = distanceY
+          previousTotalDistance = totalDistance
+          if onPinch then
+            onPinch(deltaDistanceX, deltaDistanceY, deltaTotalDistance)
+          end
+        end
+
+      elseif phase == "ended" or phase == "cancelled" then
+        if numberOfEvents == 1 then
+          display.getCurrentStage():setFocus(nil)
+          object.isFocus = false
+        elseif numberOfEvents == 2 then
+          local remainingEvent = index == 1 and secondEvent or firstEvent
+          previousX = remainingEvent.x
+          previousY = remainingEvent.y
+        else
+          local remainingEvent = index == 1 and secondEvent or firstEvent
+          local thirdEvent = event.events[3]
+          previousX, previousY = calculateMiddle(remainingEvent, thirdEvent)
+          previousDistanceX, previousDistanceY, previousTotalDistance = calculateDistances(remainingEvent, thirdEvent)
+        end
       end
     end
 

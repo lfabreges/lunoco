@@ -55,25 +55,30 @@ end
 local function handleBallImpulseOnScreenTouch(event)
   local distanceX = event.xStart - event.x
   local distanceY = event.yStart - event.y
+  local target = event.target
   local totalDistance = math.sqrt(distanceX * distanceX + distanceY * distanceY)
   local _ballImpulseForce = { x = distanceX * 4, y = distanceY * 4, hasEnoughForce = totalDistance > 10 }
 
   ballImpulseForce = nil
 
   if event.phase == "began" then
-    display.getCurrentStage():setFocus(event.target)
-  elseif event.phase == "ended" or event.phase == "cancelled" then
-    display.getCurrentStage():setFocus(nil)
-    display.remove(predictedBallPath)
-    predictedBallPath = nil
+    display.getCurrentStage():setFocus(target)
+    target.isFocus = true
+  elseif target.isFocus then
+    if event.phase == "ended" or event.phase == "cancelled" then
+      display.getCurrentStage():setFocus(nil)
+      target.isFocus = false
+      display.remove(predictedBallPath)
+      predictedBallPath = nil
 
-    if event.phase == "ended" and _ballImpulseForce.hasEnoughForce then
-      ball:setLinearVelocity(_ballImpulseForce.x, _ballImpulseForce.y)
-      numberOfShots = numberOfShots + 1
-      utils.playAudio(sounds.ball, 0.4)
+      if event.phase == "ended" and _ballImpulseForce.hasEnoughForce then
+        ball:setLinearVelocity(_ballImpulseForce.x, _ballImpulseForce.y)
+        numberOfShots = numberOfShots + 1
+        utils.playAudio(sounds.ball, 0.4)
+      end
+    elseif event.phase == "moved" then
+      ballImpulseForce = _ballImpulseForce
     end
-  elseif event.phase == "moved" then
-    ballImpulseForce = _ballImpulseForce
   end
 
   return true
