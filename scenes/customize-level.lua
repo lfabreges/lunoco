@@ -9,14 +9,9 @@ local widget = require "widget"
 local elementView = nil
 local levelName = nil
 local scene = composer.newScene()
-local scrollviews = {}
-local selectedTab = 1
-local soundView = nil
-local tabBar = nil
-local tabButtons = {}
-local tabGroup = nil
+local scrollview = nil
 
-local elementTypes = {
+local customizableElementTypes = {
   "background",
   "frame",
   "ball",
@@ -32,14 +27,7 @@ local elementTypes = {
 
 local function androidHasStoragePermission()
   local grantedAppPermissions = system.getInfo("grantedAppPermissions")
-	if grantedAppPermissions then
-    for _, appPermission in pairs(grantedAppPermissions) do
-      if appPermission == "Storage" then
-        return true
-      end
-    end
-  end
-	return false
+  return grantedAppPermissions and table.indexOf(grantedAppPermissions, "Storage") ~= nil
 end
 
 local function capturePhoto(onComplete, shouldRequestAppPermission)
@@ -64,7 +52,7 @@ end
 local function elementTypesFromLevelConfig()
   local config = require ("levels." .. levelName)
   local hashSet = { ["background"] = true, ["frame"] = true, ["ball"] = true }
-  local levelElementTypes = {}
+  local elementTypes = {}
 
   if config.obstacles then
     for index = 1, #config.obstacles do
@@ -80,14 +68,14 @@ local function elementTypesFromLevelConfig()
     end
   end
 
-  for index = 1, #elementTypes do
-    local elementType = elementTypes[index]
+  for index = 1, #customizableElementTypes do
+    local elementType = customizableElementTypes[index]
     if hashSet[elementType] then
-      levelElementTypes[#levelElementTypes + 1] = elementType
+      elementTypes[#elementTypes + 1] = elementType
     end
   end
 
-  return levelElementTypes
+  return elementTypes
 end
 
 local function goBack()
@@ -133,17 +121,6 @@ local function selectPhoto(onComplete)
   end
 end
 
-local function selectTab(index)
-  if index ~= selectedTab then
-    transition.to(tabGroup, { time = 100, x = (index - 1) * -display.actualContentWidth })
-    tabButtons[selectedTab].fill.effect = "filter.grayscale"
-    tabButtons[index].fill.effect = nil
-    selectedTab = index
-  else
-    scrollviews[index]:scrollTo("top", {})
-  end
-end
-
 function scene:create(event)
   local screenX = display.screenOriginX
   local screenY = display.screenOriginY
@@ -164,83 +141,47 @@ function scene:create(event)
   goBackButton.x = screenX + leftInset + 20
   goBackButton.y = screenY + topInset + 10
 
-  --[[
-  tabBar = display.newRect(self.view, screenX, screenY + screenHeight, screenWidth, bottomInset + 60)
-  tabBar.anchorX = 0
-  tabBar.anchorY = 1
-  tabBar:setFillColor(0, 0, 0, 0.33)
-
-  tabButtons[1] = components.newImageButton(
-    self.view,
-    "images/icons/photo.png",
-    40,
-    40,
-    { onRelease = function() selectTab(1) end }
-  )
-  tabButtons[1].x = screenX + screenWidth / 4
-  tabButtons[1].y = tabBar.y - bottomInset - (tabBar.height - bottomInset) / 2
-
-  tabButtons[2] = components.newImageButton(
-    self.view,
-    "images/icons/sound.png",
-    40,
-    40,
-    { onRelease = function() selectTab(2) end }
-  )
-  tabButtons[2].x = screenX + screenWidth - screenWidth / 4
-  tabButtons[2].y = tabButtons[1].y
-  tabButtons[2].fill.effect = "filter.grayscale"
-  ]]
-
-  tabGroup = components.newGroup(self.view)
-
-  -- TODO passer à deux pour intégrer l'onglet sons
-  for index = 1, 1 do
-    scrollviews[index] = widget.newScrollView({
-      left = screenX + (index - 1) * screenWidth,
-      top = topBar.y + topBar.height,
-      width = screenWidth,
-      height = screenHeight - topBar.height, -- - tabBar.height,
-      hideBackground = true,
-      hideScrollBar = true,
-      horizontalScrollDisabled = true,
-      topPadding = 20,
-      bottomPadding = 20,
-      leftPadding = leftInset,
-      rightPadding = rightInset,
-    })
-    tabGroup:insert(scrollviews[index])
-  end
+  scrollview = widget.newScrollView({
+    left = screenX,
+    top = topBar.y + topBar.height,
+    width = screenWidth,
+    height = screenHeight - topBar.height,
+    hideBackground = true,
+    hideScrollBar = true,
+    horizontalScrollDisabled = true,
+    topPadding = 20,
+    bottomPadding = 20,
+    leftPadding = leftInset,
+    rightPadding = rightInset,
+  })
+  self.view:insert(scrollview)
 end
 
 function scene:createElementView()
   local elementTypes = elementTypesFromLevelConfig()
   local y = 0
 
-  elementView = components.newGroup(scrollviews[1])
+  elementView = components.newGroup(scrollview)
 
   for _, elementType in ipairs(elementTypes) do
-    local elementGroup = components.newGroup(elementView)
-
-    local elementText = display.newText({
-      text = i18n.t(elementType),
-      font = native.systemFont,
-      fontSize = 20,
-      parent = elementGroup,
-      x = 20,
-      y = 0,
-    })
-
-    elementText.anchorX = 0
-    elementText.anchorY = 0
-
-    local elementFrame = newFrame(elementGroup, 20, elementText.height + 50, 80, 80)
-    local element = newElement(elementGroup, elementType)
-
-    if not element then
-      display.remove(elementGroup)
-    else
+    if table.indexOf(customizableElementTypes, elementType) ~= nil then
+      local elementGroup = components.newGroup(elementView)
       elementGroup.y = y
+
+      local elementText = display.newText({
+        text = i18n.t(elementType),
+        font = native.systemFont,
+        fontSize = 20,
+        parent = elementGroup,
+        x = 20,
+        y = 0,
+      })
+      elementText.anchorX = 0
+      elementText.anchorY = 0
+
+      local elementFrame = newFrame(elementGroup, 20, elementText.height + 50, 78, 78)
+
+      local element = newElement(elementGroup, elementType)
       element.x = elementFrame.x + elementFrame.width / 2
       element.y = elementFrame.y
 
@@ -249,7 +190,7 @@ function scene:createElementView()
         elementFrame.x + elementFrame.width + 5,
         element.y,
         122,
-        80
+        78
       )
 
       local selectPhotoButton = components.newImageButton(
@@ -265,7 +206,7 @@ function scene:createElementView()
               end
             end)
           end,
-          scrollview = scrollviews[1]
+          scrollview = scrollview
         }
       )
       selectPhotoButton.anchorX = 0
@@ -285,7 +226,7 @@ function scene:createElementView()
               end
             end)
           end,
-          scrollview = scrollviews[1]
+          scrollview = scrollview
         }
       )
       takePhotoButton.anchorX = 0
@@ -297,8 +238,8 @@ function scene:createElementView()
           elementGroup,
           customizeButtonsFrame.x + customizeButtonsFrame.width + 5,
           element.y,
-          68,
-          80
+          64,
+          78
         )
 
         local removeCustomizationButton
@@ -320,11 +261,10 @@ function scene:createElementView()
               display.remove(removeCustomizationButtonFrame)
               display.remove(removeCustomizationButton)
             end,
-            scrollview = scrollviews[1]
+            scrollview = scrollview
           }
         )
-        removeCustomizationButton.anchorX = 0
-        removeCustomizationButton.x = removeCustomizationButtonFrame.x + 14
+        removeCustomizationButton.x = removeCustomizationButtonFrame.x + removeCustomizationButtonFrame.width / 2
         removeCustomizationButton.y = element.y
       end
 
@@ -333,31 +273,15 @@ function scene:createElementView()
   end
 end
 
-function scene:createSoundView()
-  soundView = components.newGroup(scrollviews[2])
-end
-
 function scene:show(event)
   if event.phase == "will" then
     local isNewLevel = levelName and levelName ~= event.params.levelName
     levelName = event.params.levelName
 
     self:createElementView()
-    -- self:createSoundView()
 
     if isNewLevel then
-      scrollviews[1]:scrollTo("top", { time = 0 })
-      --[[
-      local scrollSoundsTabToTop = function() scrollviews[2]:scrollTo("top", { time = 0 }) end
-      scrollviews[1]:scrollTo("top", { time = 0, onComplete = scrollSoundsTabToTop })
-
-      if selectedTab ~= 1 then
-        tabButtons[selectedTab].fill.effect = "filter.grayscale"
-        tabButtons[1].fill.effect = nil
-        selectedTab = 1
-        tabGroup.x = 0
-      end
-      ]]
+      scrollview:scrollTo("top", { time = 0 })
     end
   end
 end
@@ -366,9 +290,7 @@ function scene:hide(event)
   if event.phase == "did" then
     transition.cancel()
     display.remove(elementView)
-    display.remove(soundView)
     elementView = nil
-    soundView = nil
   end
 end
 
