@@ -30,18 +30,18 @@ local function androidHasStoragePermission()
   return grantedAppPermissions and table.indexOf(grantedAppPermissions, "Storage") ~= nil
 end
 
-local function capturePhoto(onComplete, shouldRequestAppPermission)
+local function capturePhoto(listener, shouldRequestAppPermission)
   local hasAccessToCamera, hasCamera = media.hasSource(media.Camera)
   shouldRequestAppPermission = shouldRequestAppPermission == nil and true or shouldRequestAppPermission
 
   if hasAccessToCamera and (not utils.isAndroid() or androidHasStoragePermission()) then
-    media.capturePhoto({ listener = onComplete })
+    media.capturePhoto({ listener = listener })
 
   elseif shouldRequestAppPermission and hasCamera and native.canShowPopup("requestAppPermission") then
     local neededAppPermissions = utils.isAndroid() and { "Camera", "Storage" } or { "Camera" }
     native.showPopup("requestAppPermission", {
       appPermission = neededAppPermissions,
-      listener = function() capturePhoto(onComplete, false) end,
+      listener = function() capturePhoto(listener, false) end,
     })
 
   else
@@ -113,9 +113,12 @@ local function newFrame(parent, x, y, width, height)
   return frame
 end
 
-local function selectPhoto(onComplete)
+local function selectPhoto(listener)
   if media.hasSource(media.PhotoLibrary) then
-    media.selectPhoto({ mediaSource = media.PhotoLibrary, listener = onComplete })
+    media.selectPhoto({
+      mediaSource = media.PhotoLibrary,
+      listener = listener,
+    })
   else
     native.showAlert(i18n.t("permission-denied"), i18n.t("permission-denied-photo-library"), { i18n.t("ok") })
   end
