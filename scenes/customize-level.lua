@@ -25,25 +25,19 @@ local customizableElementTypes = {
   "target-hard",
 }
 
-local function androidHasStoragePermission()
-  local grantedAppPermissions = system.getInfo("grantedAppPermissions")
-  return grantedAppPermissions and table.indexOf(grantedAppPermissions, "Storage") ~= nil
-end
-
 local function capturePhoto(listener, filename, shouldRequestAppPermission)
   local hasAccessToCamera, hasCamera = media.hasSource(media.Camera)
   shouldRequestAppPermission = shouldRequestAppPermission == nil and true or shouldRequestAppPermission
 
-  if hasAccessToCamera and (not utils.isAndroid() or androidHasStoragePermission()) then
+  if hasAccessToCamera then
     media.capturePhoto({
       listener = listener,
       destination = { filename = filename, baseDir = system.TemporaryDirectory },
     })
 
   elseif shouldRequestAppPermission and hasCamera and native.canShowPopup("requestAppPermission") then
-    local neededAppPermissions = utils.isAndroid() and { "Camera", "Storage" } or { "Camera" }
     native.showPopup("requestAppPermission", {
-      appPermission = neededAppPermissions,
+      appPermission = "Camera",
       listener = function() capturePhoto(listener, filename, false) end,
     })
 
