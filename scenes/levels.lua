@@ -12,7 +12,6 @@ local levelNames = {}
 local numberOfLevels = 10
 local scene = composer.newScene()
 local scrollview = nil
-local spaceWidth = (display.actualContentWidth - 240) / 3
 
 if utils.isSimulator() then
   local levelsPath = system.pathForFile("levels", system.ResourceDirectory)
@@ -51,8 +50,8 @@ function scene:create(event)
     hideBackground = true,
     hideScrollBar = true,
     horizontalScrollDisabled = true,
-    topPadding = topInset + spaceWidth,
-    bottomPadding = bottomInset + spaceWidth,
+    topPadding = topInset + 40,
+    bottomPadding = bottomInset + 40,
     leftPadding = leftInset,
     rightPadding = rightInset,
   })
@@ -76,7 +75,8 @@ function scene:show(event)
   if event.phase == "will" then
     local centerX = scrollview.width * 0.5
     local scores = utils.loadScores()
-    local y = gameTitle.contentHeight + spaceWidth
+    local spaceWidth = (display.actualContentWidth - 240) / 3
+    local y = gameTitle.contentHeight + 40
 
     content = components.newGroup(scrollview)
 
