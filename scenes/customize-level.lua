@@ -30,18 +30,21 @@ local function androidHasStoragePermission()
   return grantedAppPermissions and table.indexOf(grantedAppPermissions, "Storage") ~= nil
 end
 
-local function capturePhoto(listener, shouldRequestAppPermission)
+local function capturePhoto(listener, filename, shouldRequestAppPermission)
   local hasAccessToCamera, hasCamera = media.hasSource(media.Camera)
   shouldRequestAppPermission = shouldRequestAppPermission == nil and true or shouldRequestAppPermission
 
   if hasAccessToCamera and (not utils.isAndroid() or androidHasStoragePermission()) then
-    media.capturePhoto({ listener = listener })
+    media.capturePhoto({
+      listener = listener,
+      destination = { filename = filename, baseDir = system.TemporaryDirectory },
+    })
 
   elseif shouldRequestAppPermission and hasCamera and native.canShowPopup("requestAppPermission") then
     local neededAppPermissions = utils.isAndroid() and { "Camera", "Storage" } or { "Camera" }
     native.showPopup("requestAppPermission", {
       appPermission = neededAppPermissions,
-      listener = function() capturePhoto(listener, false) end,
+      listener = function() capturePhoto(listener, filename, false) end,
     })
 
   else
@@ -113,11 +116,12 @@ local function newFrame(parent, x, y, width, height)
   return frame
 end
 
-local function selectPhoto(listener)
+local function selectPhoto(listener, filename)
   if media.hasSource(media.PhotoLibrary) then
     media.selectPhoto({
       mediaSource = media.PhotoLibrary,
       listener = listener,
+      destination = { filename = filename, baseDir = system.TemporaryDirectory },
     })
   else
     native.showAlert(i18n.t("permission-denied"), i18n.t("permission-denied-photo-library"), { i18n.t("ok") })
@@ -203,11 +207,15 @@ function scene:createElementView()
         40,
         {
           onRelease = function()
-            selectPhoto(function(event)
-              if event.completed then
-                navigation.gotoElementImage(levelName, elementType, event.target)
-              end
-            end)
+            local filename = "element-image." .. math.random() .. ".png"
+            selectPhoto(
+              function(event)
+                if event.completed then
+                  navigation.gotoElementImage(levelName, elementType, filename)
+                end
+              end,
+              filename
+            )
           end,
           scrollview = scrollview
         }
@@ -223,11 +231,15 @@ function scene:createElementView()
         40,
         {
           onRelease = function()
-            capturePhoto(function(event)
-              if event.completed and event.target and event.target.width and event.target.width > 0 then
-                navigation.gotoElementImage(levelName, elementType, event.target)
-              end
-            end)
+            local filename = "element-image." .. math.random() .. ".png"
+            capturePhoto(
+              function(event)
+                if event.completed and utils.fileExists(filename, system.TemporaryDirectory) then
+                  navigation.gotoElementImage(levelName, elementType, filename)
+                end
+              end,
+              filename
+            )
           end,
           scrollview = scrollview
         }

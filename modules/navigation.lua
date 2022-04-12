@@ -13,11 +13,11 @@ navigation.gotoCustomizeLevel = function(levelName)
   })
 end
 
-navigation.gotoElementImage = function(levelName, elementType, photo)
+navigation.gotoElementImage = function(levelName, elementType, filename)
   composer.gotoScene("scenes.element-image", {
     effect = defaultEffect,
     time = defaultTime,
-    params = { elementType = elementType, levelName = levelName, photo = photo },
+    params = { elementType = elementType, levelName = levelName, filename = filename },
   })
 end
 

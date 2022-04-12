@@ -86,40 +86,32 @@ function scene:show(event)
     elementType = event.params.elementType
     levelName = event.params.levelName
 
+    local centerX = display.contentCenterX
+    local centerY = display.contentCenterY
     local element = elements[elementType]
-    local photo = event.params.photo
-    local photoWidth = photo.width
-    local photoHeight = photo.height
-    local screenScale = display.actualContentWidth / display.pixelWidth
-
-    photo.xScale = screenScale
-    photo.yScale = screenScale
-    local photoName = "element-image." .. math.random() .. ".png"
-    display.save(photo, { filename = photoName, baseDir = system.TemporaryDirectory, captureOffscreenArea = true })
-    display.remove(photo)
+    local filename = event.params.filename
 
     local function removeTemporaryPhoto()
-      local filepath = system.pathForFile(photoName, system.TemporaryDirectory)
+      local filepath = system.pathForFile(filename, system.TemporaryDirectory)
       os.remove(filepath)
     end
 
-    local xScale = math.min(1, display.actualContentWidth / photoWidth)
-    local yScale = math.min(1, display.actualContentHeight / photoHeight)
+    backPhoto = display.newImage(content, filename, system.TemporaryDirectory, centerX, centerY)
+
+    local xScale = math.min(1, display.actualContentWidth / backPhoto.width)
+    local yScale = math.min(1, display.actualContentHeight / backPhoto.height)
     local photoScale = math.max(xScale, yScale)
 
-    backPhoto = display.newImageRect(content, photoName, system.TemporaryDirectory, photoWidth, photoHeight)
-    backPhoto.x = display.contentCenterX
-    backPhoto.y = display.contentCenterY
     backPhoto.xScale = photoScale
     backPhoto.yScale = photoScale
     backPhoto.alpha = 0.1
     backPhoto:addEventListener("finalize", removeTemporaryPhoto)
 
     frontContainer = display.newContainer(content, element.width, element.height)
-    frontContainer.x = display.contentCenterX
-    frontContainer.y = display.contentCenterY
+    frontContainer.x = centerX
+    frontContainer.y = centerY
 
-    frontPhoto = display.newImageRect(frontContainer, photoName, system.TemporaryDirectory, photoWidth, photoHeight)
+    frontPhoto = display.newImage(frontContainer, filename, system.TemporaryDirectory, 0, 0)
     frontPhoto.xScale = photoScale
     frontPhoto.yScale = photoScale
 
