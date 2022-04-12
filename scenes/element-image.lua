@@ -6,9 +6,11 @@ local navigation = require "modules.navigation"
 local utils = require "modules.utils"
 
 local backPhoto = nil
+local backPhotoBackground = nil
 local background = nil
 local content = nil
 local elementType = nil
+local filename = nil
 local frontContainer = nil
 local frontPhoto = nil
 local levelName = nil
@@ -40,6 +42,7 @@ local function onMove(deltaX, deltaY)
   deltaY = photoBounds.yMax + deltaY < containerBounds.yMax and containerBounds.yMax - photoBounds.yMax or deltaY
   deltaY = photoBounds.yMin + deltaY > containerBounds.yMin and containerBounds.yMin - photoBounds.yMin or deltaY
   backPhoto:translate(deltaX, deltaY)
+  backPhotoBackground:translate(deltaX, deltaY)
   frontPhoto:translate(deltaX, deltaY)
 end
 
@@ -50,6 +53,8 @@ local function onPinch(deltaDistanceX, deltaDistanceY)
   local yScale = math.min(4, math.max(minYScale, frontPhoto.yScale + deltaDistanceY / backPhoto.height))
   backPhoto.xScale = xScale
   backPhoto.yScale = yScale
+  backPhotoBackground.xScale = xScale
+  backPhotoBackground.yScale = yScale
   frontPhoto.xScale = xScale
   frontPhoto.yScale = yScale
 end
@@ -84,28 +89,29 @@ end
 function scene:show(event)
   if event.phase == "will" then
     elementType = event.params.elementType
+    filename = event.params.filename
     levelName = event.params.levelName
 
     local centerX = display.contentCenterX
     local centerY = display.contentCenterY
     local element = elements[elementType]
-    local filename = event.params.filename
 
-    local function removeTemporaryPhoto()
-      local filepath = system.pathForFile(filename, system.TemporaryDirectory)
-      os.remove(filepath)
-    end
-
+    backPhotoBackground = display.newRect(content, centerX, centerY, 1, 1)
     backPhoto = display.newImage(content, filename, system.TemporaryDirectory, centerX, centerY)
 
     local xScale = math.min(1, display.actualContentWidth / backPhoto.width)
     local yScale = math.min(1, display.actualContentHeight / backPhoto.height)
     local photoScale = math.max(xScale, yScale)
 
+    backPhotoBackground.width = backPhoto.width
+    backPhotoBackground.height = backPhoto.height
+    backPhotoBackground.xScale = photoScale
+    backPhotoBackground.yScale = photoScale
+    backPhotoBackground:setFillColor(0)
+
     backPhoto.xScale = photoScale
     backPhoto.yScale = photoScale
-    backPhoto.alpha = 0.1
-    backPhoto:addEventListener("finalize", removeTemporaryPhoto)
+    backPhoto.alpha = 0.25
 
     frontContainer = display.newContainer(content, element.width, element.height)
     frontContainer.x = centerX
@@ -141,10 +147,13 @@ function scene:hide(event)
   elseif event.phase == "did" then
     transition.cancel()
     display.remove(backPhoto)
+    display.remove(backPhotoBackground)
     display.remove(frontContainer)
     backPhoto = nil
+    backPhotoBackground = nil
     frontContainer = nil
     frontPhoto = nil
+    os.remove(system.pathForFile(filename, system.TemporaryDirectory))
   end
 end
 

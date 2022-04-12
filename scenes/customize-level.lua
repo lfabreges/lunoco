@@ -25,22 +25,45 @@ local customizableElementTypes = {
   "target-hard",
 }
 
-local function capturePhoto(listener, filename, shouldRequestAppPermission)
+local function captureAndSelectPhotoOptions(onComplete)
+  local filename = "element-image." .. math.random() .. ".png"
+  local options = {}
+
+  if utils.isAndroid() then
+    options.destination = { filename = filename, baseDir = system.TemporaryDirectory }
+    options.listener = function(event)
+      if event.completed and utils.fileExists(filename, system.TemporaryDirectory) then
+        onComplete(filename)
+      end
+    end
+  else
+    options.listener = function(event)
+      if event.completed then
+        local photo = event.target
+        photo.xScale = display.actualContentWidth / display.pixelWidth
+        photo.yScale = photo.xScale
+        display.save(photo, { filename = filename, baseDir = system.TemporaryDirectory, captureOffscreenArea = true })
+        display.remove(photo)
+        onComplete(filename)
+      end
+    end
+  end
+
+  return options
+end
+
+local function capturePhoto(onComplete, shouldRequestAppPermission)
   local hasAccessToCamera, hasCamera = media.hasSource(media.Camera)
   shouldRequestAppPermission = shouldRequestAppPermission == nil and true or shouldRequestAppPermission
 
   if hasAccessToCamera then
-    media.capturePhoto({
-      listener = listener,
-      destination = { filename = filename, baseDir = system.TemporaryDirectory },
-    })
-
+    local options = captureAndSelectPhotoOptions(onComplete)
+    media.capturePhoto(options)
   elseif shouldRequestAppPermission and hasCamera and native.canShowPopup("requestAppPermission") then
     native.showPopup("requestAppPermission", {
       appPermission = "Camera",
-      listener = function() capturePhoto(listener, filename, false) end,
+      listener = function() capturePhoto(onComplete, false) end,
     })
-
   else
     native.showAlert(i18n.t("permission-denied"), i18n.t("permission-denied-camera"), { i18n.t("ok") })
   end
@@ -110,13 +133,11 @@ local function newFrame(parent, x, y, width, height)
   return frame
 end
 
-local function selectPhoto(listener, filename)
+local function selectPhoto(onComplete)
   if media.hasSource(media.PhotoLibrary) then
-    media.selectPhoto({
-      mediaSource = media.PhotoLibrary,
-      listener = listener,
-      destination = { filename = filename, baseDir = system.TemporaryDirectory },
-    })
+    local options = captureAndSelectPhotoOptions(onComplete)
+    options.mediaSource = media.PhotoLibrary
+    media.selectPhoto(options)
   else
     native.showAlert(i18n.t("permission-denied"), i18n.t("permission-denied-photo-library"), { i18n.t("ok") })
   end
@@ -194,23 +215,17 @@ function scene:createElementView()
         78
       )
 
+      local onCapturePhotoOrSelectPhotoComplete = function(filename)
+        navigation.gotoElementImage(levelName, elementType, filename)
+      end
+
       local selectPhotoButton = components.newImageButton(
         elementGroup,
         "images/icons/photo.png",
         40,
         40,
         {
-          onRelease = function()
-            local filename = "element-image." .. math.random() .. ".png"
-            selectPhoto(
-              function(event)
-                if event.completed then
-                  navigation.gotoElementImage(levelName, elementType, filename)
-                end
-              end,
-              filename
-            )
-          end,
+          onRelease = function() selectPhoto(onCapturePhotoOrSelectPhotoComplete) end,
           scrollview = scrollview
         }
       )
@@ -224,17 +239,7 @@ function scene:createElementView()
         40,
         40,
         {
-          onRelease = function()
-            local filename = "element-image." .. math.random() .. ".png"
-            capturePhoto(
-              function(event)
-                if event.completed and utils.fileExists(filename, system.TemporaryDirectory) then
-                  navigation.gotoElementImage(levelName, elementType, filename)
-                end
-              end,
-              filename
-            )
-          end,
+          onRelease = function() capturePhoto(onCapturePhotoOrSelectPhotoComplete) end,
           scrollview = scrollview
         }
       )
