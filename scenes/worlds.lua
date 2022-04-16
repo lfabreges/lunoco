@@ -24,7 +24,7 @@ function scene:create(event)
     hideBackground = true,
     hideScrollBar = true,
     horizontalScrollDisabled = true,
-    topPadding = topInset + 40,
+    topPadding = topInset + 50,
     bottomPadding = bottomInset + 40,
     leftPadding = leftInset,
     rightPadding = rightInset,
@@ -53,7 +53,7 @@ end
 
 function scene:show(event)
   if event.phase == "will" then
-    local y = 100
+    local y = 110
 
     content = components.newGroup(scrollview)
 
