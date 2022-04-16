@@ -60,20 +60,40 @@ function scene:show(event)
     for worldNumber = 1, resources.numberOfWorlds() do
       local worldName = string.format("%03d", worldNumber)
       local worldProgress, worldNumberOfStars = score.worldProgress(worldName)
-      local worldTexture = images.worldImageTexture(worldName)
+      local worldButtonContainer = display.newContainer(content, 280, 105)
 
-      local worldButton = components.newImageButton(
-        content,
-        worldTexture.filename,
-        worldTexture.baseDir,
-        280,
-        105,
-        { onRelease = function() navigation.gotoLevels(worldName) end, scrollview = scrollview }
-      )
+      for levelNumber = 1, 5 do
+        local levelName = string.format("%03d", levelNumber)
+        local levelImageName = images.levelImageName(worldName, levelName, "screenshot")
+        local levelImageBaseDir = system.DocumentsDirectory
+
+        if not levelImageName then
+          levelImageName = "images/level-unknown.png"
+          levelImageBaseDir = system.ResourceDirectory
+        end
+
+        local levelImage = display.newImageRect(worldButtonContainer, levelImageName, levelImageBaseDir, 70, 105)
+        levelImage.anchorX = 0
+        levelImage.anchorY = 0
+        levelImage.x = (levelNumber - 1) * 52.5
+
+        if levelNumber > 1 then
+          levelImage.fill.effect = "filter.linearWipe"
+          levelImage.fill.effect.direction = { -1, 0 }
+          levelImage.fill.effect.smoothness = 0.75
+          levelImage.fill.effect.progress = 0.5
+        end
+      end
+
+      local worldButton = components.newObjectButton(worldButtonContainer, {
+        onRelease = function() navigation.gotoLevels(worldName) end,
+        scrollview = scrollview,
+      })
+      worldButton.anchorChildren = false
+      worldButton.anchorX = 0
       worldButton.anchorY = 0
+      worldButton.x = scrollview.width * 0.5 - 140
       worldButton.y = y
-      worldButton.x = scrollview.width * 0.5
-      worldTexture:releaseSelf()
 
       local worldProgressText = display.newText({
         text = i18n.t("progress", worldProgress),
@@ -99,6 +119,25 @@ function scene:show(event)
 
       y = worldProgressText.y + worldProgressText.contentHeight + 30
     end
+
+    --[[
+    local newWorldContainer = display.newContainer(content ,280, 105)
+    newWorldContainer.anchorY = 0
+    newWorldContainer.x = scrollview.width * 0.5
+    newWorldContainer.y = y
+
+    local newWorldBackground = display.newRoundedRect(newWorldContainer, 0, 0, 278, 103, 15)
+    newWorldBackground.fill.effect = "generator.linearGradient"
+    newWorldBackground.fill.effect.color1 = { 0.25, 0.25, 0.25, 0.75 }
+    newWorldBackground.fill.effect.position1  = { 0, 0 }
+    newWorldBackground.fill.effect.color2 = { 0.5, 0.5, 0.5, 0.25 }
+    newWorldBackground.fill.effect.position2  = { 1, 1 }
+    newWorldBackground.strokeWidth = 1
+    newWorldBackground:setStrokeColor(0.5, 0.5, 0.5, 0.75)
+
+    display.newImageRect(newWorldContainer, "images/icons/plus.png", 50, 50)
+    components.newObjectButton(newWorldContainer, { onRelease = function() end})
+    ]]
   end
 end
 
