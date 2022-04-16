@@ -77,7 +77,6 @@ function scene:show(event)
 
       local worldProgressText = display.newText({
         text = i18n.t("progress", worldProgress),
-        font = native.systemFontBold,
         fontSize = 20,
         parent = content,
         x = scrollview.width * 0.5 - worldButton.contentWidth / 2,

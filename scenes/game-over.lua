@@ -41,7 +41,6 @@ function scene:create(event)
   finishedInText = display.newText({
     align = "center",
     text = "",
-    font = native.systemFontBold,
     fontSize = 25,
     parent = self.view,
     x = display.contentCenterX,

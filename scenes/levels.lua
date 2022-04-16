@@ -39,7 +39,6 @@ function scene:create(event)
 
   worldProgressText = display.newText({
     text = "",
-    font = native.systemFontBold,
     fontSize = 20,
     parent = self.view,
     x = screenX + screenWidth - rightInset - 20,
