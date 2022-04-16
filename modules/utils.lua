@@ -43,14 +43,6 @@ utils.saveJson = function(content, filename, baseDirectory)
   end
 end
 
-utils.loadScores = function()
-  return utils.loadJson("scores.json", system.DocumentsDirectory)
-end
-
-utils.saveScores = function(scores)
-  utils.saveJson(scores, "scores.json", system.DocumentsDirectory)
-end
-
 utils.playAudio = function(handle, volume)
   local freeChannel = audio.findFreeChannel()
   audio.setVolume(volume or 1.0, { channel = freeChannel })

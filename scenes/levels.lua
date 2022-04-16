@@ -1,42 +1,15 @@
 local components = require "modules.components"
 local composer = require "composer"
 local images = require "modules.images"
-local lfs = require "lfs"
 local navigation = require "modules.navigation"
-local utils = require "modules.utils"
+local resources = require "resources"
+local score = require "modules.score"
 local widget = require "widget"
 
 local content = nil
 local scene = composer.newScene()
 local scrollview = nil
 local worldName = nil
-
-local numberOfLevels = {
-  ["001"] = 10,
-  ["002"] = 1,
-}
-
-if utils.isSimulator() then
-  local worldsPath = system.pathForFile("worlds", system.ResourceDirectory)
-
-  for worldName in lfs.dir(worldsPath) do
-    if worldName:match("^%d+$") then
-      local actualNumberOfLevels = 0
-      local worldDirectoryPath = system.pathForFile("worlds/" .. worldName, system.ResourceDirectory)
-
-      for filename in lfs.dir(worldDirectoryPath) do
-        if filename:match("^%d+.json$") then
-          actualNumberOfLevels = actualNumberOfLevels + 1
-        end
-      end
-
-      assert(
-        actualNumberOfLevels == numberOfLevels[worldName],
-        "Expected 'numberOfLevels[" .. worldName .. "] = " .. actualNumberOfLevels .. "' in scenes.levels"
-      )
-    end
-  end
-end
 
 local function goBack()
   navigation.gotoWorlds()
@@ -90,11 +63,11 @@ function scene:show(event)
     local centerX = scrollview.width * 0.5
     local spaceWidth = (display.actualContentWidth - 240) / 3
     local y = 0
-    local worldScores = utils.loadScores()[worldName] or {}
+    local worldScores = score.worldScores(worldName)
 
     content = components.newGroup(scrollview)
 
-    for levelNumber = 1, numberOfLevels[worldName] do
+    for levelNumber = 1, resources.numberOfLevels(worldName) do
       local isEven = levelNumber % 2 == 0
       local levelName = string.format("%03d", levelNumber)
       local levelImage = nil
@@ -124,12 +97,7 @@ function scene:show(event)
 
         for starCount = 1, 3 do
           local isFullStar = numberOfStars >= starCount
-          local star = display.newImageRect(content, "images/star.png", 20, 20)
-          local starMask = graphics.newMask("images/star-mask.png")
-
-          star:setMask(starMask)
-          star.maskScaleX = star.width / 394
-          star.maskScaleY = star.height / 394
+          local star = components.newStar(content, 20, 20)
           star.anchorY = 0
           star.x = levelButton.x + (starCount - 2) * 25
           star.y = y + 190

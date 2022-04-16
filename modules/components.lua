@@ -127,4 +127,13 @@ components.newOverlayBackground = function(parent)
   return background
 end
 
+components.newStar = function(parent, width, height)
+  local star = display.newImageRect(parent, "images/star.png", width, height)
+  local starMask = graphics.newMask("images/star-mask.png")
+  star:setMask(starMask)
+  star.maskScaleX = star.width / 394
+  star.maskScaleY = star.height / 394
+  return star
+end
+
 return components

@@ -1,5 +1,7 @@
 local composer = require "composer"
 local lfs = require "lfs"
+local resources = require "resources"
+local score = require "modules.score"
 local utils = require "modules.utils"
 
 math.randomseed(os.time())
@@ -11,7 +13,7 @@ native.setProperty("preferredScreenEdgesDeferringSystemGestures", true)
 local version = utils.loadJson("version.json", system.DocumentsDirectory)
 
 if version.number == nil then
-  utils.saveScores({ ["001"] = utils.loadScores() })
+  score.saveScores({ ["001"] = score.loadScores() })
 
   local firstWorldTemporaryPath = system.pathForFile("_001", system.DocumentsDirectory)
   lfs.mkdir(firstWorldTemporaryPath)
@@ -32,7 +34,9 @@ if version.number == nil then
   utils.saveJson(version, "version.json", system.DocumentsDirectory)
 end
 
-composer.gotoScene("scenes.worlds")
+if resources.validateNumberOfLevels() then
+  composer.gotoScene("scenes.worlds")
+end
 
 if utils.isSimulator() then
   timer.performWithDelay(5000, utils.printMemoryUsage, -1)

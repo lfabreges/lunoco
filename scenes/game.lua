@@ -3,6 +3,7 @@ local composer = require "composer"
 local elements = require "modules.elements"
 local images = require "modules.images"
 local navigation = require "modules.navigation"
+local score = require "modules.score"
 local utils = require "modules.utils"
 
 local ball = nil
@@ -35,12 +36,12 @@ local function gameOver()
     numberOfStars = 1
   end
 
-  local scores = utils.loadScores()
+  local scores = score.loadScores()
   scores[worldName] = scores[worldName] or {}
 
   if not scores[worldName][levelName] or scores[worldName][levelName].numberOfShots > numberOfShots then
     scores[worldName][levelName] = { numberOfShots = numberOfShots, numberOfStars = numberOfStars }
-    utils.saveScores(scores)
+    score.saveScores(scores)
   end
 
   composer.showOverlay("scenes.game-over", {

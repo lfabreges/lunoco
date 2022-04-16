@@ -17,6 +17,7 @@
   "permission-denied": "Permission denied",
   "permission-denied-camera": "Lunoco doesn't have permission to use your camera",
   "permission-denied-photo-library": "Lunoco doesn't have permission to access your photo library",
+  "progress": "%0d%%",
   "resume": "Resume",
   "retry": "Retry",
   "target-easy": "Easy target",

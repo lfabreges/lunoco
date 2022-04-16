@@ -80,13 +80,16 @@ images.removeLevelImage = function(worldName, levelName, imageName)
 end
 
 images.saveLevelImage = function(object, worldName, levelName, imageName)
-  local levelImageNames = loadLevelImageNames(worldName, levelName)
-  local levelDirectoryName = worldName .. "/" .. levelName
-  local levelDirectoryPath = system.pathForFile(levelDirectoryName, system.DocumentsDirectory)
-  lfs.mkdir(levelDirectoryPath)
-  local filename = levelDirectoryName .. "/" .. imageName .. ".nocache." .. math.random() .. ".png"
+  local worldDirectoryPath = system.pathForFile(worldName, system.DocumentsDirectory)
+  lfs.mkdir(worldDirectoryPath)
+  lfs.chdir(worldDirectoryPath)
+  lfs.mkdir(levelName)
+
+  local filename = worldName .. "/" .. levelName .. "/" .. imageName .. ".nocache." .. math.random() .. ".png"
   display.save(object, { filename = filename, captureOffscreenArea = true })
   images.removeLevelImage(worldName, levelName, imageName)
+
+  local levelImageNames = loadLevelImageNames(worldName, levelName)
   levelImageNames[imageName] = filename
 end
 

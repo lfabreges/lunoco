@@ -2,31 +2,14 @@ local components = require "modules.components"
 local composer = require "composer"
 local i18n = require "modules.i18n"
 local images = require "modules.images"
-local lfs = require "lfs"
 local navigation = require "modules.navigation"
-local utils = require "modules.utils"
+local resources = require "resources"
+local score = require "modules.score"
 local widget = require "widget"
 
 local content = nil
-local numberOfWorlds = 2
 local scene = composer.newScene()
 local scrollview = nil
-
-if utils.isSimulator() then
-  local worldsPath = system.pathForFile("worlds", system.ResourceDirectory)
-  local actualNumberOfWorlds = 0
-
-  for filename in lfs.dir(worldsPath) do
-    if filename:match("^%d+$") then
-      actualNumberOfWorlds = actualNumberOfWorlds + 1
-    end
-  end
-
-  assert(
-    actualNumberOfWorlds == numberOfWorlds,
-    "Expected 'numberOfWorlds = " .. actualNumberOfWorlds .. "' in scenes.worlds"
-  )
-end
 
 function scene:create(event)
   local topInset, leftInset, bottomInset, rightInset = display.getSafeAreaInsets()
@@ -74,8 +57,9 @@ function scene:show(event)
 
     content = components.newGroup(scrollview)
 
-    for worldNumber = 1, numberOfWorlds do
+    for worldNumber = 1, resources.numberOfWorlds() do
       local worldName = string.format("%03d", worldNumber)
+      local worldProgress, worldNumberOfStars = score.worldProgress(worldName)
       local worldTexture = images.worldImageTexture(worldName)
 
       local worldButton = components.newImageButton(
@@ -86,13 +70,35 @@ function scene:show(event)
         105,
         { onRelease = function() navigation.gotoLevels(worldName) end, scrollview = scrollview }
       )
-
       worldButton.anchorY = 0
       worldButton.y = y
       worldButton.x = scrollview.width * 0.5
       worldTexture:releaseSelf()
 
-      y = y + 150
+      local worldProgressText = display.newText({
+        text = i18n.t("progress", worldProgress),
+        font = native.systemFontBold,
+        fontSize = 20,
+        parent = content,
+        x = scrollview.width * 0.5 - worldButton.contentWidth / 2,
+        y = y + worldButton.height + 10,
+      })
+      worldProgressText.anchorX = 0
+      worldProgressText.anchorY = 0
+
+      if worldNumberOfStars > 0 then
+        for starCount = 1, 3 do
+          local isFullStar = worldNumberOfStars >= starCount
+          local star = components.newStar(content, 20, 20)
+          star.anchorX = 1
+          star.anchorY = 0
+          star.x = scrollview.width * 0.5 + worldButton.contentWidth / 2 + (starCount - 3) * 25
+          star.y = worldProgressText.y
+          star.fill.effect = not isFullStar and "filter.grayscale" or nil
+        end
+      end
+
+      y = worldProgressText.y + worldProgressText.contentHeight + 40
     end
   end
 end
