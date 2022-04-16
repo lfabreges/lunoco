@@ -35,7 +35,8 @@ local function retryLevel()
 end
 
 function scene:create(event)
-  components.newOverlayBackground(self.view)
+  local background = components.newBackground(self.view)
+  background:setFillColor(0, 0, 0, 0.9)
 
   finishedInText = display.newText({
     align = "center",
@@ -47,19 +48,11 @@ function scene:create(event)
     y = display.contentCenterY / 2,
   })
 
-  local retryButton = components.newButton(self.view, {
-    label = i18n.t("retry"),
-    width = 120,
-    onRelease = retryLevel,
-  })
+  local retryButton = components.newTextButton(self.view, i18n.t("retry"), 120, 40, { onRelease = retryLevel })
   retryButton.x = display.contentCenterX - 70
   retryButton.y = display.contentCenterY + display.contentCenterY / 2
 
-  local levelsButton = components.newButton(self.view, {
-    label = i18n.t("levels"),
-    width = 120,
-    onRelease = gotoLevels,
-  })
+  local levelsButton = components.newTextButton(self.view, i18n.t("levels"), 120, 40, { onRelease = gotoLevels })
   levelsButton.x = display.contentCenterX + 70
   levelsButton.y = display.contentCenterY + display.contentCenterY / 2
 end

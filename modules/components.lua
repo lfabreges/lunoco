@@ -1,5 +1,4 @@
 local utils = require "modules.utils"
-local widget = require "widget"
 
 local components = {}
 
@@ -27,25 +26,14 @@ components.newBackground = function(parent)
   return background
 end
 
-components.newButton = function(parent, options)
-  local buttonOptions = {
-    labelColor = { default = { 1.0 }, over = { 0.5 } },
-    width = 160,
-    height = 40,
-    shape = "roundedRect",
-    cornerRadius = 2,
-    fillColor = { default = { 0.14, 0.19, 0.4, 1 }, over = { 0.14, 0.19, 0.4, 0.4 } },
-    strokeColor = { default = { 1, 1, 1, 1 }, over = { 1, 1, 1, 0.5 } },
-    strokeWidth = 2,
-  }
-
-  for key, value in pairs(options) do
-    buttonOptions[key] = value
-  end
-
-  local button = widget.newButton(buttonOptions)
-  parent:insert(button)
-  return button
+components.newTextButton = function(parent, text, width, height, options)
+  local container = display.newContainer(parent, width, height)
+  local rectangle = display.newRoundedRect(container, 0, 0, width - 2, height - 2, 5)
+  rectangle.strokeWidth = 1
+  rectangle:setFillColor(0.5, 0.5, 0.5, 0.25)
+  rectangle:setStrokeColor(0.5, 0.5, 0.5, 0.75)
+  label = display.newText({ text = text, fontSize = height * 0.4, parent = container })
+  return components.newObjectButton(container, options)
 end
 
 components.newImageButton = function(parent, imageName, imageBaseDir, width, height, options)
@@ -55,45 +43,47 @@ components.newImageButton = function(parent, imageName, imageBaseDir, width, hei
     width = imageBaseDir
     imageBaseDir = system.ResourceDirectory
   end
-
   local imageButton = display.newImageRect(parent, imageName, imageBaseDir, width, height)
+  return components.newObjectButton(imageButton, options)
+end
 
+components.newObjectButton = function(object, options)
   local function setDefaultState()
-    if imageButton.isOver then
-      imageButton.isOver = false
-      transition.to(imageButton, { alpha = 1.0, time = 100 })
+    if object.isOver then
+      object.isOver = false
+      transition.to(object, { alpha = 1.0, time = 100 })
     end
   end
 
   local function setOverState()
-    if not imageButton.isOver then
-      imageButton.isOver = true
-      transition.to(imageButton, { alpha = 0.2, time = 100 })
+    if not object.isOver then
+      object.isOver = true
+      transition.to(object, { alpha = 0.2, time = 100 })
     end
   end
 
   local function onButtonTouch(event)
     if event.phase == "began" then
-      display.getCurrentStage():setFocus(imageButton, event.id)
-      imageButton.isFocus = true
+      display.getCurrentStage():setFocus(object, event.id)
+      object.isFocus = true
       setOverState()
       if options.onEvent then
         options.onEvent(event)
       elseif options.onPress then
         options.onPress(event)
       end
-    elseif imageButton.isFocus then
+    elseif object.isFocus then
       if event.phase == "moved" then
         if options.scrollview and math.abs(event.y - event.yStart) > 5 then
           setDefaultState()
           options.scrollview:takeFocus(event)
-        elseif not isWithinBounds(imageButton, event) then
+        elseif not isWithinBounds(object, event) then
           setDefaultState()
-        elseif not imageButton.isOver then
+        elseif not object.isOver then
           setOverState()
         end
       elseif event.phase == "ended" or event.phase == "cancelled" then
-        if isWithinBounds(imageButton, event) then
+        if isWithinBounds(object, event) then
           if options.onEvent then
             options.onEvent(event)
           elseif options.onRelease then
@@ -104,27 +94,21 @@ components.newImageButton = function(parent, imageName, imageBaseDir, width, hei
           options.onEvent(event)
         end
         setDefaultState()
-        display.getCurrentStage():setFocus(imageButton, nil)
-        imageButton.isFocus = false
+        display.getCurrentStage():setFocus(object, nil)
+        object.isFocus = false
       end
     end
     return true
   end
 
-  imageButton:addEventListener("touch", onButtonTouch)
-  return imageButton
+  object:addEventListener("touch", onButtonTouch)
+  return object
 end
 
 components.newGroup = function(parent)
   local group = display.newGroup()
   parent:insert(group)
   return group
-end
-
-components.newOverlayBackground = function(parent)
-  local background = components.newBackground(parent)
-  background:setFillColor(0, 0, 0, 0.9)
-  return background
 end
 
 components.newStar = function(parent, width, height)

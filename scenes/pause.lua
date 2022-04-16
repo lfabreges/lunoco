@@ -27,35 +27,40 @@ local function retryLevel()
 end
 
 function scene:create(event)
-  components.newOverlayBackground(self.view)
+  local screenY = display.screenOriginY
+  local screenHeight = display.actualContentHeight
 
-  local resumeButton = components.newButton(self.view, {
-    label = i18n.t("resume"),
-    onRelease = resumeGame,
-  })
+  local resumeBackground = components.newBackground(self.view)
+  resumeBackground.height = screenHeight * 0.4
+  resumeBackground:setFillColor(1, 1, 1, 0.9)
+
+  local remainingBackground = components.newBackground(self.view)
+  remainingBackground.y = screenY + screenHeight * 0.4
+  remainingBackground.height = screenHeight * 0.6
+  remainingBackground:setFillColor(0, 0, 0, 0.9)
+
+  local resumeButtonGroup = components.newGroup(self.view)
+  local resumeButtonImage = display.newImageRect(resumeButtonGroup, "images/icons/resume.png", 40, 40)
+  local resumeButtonArea = display.newRect(resumeButtonGroup, 0, 0, resumeBackground.width, resumeBackground.height)
+  resumeButtonArea.isVisible = false
+  resumeButtonArea.isHitTestable = true
+  local resumeButton = components.newObjectButton(resumeButtonGroup, { onRelease = resumeGame })
   resumeButton.x = display.contentCenterX
-  resumeButton.y = display.contentCenterY - 90
+  resumeButton.y = screenY + screenHeight * 0.2
 
-  local retryButton = components.newButton(self.view, {
-    label = i18n.t("retry"),
-    onRelease = retryLevel,
-  })
+  local retryButton = components.newTextButton(self.view, i18n.t("retry"), 160, 40, { onRelease = retryLevel })
   retryButton.x = display.contentCenterX
-  retryButton.y = display.contentCenterY - 30
+  retryButton.y = screenY + screenHeight * 0.7 - 60
 
-  local levelsButton = components.newButton(self.view, {
-    label = i18n.t("levels"),
-    onRelease = gotoLevels,
-  })
+  local levelsButton = components.newTextButton(self.view, i18n.t("levels"), 160, 40, { onRelease = gotoLevels })
   levelsButton.x = display.contentCenterX
-  levelsButton.y = display.contentCenterY + 30
+  levelsButton.y = screenY + screenHeight * 0.7
 
-  local customizeButton = components.newButton(self.view, {
-    label = i18n.t("customize"),
+  local customizeButton = components.newTextButton(self.view, i18n.t("customize"), 160, 40, {
     onRelease = gotoCustomizeLevel,
   })
   customizeButton.x = display.contentCenterX
-  customizeButton.y = display.contentCenterY + 90
+  customizeButton.y = screenY + screenHeight * 0.7 + 60
 end
 
 function scene:show(event)
