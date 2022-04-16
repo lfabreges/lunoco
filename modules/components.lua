@@ -120,4 +120,18 @@ components.newStar = function(parent, width, height)
   return star
 end
 
+components.newTopBar = function(parent)
+  local screenX = display.screenOriginX
+  local screenY = display.screenOriginY
+  local screenWidth = display.actualContentWidth
+  local topInset, leftInset, bottomInset, rightInset = display.getSafeAreaInsets()
+  local topBar = display.newRect(parent, screenX, screenY, screenWidth, topInset + 60)
+  topBar.anchorX = 0
+  topBar.anchorY = 0
+  topBar.strokeWidth = 1
+  topBar:setFillColor(0, 0, 0, 0.33)
+  topBar:setStrokeColor(0.5, 0.5, 0.5, 0.75)
+  return topBar
+end
+
 return components
