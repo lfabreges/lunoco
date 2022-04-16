@@ -1,13 +1,13 @@
 local components = require "modules.components"
 local composer = require "composer"
 local i18n = require "modules.i18n"
+local images = require "modules.images"
 local lfs = require "lfs"
 local navigation = require "modules.navigation"
 local utils = require "modules.utils"
 local widget = require "widget"
 
 local content = nil
-local gameTitle = nil
 local numberOfWorlds = 2
 local scene = composer.newScene()
 local scrollview = nil
@@ -49,52 +49,50 @@ function scene:create(event)
 
   self.view:insert(scrollview)
 
-  gameTitle = display.newText({
-    align = "center",
+  local titleGroup = components.newGroup(scrollview)
+
+  local gameIcon = display.newImageRect(titleGroup, "images/icon.png", 60, 60)
+  gameIcon.anchorX = 0
+  gameIcon.anchorY = 0
+
+  local gameTitle = display.newText({
     text = i18n.t("title"),
     font = native.systemFontBold,
     fontSize = 40,
-    x = scrollview.width * 0.5,
-    y = 0,
+    parent = titleGroup,
+    x = gameIcon.width + 20,
+    y = gameIcon.height / 2,
   })
 
-  gameTitle.anchorY = 0
-  scrollview:insert(gameTitle)
+  gameTitle.anchorX = 0
+  titleGroup.x = display.actualContentWidth / 2 - titleGroup.contentWidth / 2
 end
 
 function scene:show(event)
   if event.phase == "will" then
-    local y = gameTitle.contentHeight + 40
+    local y = 100
 
     content = components.newGroup(scrollview)
 
     for worldNumber = 1, numberOfWorlds do
       local worldName = string.format("%03d", worldNumber)
-      -- TODO Image du monde
-      -- Prendre les images de tous les niveaux et les étaler comme un jeu de carte
-      local levelImage = nil
-      --local levelImageName = images.levelImageName(levelName, "screenshot")
-      -- local levelImageBaseDir = system.DocumentsDirectory
+      local worldTexture = images.worldImageTexture(worldName)
 
-      if not levelImageName then
-        levelImageName = "images/level-unknown.png"
-        levelImageBaseDir = system.ResourceDirectory
-      end
-
-      local levelButton = components.newImageButton(
+      local worldButton = components.newImageButton(
         content,
-        levelImageName,
-        levelImageBaseDir,
-        120,
-        180,
+        worldTexture.filename,
+        worldTexture.baseDir,
+        280,
+        105,
         { onRelease = function() navigation.gotoLevels(worldName) end, scrollview = scrollview }
       )
 
-      levelButton.anchorY = 0
-      levelButton.y = y
-      levelButton.x = scrollview.width * 0.5
+      worldButton.anchorY = 0
+      worldButton.y = y
+      worldButton.x = scrollview.width * 0.5
+      worldTexture:releaseSelf()
 
-      y = y + 240
+      y = y + 150
     end
   end
 end

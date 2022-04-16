@@ -1,6 +1,5 @@
 local components = require "modules.components"
 local composer = require "composer"
-local i18n = require "modules.i18n"
 local images = require "modules.images"
 local lfs = require "lfs"
 local navigation = require "modules.navigation"

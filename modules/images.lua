@@ -35,7 +35,38 @@ images.levelImageName = function(worldName, levelName, imageName)
   return levelImageNames[imageName] and levelImageNames[imageName] or nil
 end
 
-images.worldImageName = function(worldName)
+images.worldImageTexture = function(worldName)
+  local texture = graphics.newTexture({ type = "canvas", width = 320, height = 120 })
+  texture.anchorX = -0.5
+  texture.anchorY = -0.5
+
+  for levelNumber = 1, 5 do
+    local levelName = string.format("%03d", levelNumber)
+    local levelImageName = images.levelImageName(worldName, levelName, "screenshot")
+    local levelImageBaseDir = system.DocumentsDirectory
+
+    if not levelImageName then
+      levelImageName = "images/level-unknown.png"
+      levelImageBaseDir = system.ResourceDirectory
+    end
+
+    local levelImage = display.newImageRect(levelImageName, levelImageBaseDir, 80, 120)
+    levelImage.anchorX = 0
+    levelImage.anchorY = 0
+    levelImage.x = (levelNumber - 1) * 60
+
+    if levelNumber > 1 then
+      levelImage.fill.effect = "filter.linearWipe"
+      levelImage.fill.effect.direction = { -1, 0 }
+      levelImage.fill.effect.smoothness = 0.75
+      levelImage.fill.effect.progress = 0.5
+    end
+
+    texture:draw(levelImage)
+  end
+
+  texture:invalidate()
+  return texture
 end
 
 images.removeLevelImage = function(worldName, levelName, imageName)
