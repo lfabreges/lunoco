@@ -11,13 +11,6 @@
       "x":220,
       "width":80
     },{
-      "y":0,
-      "type":"corner",
-      "height":80,
-      "rotation":90,
-      "x":0,
-      "width":80
-    },{
       "y":270,
       "type":"horizontal-barrier",
       "height":30,
