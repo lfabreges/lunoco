@@ -98,7 +98,7 @@ function scene:show(event)
         end
       end
 
-      y = worldProgressText.y + worldProgressText.contentHeight + 40
+      y = worldProgressText.y + worldProgressText.contentHeight + 30
     end
   end
 end

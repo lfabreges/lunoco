@@ -1,5 +1,6 @@
 local components = require "modules.components"
 local composer = require "composer"
+local i18n = require "modules.i18n"
 local images = require "modules.images"
 local navigation = require "modules.navigation"
 local resources = require "resources"
@@ -10,6 +11,7 @@ local content = nil
 local scene = composer.newScene()
 local scrollview = nil
 local worldName = nil
+local worldProgressText = nil
 
 local function goBack()
   navigation.gotoWorlds()
@@ -35,9 +37,18 @@ function scene:create(event)
 
   local goBackButton = components.newImageButton(self.view, "images/icons/back.png", 40, 40, { onRelease = goBack })
   goBackButton.anchorX = 0
-  goBackButton.anchorY = 0
   goBackButton.x = screenX + leftInset + 20
-  goBackButton.y = screenY + topInset + 10
+  goBackButton.y = screenY + topInset + 30
+
+  worldProgressText = display.newText({
+    text = "",
+    font = native.systemFontBold,
+    fontSize = 20,
+    parent = self.view,
+    x = screenX + screenWidth - rightInset - 20,
+    y = screenY + topInset + 30,
+  })
+  worldProgressText.anchorX = 1
 
   scrollview = widget.newScrollView({
     left = screenX,
@@ -63,9 +74,11 @@ function scene:show(event)
     local centerX = scrollview.width * 0.5
     local spaceWidth = (display.actualContentWidth - 240) / 3
     local y = 0
+    local worldProgress = score.worldProgress(worldName)
     local worldScores = score.worldScores(worldName)
 
     content = components.newGroup(scrollview)
+    worldProgressText.text = i18n.t("progress", worldProgress)
 
     for levelNumber = 1, resources.numberOfLevels(worldName) do
       local isEven = levelNumber % 2 == 0
