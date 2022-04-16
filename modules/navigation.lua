@@ -5,35 +5,46 @@ local navigation = {}
 local defaultEffect = "crossFade"
 local defaultTime = 500
 
-navigation.gotoCustomizeLevel = function(levelName)
+navigation.gotoCustomizeLevel = function(worldName, levelName)
   composer.gotoScene("scenes.customize-level", {
     effect = defaultEffect,
     time = defaultTime,
-    params = { levelName = levelName },
+    params = { worldName = worldName, levelName = levelName },
   })
 end
 
-navigation.gotoElementImage = function(levelName, elementType, filename)
+navigation.gotoElementImage = function(worldName, levelName, elementType, filename)
   composer.gotoScene("scenes.element-image", {
     effect = defaultEffect,
     time = defaultTime,
-    params = { elementType = elementType, levelName = levelName, filename = filename },
+    params = { worldName = worldName, levelName = levelName, elementType = elementType, filename = filename },
   })
 end
 
-navigation.gotoLevels = function()
-  composer.gotoScene("scenes.levels", { effect = defaultEffect, time = defaultTime })
+navigation.gotoLevels = function(worldName)
+  composer.gotoScene("scenes.levels", {
+    effect = defaultEffect,
+    time = defaultTime,
+    params = { worldName = worldName },
+  })
 end
 
-navigation.gotoGame = function(levelName)
+navigation.gotoGame = function(worldName, levelName)
   composer.gotoScene("scenes.game", {
     effect = defaultEffect,
     time = defaultTime,
-    params = { levelName = levelName },
+    params = { worldName = worldName, levelName = levelName },
   })
 end
 
-navigation.reloadGame = function(levelName)
+navigation.gotoWorlds = function()
+  composer.gotoScene("scenes.worlds", {
+    effect = defaultEffect,
+    time = defaultTime,
+  })
+end
+
+navigation.reloadGame = function(worldName, levelName)
   composer.hideOverlay()
 
   local screenCapture = display.captureScreen()
@@ -48,9 +59,7 @@ navigation.reloadGame = function(levelName)
       nextScene = "scenes.game",
       effect = defaultEffect,
       time = defaultTime,
-      nextParams = {
-        levelName = levelName
-      }
+      nextParams = { worldName = worldName, levelName = levelName },
     }
   })
 end

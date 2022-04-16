@@ -1,52 +1,77 @@
 local components = require "modules.components"
 local composer = require "composer"
 local i18n = require "modules.i18n"
+local images = require "modules.images"
 local lfs = require "lfs"
 local navigation = require "modules.navigation"
 local utils = require "modules.utils"
 local widget = require "widget"
 
 local content = nil
-local gameTitle = nil
-local levelNames = {}
-local numberOfLevels = 10
 local scene = composer.newScene()
 local scrollview = nil
+local worldName = nil
+
+local numberOfLevels = {
+  ["001"] = 10,
+  ["002"] = 1,
+}
 
 if utils.isSimulator() then
-  local levelsPath = system.pathForFile("levels", system.ResourceDirectory)
-  local actualNumberOfLevels = 0
+  local worldsPath = system.pathForFile("worlds", system.ResourceDirectory)
 
-  for filename in lfs.dir(levelsPath) do
-    if filename:match("^.+%.lua$") then
-      actualNumberOfLevels = actualNumberOfLevels + 1
+  for worldName in lfs.dir(worldsPath) do
+    if worldName:match("^%d+$") then
+      local actualNumberOfLevels = 0
+      local worldDirectoryPath = system.pathForFile("worlds/" .. worldName, system.ResourceDirectory)
+
+      for filename in lfs.dir(worldDirectoryPath) do
+        if filename:match("^%d+.json$") then
+          actualNumberOfLevels = actualNumberOfLevels + 1
+        end
+      end
+
+      assert(
+        actualNumberOfLevels == numberOfLevels[worldName],
+        "Expected 'numberOfLevels[" .. worldName .. "] = " .. actualNumberOfLevels .. "' in scenes.levels"
+      )
     end
   end
-
-  assert(
-    actualNumberOfLevels == numberOfLevels,
-    "Expected 'numberOfLevels = " .. actualNumberOfLevels .. "' in scenes.levels"
-  )
 end
 
-for levelNumber = 1, numberOfLevels do
-  levelNames[levelNumber] = string.format("%03d", levelNumber)
+local function goBack()
+  navigation.gotoWorlds()
 end
 
 local function startLevel(levelName)
-  navigation.gotoGame(levelName)
+  navigation.gotoGame(worldName, levelName)
 end
 
 function scene:create(event)
+  local screenX = display.screenOriginX
+  local screenY = display.screenOriginY
+  local screenWidth = display.actualContentWidth
+  local screenHeight = display.actualContentHeight
   local topInset, leftInset, bottomInset, rightInset = display.getSafeAreaInsets()
 
   components.newBackground(self.view)
 
+  local topBar = display.newRect(self.view, screenX, screenY, screenWidth, topInset + 60)
+  topBar.anchorX = 0
+  topBar.anchorY = 0
+  topBar:setFillColor(0, 0, 0, 0.33)
+
+  local goBackButton = components.newImageButton(self.view, "images/icons/back.png", 40, 40, { onRelease = goBack })
+  goBackButton.anchorX = 0
+  goBackButton.anchorY = 0
+  goBackButton.x = screenX + leftInset + 20
+  goBackButton.y = screenY + topInset + 10
+
   scrollview = widget.newScrollView({
-    left = display.screenOriginX,
-    top = display.screenOriginY,
-    width = display.actualContentWidth,
-    height = display.actualContentHeight,
+    left = screenX,
+    top = topBar.y + topBar.height,
+    width = screenWidth,
+    height = screenHeight - topBar.height,
     hideBackground = true,
     hideScrollBar = true,
     horizontalScrollDisabled = true,
@@ -57,33 +82,24 @@ function scene:create(event)
   })
 
   self.view:insert(scrollview)
-
-  gameTitle = display.newText({
-    align = "center",
-    text = i18n.t("title"),
-    font = native.systemFontBold,
-    fontSize = 40,
-    x = scrollview.width * 0.5,
-    y = 0,
-  })
-
-  gameTitle.anchorY = 0
-  scrollview:insert(gameTitle)
 end
 
 function scene:show(event)
   if event.phase == "will" then
+    worldName = event.params.worldName
+
     local centerX = scrollview.width * 0.5
-    local scores = utils.loadScores()
     local spaceWidth = (display.actualContentWidth - 240) / 3
-    local y = gameTitle.contentHeight + 40
+    local y = 0
+    local worldScores = utils.loadScores()[worldName] or {}
 
     content = components.newGroup(scrollview)
 
-    for index, levelName in ipairs(levelNames) do
-      local isEven = index % 2 == 0
+    for levelNumber = 1, numberOfLevels[worldName] do
+      local isEven = levelNumber % 2 == 0
+      local levelName = string.format("%03d", levelNumber)
       local levelImage = nil
-      local levelImageName = utils.levelImageName(levelName, "screenshot")
+      local levelImageName = images.levelImageName(worldName, levelName, "screenshot")
       local levelImageBaseDir = system.DocumentsDirectory
 
       if not levelImageName then
@@ -104,8 +120,8 @@ function scene:show(event)
       levelButton.y = y
       levelButton.x = isEven and centerX + 60 + spaceWidth / 2 or centerX - 60 - spaceWidth / 2
 
-      if scores[levelName] then
-        local numberOfStars = scores[levelName].numberOfStars
+      if worldScores[levelName] then
+        local numberOfStars = worldScores[levelName].numberOfStars
 
         for starCount = 1, 3 do
           local isFullStar = numberOfStars >= starCount
@@ -126,6 +142,8 @@ function scene:show(event)
         y = y + 240
       end
     end
+
+    scrollview:scrollTo("top", { time = 0 })
   end
 end
 

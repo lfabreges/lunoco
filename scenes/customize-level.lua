@@ -2,6 +2,7 @@ local components = require "modules.components"
 local composer = require "composer"
 local elements = require "modules.elements"
 local i18n = require "modules.i18n"
+local images = require "modules.images"
 local navigation = require "modules.navigation"
 local utils = require "modules.utils"
 local widget = require "widget"
@@ -10,6 +11,7 @@ local elementView = nil
 local levelName = nil
 local scene = composer.newScene()
 local scrollview = nil
+local worldName = nil
 
 local customizableElementTypes = {
   "background",
@@ -70,7 +72,7 @@ local function capturePhoto(onComplete, shouldRequestAppPermission)
 end
 
 local function elementTypesFromLevelConfig()
-  local config = require ("levels." .. levelName)
+  local config = utils.loadLevelConfig(worldName, levelName)
   local hashSet = { ["background"] = true, ["frame"] = true, ["ball"] = true }
   local elementTypes = {}
 
@@ -99,26 +101,26 @@ local function elementTypesFromLevelConfig()
 end
 
 local function goBack()
-  navigation.gotoGame(levelName)
+  navigation.gotoGame(worldName, levelName)
 end
 
 local function newElement(parent, elementType)
   local element = nil
 
   if elementType == "background" then
-    element = elements.newBackground(parent, levelName, 32, 50)
+    element = elements.newBackground(parent, worldName, levelName, 32, 50)
   elseif elementType == "ball" then
-    element = elements.newBall(parent, levelName, 50, 50)
+    element = elements.newBall(parent, worldName, levelName, 50, 50)
   elseif elementType == "frame" then
-    element = elements.newFrame(parent, levelName, 50, 50)
+    element = elements.newFrame(parent, worldName, levelName, 50, 50)
   elseif elementType == "obstacle-corner" then
-    element = elements.newObstacleCorner(parent, levelName, 50, 50)
+    element = elements.newObstacleCorner(parent, worldName, levelName, 50, 50)
   elseif elementType:starts("obstacle-horizontal-barrier") then
-    element = elements.newObstacleBarrier(parent, levelName, elementType:sub(10), 50, 20)
+    element = elements.newObstacleBarrier(parent, worldName, levelName, elementType:sub(10), 50, 20)
   elseif elementType:starts("obstacle-vertical-barrier") then
-    element = elements.newObstacleBarrier(parent, levelName, elementType:sub(10), 20, 50)
+    element = elements.newObstacleBarrier(parent, worldName, levelName, elementType:sub(10), 20, 50)
   elseif elementType:starts("target-") then
-    element = elements.newTarget(parent, levelName, elementType:sub(8), 50, 50)
+    element = elements.newTarget(parent, worldName, levelName, elementType:sub(8), 50, 50)
   end
 
   return element
@@ -176,6 +178,7 @@ function scene:create(event)
     leftPadding = leftInset,
     rightPadding = rightInset,
   })
+
   self.view:insert(scrollview)
 end
 
@@ -216,7 +219,7 @@ function scene:createElementView()
       )
 
       local onCapturePhotoOrSelectPhotoComplete = function(filename)
-        navigation.gotoElementImage(levelName, elementType, filename)
+        navigation.gotoElementImage(worldName, levelName, elementType, filename)
       end
 
       local selectPhotoButton = components.newImageButton(
@@ -265,7 +268,7 @@ function scene:createElementView()
           40,
           {
             onRelease = function()
-              utils.removeLevelImage(levelName, elementType)
+              images.removeLevelImage(worldName, levelName, elementType)
               local defaultElement = newElement(elementGroup, elementType)
               defaultElement.x = element.x
               defaultElement.y = element.y
@@ -289,7 +292,13 @@ end
 
 function scene:show(event)
   if event.phase == "will" then
-    local isNewLevel = levelName and levelName ~= event.params.levelName
+    local isNewLevel = false
+
+    if worldName and levelName then
+      isNewLevel = worldName ~= event.params.worldName or levelName ~= event.params.levelName
+    end
+
+    worldName = event.params.worldName
     levelName = event.params.levelName
 
     self:createElementView()

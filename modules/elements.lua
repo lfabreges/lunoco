@@ -1,9 +1,9 @@
-local utils = require "modules.utils"
+local images = require "modules.images"
 
 local elements = {}
 
-local function elementImage(levelName, elementType, defaultImageName)
-  local imageName = utils.levelImageName(levelName, elementType)
+local function elementImage(worldName, levelName, elementType, defaultImageName)
+  local imageName = images.levelImageName(worldName, levelName, elementType)
   if imageName then
     return imageName, system.DocumentsDirectory, false
   else
@@ -11,15 +11,20 @@ local function elementImage(levelName, elementType, defaultImageName)
   end
 end
 
-elements.newBackground = function(parent, levelName, width, height)
-  local imageName, imageBaseDir, isDefault = elementImage(levelName, "background", "images/elements/background.png")
+elements.newBackground = function(parent, worldName, levelName, width, height)
+  local imageName, imageBaseDir, isDefault = elementImage(
+    worldName,
+    levelName,
+    "background",
+    "images/elements/background.png"
+  )
   local background = display.newImageRect(parent, imageName, imageBaseDir, width, height)
   background.isDefault = isDefault
   return background
 end
 
-elements.newBall = function(parent, levelName, width, height)
-  local imageName, imageBaseDir, isDefault = elementImage(levelName, "ball", "images/elements/ball.png")
+elements.newBall = function(parent, worldName, levelName, width, height)
+  local imageName, imageBaseDir, isDefault = elementImage(worldName, levelName, "ball", "images/elements/ball.png")
   local ball = display.newImageRect(parent, imageName, imageBaseDir, width, height)
   local ballMask = graphics.newMask("images/elements/ball-mask.png")
   ball:setMask(ballMask)
@@ -29,8 +34,8 @@ elements.newBall = function(parent, levelName, width, height)
   return ball
 end
 
-elements.newFrame = function(parent, levelName, width, height)
-  local imageName, imageBaseDir, isDefault = elementImage(levelName, "frame", "images/elements/frame.png")
+elements.newFrame = function(parent, worldName, levelName, width, height)
+  local imageName, imageBaseDir, isDefault = elementImage(worldName, levelName, "frame", "images/elements/frame.png")
   local frame = display.newContainer(parent, width, height)
   local imageWidth = math.min(128, width)
   local imageHeight = math.min(128, height)
@@ -45,12 +50,12 @@ elements.newFrame = function(parent, levelName, width, height)
   end
 
   frame.isDefault = isDefault
-
   return frame
 end
 
-elements.newObstacleBarrier = function(parent, levelName, barrierType, width, height)
+elements.newObstacleBarrier = function(parent, worldName, levelName, barrierType, width, height)
   local imageName, imageBaseDir, isDefault = elementImage(
+    worldName,
     levelName,
     "obstacle-" .. barrierType,
     "images/elements/" .. barrierType .. ".png"
@@ -60,8 +65,13 @@ elements.newObstacleBarrier = function(parent, levelName, barrierType, width, he
   return barrier
 end
 
-elements.newObstacleCorner = function(parent, levelName, width, height)
-  local imageName, imageBaseDir, isDefault = elementImage(levelName, "obstacle-corner", "images/elements/corner.png")
+elements.newObstacleCorner = function(parent, worldName, levelName, width, height)
+  local imageName, imageBaseDir, isDefault = elementImage(
+    worldName,
+    levelName,
+    "obstacle-corner",
+    "images/elements/corner.png"
+  )
   local corner = display.newImageRect(parent, imageName, imageBaseDir, width, height)
   local cornerMask = graphics.newMask("images/elements/corner-mask.png")
   corner:setMask(cornerMask)
@@ -71,8 +81,9 @@ elements.newObstacleCorner = function(parent, levelName, width, height)
   return corner
 end
 
-elements.newTarget = function(parent, levelName, targetType, width, height)
+elements.newTarget = function(parent, worldName, levelName, targetType, width, height)
   local imageName, imageBaseDir, isDefault = elementImage(
+    worldName,
     levelName,
     "target-" .. targetType,
     "images/elements/target-" .. targetType .. ".png"

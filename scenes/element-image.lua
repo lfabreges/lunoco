@@ -1,6 +1,7 @@
 local components = require "modules.components"
 local composer = require "composer"
 local i18n = require "modules.i18n"
+local images = require "modules.images"
 local multitouch = require "libraries.multitouch"
 local navigation = require "modules.navigation"
 local utils = require "modules.utils"
@@ -15,6 +16,7 @@ local frontContainer = nil
 local frontPhoto = nil
 local levelName = nil
 local scene = composer.newScene()
+local worldName = nil
 
 local elements = {
   ["background"] = { width = 200, height = 306 },
@@ -31,7 +33,7 @@ local elements = {
 }
 
 local function goBack()
-  navigation.gotoCustomizeLevel(levelName)
+  navigation.gotoCustomizeLevel(worldName, levelName)
 end
 
 local function onMove(deltaX, deltaY)
@@ -62,9 +64,9 @@ end
 local function saveImage()
   local b = frontContainer.contentBounds
   local elementCapture = display.captureBounds({ xMin = b.xMin, xMax = b.xMax - 1, yMin = b.yMin, yMax = b.yMax - 1 })
-  utils.saveLevelImage(elementCapture, levelName, elementType)
+  images.saveLevelImage(elementCapture, worldName, levelName, elementType)
   display.remove(elementCapture)
-  navigation.gotoCustomizeLevel(levelName)
+  navigation.gotoCustomizeLevel(worldName, levelName)
 end
 
 function scene:create(event)
@@ -88,9 +90,10 @@ end
 
 function scene:show(event)
   if event.phase == "will" then
+    worldName = event.params.worldName
+    levelName = event.params.levelName
     elementType = event.params.elementType
     filename = event.params.filename
-    levelName = event.params.levelName
 
     local centerX = display.contentCenterX
     local centerY = display.contentCenterY

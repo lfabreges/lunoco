@@ -1,0 +1,37 @@
+{
+  "ball":{
+    "y":460,
+    "x":180
+  },
+  "obstacles":[{
+      "y":100,
+      "type":"horizontal-barrier",
+      "height":30,
+      "x":180,
+      "width":120
+    }],
+  "stars":{
+    "one":4,
+    "three":2,
+    "two":3
+  },
+  "targets":[{
+      "y":300,
+      "type":"normal",
+      "height":40,
+      "x":40,
+      "width":40
+    },{
+      "y":200,
+      "type":"normal",
+      "height":40,
+      "x":170,
+      "width":40
+    },{
+      "y":20,
+      "type":"hard",
+      "height":40,
+      "x":220,
+      "width":40
+    }]
+}

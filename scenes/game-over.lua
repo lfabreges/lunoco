@@ -10,6 +10,7 @@ local numberOfShots = nil
 local numberOfStars = nil
 local scene = composer.newScene()
 local stars = nil
+local worldName = nil
 
 local sounds = {
   starEmpty = audio.loadSound("sounds/star-empty.wav"),
@@ -32,11 +33,11 @@ local function displayStars(event)
 end
 
 local function gotoLevels()
-  navigation.gotoLevels()
+  navigation.gotoLevels(worldName)
 end
 
 local function retryLevel()
-  navigation.reloadGame(levelName)
+  navigation.reloadGame(worldName, levelName)
 end
 
 function scene:create(event)
@@ -71,6 +72,7 @@ end
 
 function scene:show(event)
   if event.phase == "will" then
+    worldName = event.params.worldName
     levelName = event.params.levelName
     numberOfShots = event.params.numberOfShots
     numberOfStars = event.params.numberOfStars

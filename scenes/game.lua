@@ -1,6 +1,7 @@
 local components = require "modules.components"
 local composer = require "composer"
 local elements = require "modules.elements"
+local images = require "modules.images"
 local navigation = require "modules.navigation"
 local utils = require "modules.utils"
 
@@ -15,6 +16,7 @@ local numberOfShots = nil
 local predictedBallPath = nil
 local scale = 30
 local scene = composer.newScene()
+local worldName = nil
 
 local sounds = {
   ball = audio.loadSound("sounds/ball.wav"),
@@ -34,9 +36,10 @@ local function gameOver()
   end
 
   local scores = utils.loadScores()
+  scores[worldName] = scores[worldName] or {}
 
-  if (not scores[levelName] or scores[levelName].numberOfShots > numberOfShots) then
-    scores[levelName] = { numberOfShots = numberOfShots, numberOfStars = numberOfStars }
+  if not scores[worldName][levelName] or scores[worldName][levelName].numberOfShots > numberOfShots then
+    scores[worldName][levelName] = { numberOfShots = numberOfShots, numberOfStars = numberOfStars }
     utils.saveScores(scores)
   end
 
@@ -45,6 +48,7 @@ local function gameOver()
     effect = "crossFade",
     time = 500,
     params = {
+      worldName = worldName,
       levelName = levelName,
       numberOfShots = numberOfShots,
       numberOfStars = numberOfStars,
@@ -57,7 +61,7 @@ local function takeLevelScreenshot()
   local screenshotScale = screenshot.xScale * 0.33
   screenshot.xScale = screenshotScale
   screenshot.yScale = screenshotScale
-  utils.saveLevelImage(screenshot, levelName, "screenshot")
+  images.saveLevelImage(screenshot, worldName, levelName, "screenshot")
   display.remove(screenshot)
 end
 
@@ -79,14 +83,14 @@ function scene:createLevel()
 end
 
 function scene:createBackground()
-  local background = elements.newBackground(level, levelName, 300, 460)
+  local background = elements.newBackground(level, worldName, levelName, 300, 460)
   background.anchorX = 0
   background.anchorY = 0
   background:translate(10, 10)
 end
 
 function scene:createBall()
-  ball = elements.newBall(level, levelName, 30, 30)
+  ball = elements.newBall(level, worldName, levelName, 30, 30)
 
   ball.x = 10 + config.ball.x
   ball.y = 10 + config.ball.y - 15
@@ -104,7 +108,7 @@ function scene:createBall()
 end
 
 function scene:createFrame()
-  local frame = elements.newFrame(level, levelName, display.actualContentWidth, display.actualContentHeight)
+  local frame = elements.newFrame(level, worldName, levelName, display.actualContentWidth, display.actualContentHeight)
   frame.anchorX = 0
   frame.anchorY = 0
   frame.x = display.screenOriginX
@@ -122,7 +126,7 @@ end
 function scene:createObstacles()
   for _, config in ipairs(config.obstacles) do
     if config.type == "corner" then
-      local corner = elements.newObstacleCorner(level, levelName, config.width, config.height)
+      local corner = elements.newObstacleCorner(level, worldName, levelName, config.width, config.height)
       corner.x = 10 + config.x + corner.width / 2
       corner.y = 10 + config.y + corner.height / 2
       corner.rotation = config.rotation
@@ -142,7 +146,14 @@ function scene:createObstacles()
       physics.addBody(corner, "static", { density = 1.0, friction = 0.3, bounce = 0.5, chain = scaledChain })
 
     elseif config.type:starts("horizontal-barrier") or config.type:starts("vertical-barrier") then
-      local barrier = elements.newObstacleBarrier(level, levelName, config.type, config.width, config.height)
+      local barrier = elements.newObstacleBarrier(
+        level,
+        worldName,
+        levelName,
+        config.type,
+        config.width,
+        config.height
+      )
       barrier.anchorChildren = true
       barrier.anchorX = 0
       barrier.anchorY = 0
@@ -158,7 +169,7 @@ function scene:createTargets()
   local numberOfTargets = 0
 
   for _, config in ipairs(config.targets) do
-    local target = elements.newTarget(level, levelName, config.type, config.width, config.height)
+    local target = elements.newTarget(level, worldName, levelName, config.type, config.width, config.height)
     target.anchorChildren = true
     target.anchorX = 0
     target.anchorY = 0
@@ -260,7 +271,10 @@ end
 function scene:pause()
   audio.pause()
   physics.pause()
-  composer.showOverlay("scenes.pause", { isModal = true, params = { levelName = levelName }})
+  composer.showOverlay("scenes.pause", {
+    isModal = true,
+    params = { worldName = worldName, levelName = levelName },
+  })
 end
 
 function scene:resume()
@@ -270,8 +284,9 @@ end
 
 function scene:show(event)
   if event.phase == "will" then
+    worldName = event.params.worldName
     levelName = event.params.levelName
-    config = require ("levels." .. levelName)
+    config = utils.loadLevelConfig(worldName, levelName)
     self:createLevel()
   elseif event.phase == "did" then
     Runtime:addEventListener("lateUpdate", scene)
