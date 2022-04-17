@@ -118,6 +118,7 @@ function scene:show(event)
       end
     end
 
+    -- TODO Préserver le scroll si de retour d'un niveau en cours de jeu
     scrollview:scrollTo("top", { time = 0 })
   end
 end

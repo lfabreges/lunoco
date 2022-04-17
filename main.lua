@@ -10,30 +10,34 @@ native.setProperty("androidSystemUiVisibility", "immersiveSticky")
 native.setProperty("preferredScreenEdgesDeferringSystemGestures", true)
 
 local version = utils.loadJson("version.json", system.DocumentsDirectory)
---[[
+
 if version.number == nil then
-  -- TODO Convert level name to save score with one less zero
-  score.saveScores({ ["001"] = score.loadScores() })
+  local oldScores = utils.loadJson("scores.json", system.DocumentsDirectory)
+  local newScores = { ["builtIn"] = { ["01"] = {} } }
+  for levelName, levelScore in pairs(oldScores) do
+    if levelName:match("^%d+$") then
+      local levelNumber = tonumber(levelName)
+      newScores["builtIn"]["01"][string.format("%02d", levelNumber)] = levelScore
+    end
+  end
+  utils.saveJson(newScores, "scores.json", system.DocumentsDirectory)
 
-  local firstWorldTemporaryPath = system.pathForFile("_001", system.DocumentsDirectory)
-  lfs.mkdir(firstWorldTemporaryPath)
-
+  utils.mkdir(system.DocumentsDirectory, "elements", "builtIn", "01")
   for levelNumber = 1, 10 do
     local levelName = string.format("%03d", levelNumber)
     if utils.fileExists(levelName, system.DocumentsDirectory) then
       local oldFilePath = system.pathForFile(levelName, system.DocumentsDirectory)
-      local newFilePath = system.pathForFile("_001" .. "/" .. levelName, system.DocumentsDirectory)
+      local newFilePath = system.pathForFile(
+        "elements/builtIn/01/" .. string.format("%02d", levelNumber),
+        system.DocumentsDirectory
+      )
       os.rename(oldFilePath, newFilePath)
     end
   end
 
-  local firstWorldPath = system.pathForFile("001", system.DocumentsDirectory)
-  os.rename(firstWorldTemporaryPath, firstWorldPath)
-
   version.number = 2
   utils.saveJson(version, "version.json", system.DocumentsDirectory)
 end
-]]
 
 composer.gotoScene("scenes.worlds")
 
