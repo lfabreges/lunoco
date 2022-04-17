@@ -3,7 +3,6 @@ local composer = require "composer"
 local i18n = require "modules.i18n"
 local images = require "modules.images"
 local navigation = require "modules.navigation"
-local score = require "modules.score"
 local universe = require "universe"
 local widget = require "widget"
 
@@ -70,8 +69,8 @@ function scene:show(event)
     local centerX = scrollview.width * 0.5
     local spaceWidth = (display.actualContentWidth - 240) / 3
     local y = 0
-    local worldProgress = score.worldProgress(world)
-    local worldScores = score.loadWorldScores(world)
+    local worldProgress = world:progress()
+    local worldScores = world:scores()
 
     content = components.newGroup(scrollview)
     worldProgressText.text = i18n.t("progress", worldProgress)

@@ -1,6 +1,5 @@
 local composer = require "composer"
 local lfs = require "lfs"
-local score = require "modules.score"
 local utils = require "modules.utils"
 
 math.randomseed(os.time())

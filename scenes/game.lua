@@ -3,7 +3,6 @@ local composer = require "composer"
 local elements = require "modules.elements"
 local images = require "modules.images"
 local navigation = require "modules.navigation"
-local score = require "modules.score"
 local utils = require "modules.utils"
 
 local ball = nil
@@ -36,7 +35,7 @@ local function gameOver()
     numberOfStars = 1
   end
 
-  score.saveLevelScoreIfBetter(world, levelName, numberOfShots, numberOfStars)
+  world:saveLevelScore(levelName, numberOfShots, numberOfStars)
 
   composer.showOverlay("scenes.game-over", {
     isModal = true,

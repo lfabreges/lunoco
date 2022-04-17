@@ -3,7 +3,6 @@ local composer = require "composer"
 local i18n = require "modules.i18n"
 local images = require "modules.images"
 local navigation = require "modules.navigation"
-local score = require "modules.score"
 local universe = require "universe"
 local widget = require "widget"
 
@@ -60,7 +59,7 @@ function scene:show(event)
 
     for _, world in ipairs(worlds) do
       local worldLevels = world:levels()
-      local worldProgress, worldNumberOfStars = score.worldProgress(world)
+      local worldProgress, worldNumberOfStars = world:progress()
       local worldButtonContainer = display.newContainer(content, 280, 105)
 
       for levelNumber = 1, 5 do
