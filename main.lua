@@ -1,6 +1,5 @@
 local composer = require "composer"
 local lfs = require "lfs"
-local resources = require "resources"
 local score = require "modules.score"
 local utils = require "modules.utils"
 
@@ -11,8 +10,9 @@ native.setProperty("androidSystemUiVisibility", "immersiveSticky")
 native.setProperty("preferredScreenEdgesDeferringSystemGestures", true)
 
 local version = utils.loadJson("version.json", system.DocumentsDirectory)
-
+--[[
 if version.number == nil then
+  -- TODO Convert level name to save score with one less zero
   score.saveScores({ ["001"] = score.loadScores() })
 
   local firstWorldTemporaryPath = system.pathForFile("_001", system.DocumentsDirectory)
@@ -33,10 +33,9 @@ if version.number == nil then
   version.number = 2
   utils.saveJson(version, "version.json", system.DocumentsDirectory)
 end
+]]
 
-if resources.validateNumberOfLevels() then
-  composer.gotoScene("scenes.worlds")
-end
+composer.gotoScene("scenes.worlds")
 
 if utils.isSimulator() then
   timer.performWithDelay(5000, utils.printMemoryUsage, -1)

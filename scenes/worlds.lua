@@ -3,8 +3,8 @@ local composer = require "composer"
 local i18n = require "modules.i18n"
 local images = require "modules.images"
 local navigation = require "modules.navigation"
-local resources = require "resources"
 local score = require "modules.score"
+local universe = require "universe"
 local widget = require "widget"
 
 local content = nil
@@ -54,17 +54,18 @@ end
 function scene:show(event)
   if event.phase == "will" then
     local y = 110
+    local worlds = universe.worlds()
 
     content = components.newGroup(scrollview)
 
-    for _, worldName in ipairs(resources.worldNames()) do
-      local worldNumberOfLevels = resources.numberOfLevels(worldName)
-      local worldProgress, worldNumberOfStars = score.worldProgress(worldName)
+    for _, world in ipairs(worlds) do
+      local worldLevels = world:levels()
+      local worldProgress, worldNumberOfStars = score.worldProgress(world)
       local worldButtonContainer = display.newContainer(content, 280, 105)
 
       for levelNumber = 1, 5 do
-        local levelName = string.format("%03d", levelNumber)
-        local levelImageName = images.levelImageName(worldName, levelName, "screenshot")
+        local levelName = worldLevels[levelNumber] or "unknown"
+        local levelImageName = images.levelImageName(world, levelName, "screenshot")
         local levelImageBaseDir = system.DocumentsDirectory
 
         if not levelImageName then
@@ -86,7 +87,7 @@ function scene:show(event)
       end
 
       local worldButton = components.newObjectButton(worldButtonContainer, {
-        onRelease = function() navigation.gotoLevels(worldName) end,
+        onRelease = function() navigation.gotoLevels(world) end,
         scrollview = scrollview,
       })
       worldButton.anchorChildren = false

@@ -1,4 +1,4 @@
-local resources = require "resources"
+local universe = require "universe"
 local utils = require "modules.utils"
 
 local score = {}
@@ -15,19 +15,31 @@ score.saveScores = function(scores)
   cachedScores = scores
 end
 
-score.worldScores = function(worldName)
-  return score.loadScores()[worldName] or {}
+score.loadWorldScores = function(world)
+  local scores = score.loadScores()
+  return scores[world.category] and scores[world.category][world.name] or {}
 end
 
-score.worldProgress = function(worldName)
-  local worldScores = score.worldScores(worldName)
-  local numberOfLevels = resources.numberOfLevels(worldName)
+score.saveLevelScoreIfBetter = function(world, levelName, numberOfShots, numberOfStars)
+  local scores = score.loadScores()
+  scores[world.category] = scores[world.category] or {}
+  scores[world.category][world.name] = scores[world.category][world.name] or {}
+  local worldScores = scores[world.category][world.name]
+  if not worldScores[levelName] or worldScores[levelName].numberOfShots > numberOfShots then
+    worldScores[levelName] = { numberOfShots = numberOfShots, numberOfStars = numberOfStars }
+    score.saveScores(scores)
+  end
+end
+
+score.worldProgress = function(world)
+  local worldScores = score.loadWorldScores(world)
+  local worldLevels = world:levels()
+  local numberOfLevels = #worldLevels
   local numberOfFinishedLevels = 0
   local totalNumberOfStars = 0
   local worldNumberOfStars = 3
 
-  for levelNumber = 1, numberOfLevels do
-    local levelName = string.format("%03d", levelNumber)
+  for _, levelName in pairs(worldLevels) do
     if worldScores[levelName] then
       local levelNumberOfStars = worldScores[levelName].numberOfStars
       numberOfFinishedLevels = numberOfFinishedLevels + 1

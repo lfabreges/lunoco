@@ -3,14 +3,14 @@ local composer = require "composer"
 local i18n = require "modules.i18n"
 local images = require "modules.images"
 local navigation = require "modules.navigation"
-local resources = require "resources"
 local score = require "modules.score"
+local universe = require "universe"
 local widget = require "widget"
 
 local content = nil
 local scene = composer.newScene()
 local scrollview = nil
-local worldName = nil
+local world = nil
 local worldProgressText = nil
 
 local function goBack()
@@ -18,7 +18,7 @@ local function goBack()
 end
 
 local function startLevel(levelName)
-  navigation.gotoGame(worldName, levelName)
+  navigation.gotoGame(world, levelName)
 end
 
 function scene:create(event)
@@ -65,22 +65,21 @@ end
 
 function scene:show(event)
   if event.phase == "will" then
-    worldName = event.params.worldName
+    world = event.params.world
 
     local centerX = scrollview.width * 0.5
     local spaceWidth = (display.actualContentWidth - 240) / 3
     local y = 0
-    local worldProgress = score.worldProgress(worldName)
-    local worldScores = score.worldScores(worldName)
+    local worldProgress = score.worldProgress(world)
+    local worldScores = score.loadWorldScores(world)
 
     content = components.newGroup(scrollview)
     worldProgressText.text = i18n.t("progress", worldProgress)
 
-    for levelNumber = 1, resources.numberOfLevels(worldName) do
+    for levelNumber, levelName in ipairs(world:levels()) do
       local isEven = levelNumber % 2 == 0
-      local levelName = string.format("%03d", levelNumber)
       local levelImage = nil
-      local levelImageName = images.levelImageName(worldName, levelName, "screenshot")
+      local levelImageName = images.levelImageName(world, levelName, "screenshot")
       local levelImageBaseDir = system.DocumentsDirectory
 
       if not levelImageName then

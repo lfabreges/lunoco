@@ -11,6 +11,15 @@ utils.fileExists = function(filename, baseDirectory)
   return os.rename(filepath, filepath) and true or false
 end
 
+utils.mkdir = function(baseDirectory, ...)
+  local baseDirectoryPath = system.pathForFile(nil, baseDirectory)
+  lfs.chdir(baseDirectoryPath)
+  for _, directoryName in ipairs({ ... }) do
+    lfs.mkdir(directoryName)
+    lfs.chdir(directoryName)
+  end
+end
+
 utils.isAndroid = function()
   return platform == "android"
 end
@@ -19,8 +28,8 @@ utils.isSimulator = function()
   return environment == "simulator"
 end
 
-utils.loadLevelConfig = function(worldName, levelName)
-  return utils.loadJson("worlds/" .. worldName .. "/" .. levelName .. ".json")
+utils.loadLevelConfig = function(world, levelName)
+  return utils.loadJson("worlds/" .. world.name .. "/" .. levelName .. ".json", world.baseDirectory)
 end
 
 utils.loadJson = function(filename, baseDirectory)
