@@ -2,24 +2,41 @@ local utils = require "modules.utils"
 
 local resources = {}
 
-local numberOfWorlds = nil
+local worldNames = nil
+
 local numberOfLevels = {
   ["001"] = 10,
   ["002"] = 1,
 }
 
 resources.numberOfLevels = function(worldName)
-  return numberOfLevels[worldName] or 0
+  if worldName == "user" then
+    local userWorldNumberOfLevels = 0
+    if utils.fileExists("user", system.DocumentsDirectory) then
+      local userWorldPath = system.pathForFile("user", system.DocumentsDirectory)
+      for filename in lfs.dir(userWorldPath) do
+        if filename:match("^%d+.json$") then
+          userWorldNumberOfLevels = userWorldNumberOfLevels + 1
+        end
+      end
+    end
+    return userWorldNumberOfLevels
+  else
+    return numberOfLevels[worldName] or 0
+  end
 end
 
-resources.numberOfWorlds = function()
-  if numberOfWorlds == nil then
-    numberOfWorlds = 0
+resources.worldNames = function()
+  if worldNames == nil then
+    worldNames = {}
+    local worldNumber = 1
     for _ in pairs(numberOfLevels) do
-      numberOfWorlds = numberOfWorlds + 1
+      worldNames[worldNumber] = string.format("%03d", worldNumber)
+      worldNumber = worldNumber + 1
     end
+    worldNames[worldNumber] = "user"
   end
-  return numberOfWorlds
+  return worldNames
 end
 
 resources.validateNumberOfLevels = function()

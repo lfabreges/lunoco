@@ -57,8 +57,8 @@ function scene:show(event)
 
     content = components.newGroup(scrollview)
 
-    for worldNumber = 1, resources.numberOfWorlds() do
-      local worldName = string.format("%03d", worldNumber)
+    for _, worldName in ipairs(resources.worldNames()) do
+      local worldNumberOfLevels = resources.numberOfLevels(worldName)
       local worldProgress, worldNumberOfStars = score.worldProgress(worldName)
       local worldButtonContainer = display.newContainer(content, 280, 105)
 
@@ -120,7 +120,6 @@ function scene:show(event)
       y = worldProgressText.y + worldProgressText.contentHeight + 30
     end
 
-    --[[
     local newWorldContainer = display.newContainer(content ,280, 105)
     newWorldContainer.anchorY = 0
     newWorldContainer.x = scrollview.width * 0.5
@@ -136,8 +135,7 @@ function scene:show(event)
     newWorldBackground:setStrokeColor(0.5, 0.5, 0.5, 0.75)
 
     display.newImageRect(newWorldContainer, "images/icons/plus.png", 50, 50)
-    components.newObjectButton(newWorldContainer, { onRelease = function() end})
-    ]]
+    components.newObjectButton(newWorldContainer, { onRelease = function() navigation.gotoLevels("user") end })
   end
 end
 
