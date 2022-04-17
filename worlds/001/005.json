@@ -1,75 +1,87 @@
 {
-  "ball":{
-    "y":460,
-    "x":150
+  "ball": {
+    "x": 150,
+    "y": 460
   },
-  "obstacles":[{
-      "y":380,
-      "type":"corner",
-      "height":80,
-      "x":0,
-      "width":80
-    },{
-      "y":380,
-      "type":"corner",
-      "height":80,
-      "rotation":270,
-      "x":220,
-      "width":80
-    },{
-      "y":0,
-      "type":"corner",
-      "height":80,
-      "rotation":180,
-      "x":220,
-      "width":80
-    },{
-      "y":300,
-      "type":"horizontal-barrier",
-      "height":30,
-      "x":0,
-      "width":80
-    },{
-      "y":220,
-      "type":"horizontal-barrier-large",
-      "height":30,
-      "x":40,
-      "width":140
-    },{
-      "y":90,
-      "type":"horizontal-barrier-large",
-      "height":30,
-      "x":55,
-      "width":200
-    },{
-      "y":200,
-      "type":"vertical-barrier",
-      "height":150,
-      "x":230,
-      "width":30
-    }],
-  "stars":{
-    "one":6,
-    "three":2,
-    "two":4
+  "obstacles": [
+    {
+      "type": "corner",
+      "x": 0,
+      "y": 380,
+      "width": 80,
+      "height": 80
+    },
+    {
+      "type": "corner",
+      "x": 220,
+      "y": 380,
+      "width": 80,
+      "height": 80,
+      "rotation": 270
+    },
+    {
+      "type": "corner",
+      "x": 220,
+      "y": 0,
+      "width": 80,
+      "height": 80,
+      "rotation": 180
+    },
+    {
+      "type": "horizontal-barrier",
+      "x": 0,
+      "y": 300,
+      "width": 80,
+      "height": 30
+    },
+    {
+      "type": "horizontal-barrier-large",
+      "x": 40,
+      "y": 220,
+      "width": 140,
+      "height": 30
+    },
+    {
+      "type": "horizontal-barrier-large",
+      "x": 55,
+      "y": 90,
+      "width": 200,
+      "height": 30
+    },
+    {
+      "type": "vertical-barrier",
+      "x": 230,
+      "y": 200,
+      "width": 30,
+      "height": 150
+    }
+  ],
+  "stars": {
+    "one": 6,
+    "two": 4,
+    "three": 2
   },
-  "targets":[{
-      "y":40,
-      "type":"easy",
-      "height":40,
-      "x":60,
-      "width":40
-    },{
-      "y":140,
-      "type":"normal",
-      "height":40,
-      "x":220,
-      "width":40
-    },{
-      "y":170,
-      "type":"hard",
-      "height":40,
-      "x":60,
-      "width":40
-    }]
+  "targets": [
+    {
+      "type": "easy",
+      "x": 60,
+      "y": 40,
+      "width": 40,
+      "height": 40
+    },
+    {
+      "type": "normal",
+      "x": 220,
+      "y": 140,
+      "width": 40,
+      "height": 40
+    },
+    {
+      "type": "hard",
+      "x": 60,
+      "y": 170,
+      "width": 40,
+      "height": 40
+    }
+  ]
 }

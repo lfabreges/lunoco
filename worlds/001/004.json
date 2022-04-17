@@ -1,64 +1,74 @@
 {
-  "ball":{
-    "y":460,
-    "x":150
+  "ball": {
+    "x": 150,
+    "y": 460
   },
-  "obstacles":[{
-      "y":380,
-      "type":"corner",
-      "height":80,
-      "x":0,
-      "width":80
-    },{
-      "y":380,
-      "type":"corner",
-      "height":80,
-      "rotation":270,
-      "x":220,
-      "width":80
-    },{
-      "y":0,
-      "type":"corner",
-      "height":80,
-      "rotation":180,
-      "x":220,
-      "width":80
-    },{
-      "y":0,
-      "type":"corner",
-      "height":80,
-      "rotation":90,
-      "x":0,
-      "width":80
-    },{
-      "y":100,
-      "type":"vertical-barrier-large",
-      "height":180,
-      "x":50,
-      "width":40
-    },{
-      "y":100,
-      "type":"vertical-barrier-large",
-      "height":180,
-      "x":210,
-      "width":40
-    },{
-      "y":240,
-      "type":"horizontal-barrier",
-      "height":40,
-      "x":100,
-      "width":100
-    }],
-  "stars":{
-    "one":3,
-    "three":1,
-    "two":2
+  "obstacles": [
+    {
+      "type": "corner",
+      "x": 0,
+      "y": 380,
+      "width": 80,
+      "height": 80
+    },
+    {
+      "type": "corner",
+      "x": 220,
+      "y": 380,
+      "width": 80,
+      "height": 80,
+      "rotation": 270
+    },
+    {
+      "type": "corner",
+      "x": 220,
+      "y": 0,
+      "width": 80,
+      "height": 80,
+      "rotation": 180
+    },
+    {
+      "type": "corner",
+      "x": 0,
+      "y": 0,
+      "width": 80,
+      "height": 80,
+      "rotation": 90
+    },
+    {
+      "type": "vertical-barrier-large",
+      "x": 50,
+      "y": 100,
+      "width": 40,
+      "height": 180
+    },
+    {
+      "type": "vertical-barrier-large",
+      "x": 210,
+      "y": 100,
+      "width": 40,
+      "height": 180
+    },
+    {
+      "type": "horizontal-barrier",
+      "x": 100,
+      "y": 240,
+      "width": 100,
+      "height": 40
+    }
+  ],
+  "stars": {
+    "one": 3,
+    "two": 2,
+    "three": 1
   },
-  "targets":[{
-      "y":180,
-      "type":"normal",
-      "height":40,
-      "x":130,
-      "width":40
-    }]
+  "targets": [
+    {
+      "type": "normal",
+      "x": 130,
+      "y": 180,
+      "width": 40,
+      "height": 40
+    }
+  ]
 }

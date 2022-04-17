@@ -1,63 +1,73 @@
 {
-  "ball":{
-    "y":460,
-    "x":150
+  "ball": {
+    "x": 150,
+    "y": 460
   },
-  "obstacles":[{
-      "y":0,
-      "type":"corner",
-      "height":75,
-      "rotation":180,
-      "x":225,
-      "width":75
-    },{
-      "y":0,
-      "type":"corner",
-      "height":75,
-      "rotation":90,
-      "x":0,
-      "width":75
-    },{
-      "y":100,
-      "type":"vertical-barrier-large",
-      "height":250,
-      "x":60,
-      "width":40
-    },{
-      "y":100,
-      "type":"vertical-barrier-large",
-      "height":250,
-      "x":200,
-      "width":40
-    }],
-  "stars":{
-    "one":4,
-    "three":2,
-    "two":3
+  "obstacles": [
+    {
+      "type": "corner",
+      "x": 225,
+      "y": 0,
+      "width": 75,
+      "height": 75,
+      "rotation": 180
+    },
+    {
+      "type": "corner",
+      "x": 0,
+      "y": 0,
+      "width": 75,
+      "height": 75,
+      "rotation": 90
+    },
+    {
+      "type": "vertical-barrier-large",
+      "x": 60,
+      "y": 100,
+      "width": 40,
+      "height": 250
+    },
+    {
+      "type": "vertical-barrier-large",
+      "x": 200,
+      "y": 100,
+      "width": 40,
+      "height": 250
+    }
+  ],
+  "stars": {
+    "one": 4,
+    "two": 3,
+    "three": 2
   },
-  "targets":[{
-      "y":100,
-      "type":"easy",
-      "height":40,
-      "x":10,
-      "width":40
-    },{
-      "y":310,
-      "type":"normal",
-      "height":40,
-      "x":10,
-      "width":40
-    },{
-      "y":100,
-      "type":"easy",
-      "height":40,
-      "x":250,
-      "width":40
-    },{
-      "y":310,
-      "type":"normal",
-      "height":40,
-      "x":250,
-      "width":40
-    }]
+  "targets": [
+    {
+      "type": "easy",
+      "x": 10,
+      "y": 100,
+      "width": 40,
+      "height": 40
+    },
+    {
+      "type": "normal",
+      "x": 10,
+      "y": 310,
+      "width": 40,
+      "height": 40
+    },
+    {
+      "type": "easy",
+      "x": 250,
+      "y": 100,
+      "width": 40,
+      "height": 40
+    },
+    {
+      "type": "normal",
+      "x": 250,
+      "y": 310,
+      "width": 40,
+      "height": 40
+    }
+  ]
 }
