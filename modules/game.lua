@@ -52,6 +52,7 @@ local function createObstacles(parent, level)
       corner.x = 10 + configuration.x + corner.width / 2
       corner.y = 10 + configuration.y + corner.height / 2
       corner.rotation = configuration.rotation
+      corner.type = configuration.type
       obstacles[index] = corner
 
       local chain = {
@@ -77,6 +78,7 @@ local function createObstacles(parent, level)
       barrier.anchorY = 0
       barrier.x = 10 + configuration.x
       barrier.y = 10 + configuration.y
+      barrier.type = configuration.type
       obstacles[index] = barrier
 
       physics.addBody(barrier, "static", {
@@ -128,6 +130,60 @@ game.createLevel = function(parent, level)
   objects.ball = createBall(parent, level)
 
   return objects
+end
+
+game.createLevelConfiguration = function(objects)
+  local configuration = {}
+
+  configuration.ball = {
+    x = objects.ball.x - 10,
+    y = objects.ball.y + 5,
+  }
+
+  -- TODO à personnaliser
+  configuration.stars = {
+    one = 2,
+    two = 4,
+    three = 6,
+  }
+
+  configuration.obstacles = {}
+  configuration.targets = {}
+
+  for index = 1, #objects.obstacles do
+    local obstacle = objects.obstacles[index]
+    if obstacle.type == "corner" then
+      configuration.obstacles[index] = {
+        type = obstacle.type,
+        x = obstacle.x - 10 - obstacle.width / 2,
+        y = obstacle.y - 10 - obstacle.height / 2,
+        width = obstacle.width,
+        height = obstacle.height,
+        rotation = obstacle.rotation,
+      }
+    elseif obstacle.type:starts("horizontal-barrier") or obstacle.type:starts("vertical-barrier") then
+      configuration.obstacles[index] = {
+        type = obstacle.type,
+        x = obstacle.x - 10,
+        y = obstacle.y - 10,
+        width = obstacle.width,
+        height = obstacle.height,
+      }
+    end
+  end
+
+  for index = 1, #objects.targets do
+    local target = objects.targets[index]
+    configuration.targets[index] = {
+      type = target.type,
+      x = target.x - 10,
+      y = target.y - 10,
+      width = target.width,
+      height = target.height,
+    }
+  end
+
+  return configuration
 end
 
 return game
