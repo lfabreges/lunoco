@@ -4,7 +4,7 @@ local worldClass = require "classes.world"
 
 local universe = {}
 
-local numberOfBuiltInWorlds = 2
+local numberOfBuiltInWorlds = 1
 local worlds = nil
 
 universe.newWorld = function()

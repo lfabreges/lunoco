@@ -3,6 +3,7 @@
 * Permettre à l'utilisateur de créer un nouveau niveau dans son propre monde
 * Simplifier une partie du code si pertinent avec un removeScene dans le hide
 * Tester la migration des anciennes données
+* Tester le multitouch avec une gestion du focus par event
 * Ajouter des checks dès que les données proviennent de systemDocument ?
 
 # Modes de jeu

@@ -78,8 +78,15 @@ local function createMoveAndPinchListener(object, onMove, onPinch)
     local phase = event.phase
     local index = event.index
     local numberOfEvents = event.numberOfEvents
+    local currentEvent = event.events[index]
     local firstEvent = event.events[1]
     local secondEvent = event.events[2]
+
+    if phase == "began" then
+      display.getCurrentStage():setFocus(object, currentEvent.id)
+      object.isFocus = object.isFocus or {}
+      object.isFocus[currentEvent.id] = true
+    end
 
     if index > 2 then
       return true
@@ -87,8 +94,6 @@ local function createMoveAndPinchListener(object, onMove, onPinch)
 
     if phase == "began" then
       if index == 1 then
-        display.getCurrentStage():setFocus(object)
-        object.isFocus = true
         previousX = firstEvent.x
         previousY = firstEvent.y
       elseif index == 2 then
@@ -96,7 +101,7 @@ local function createMoveAndPinchListener(object, onMove, onPinch)
         previousDistanceX, previousDistanceY, previousTotalDistance = calculateDistances(firstEvent, secondEvent)
       end
 
-    elseif object.isFocus then
+    elseif object.isFocus and object.isFocus[currentEvent.id] then
       if phase == "moved" then
         local x, y
         if numberOfEvents == 1 then
@@ -110,7 +115,7 @@ local function createMoveAndPinchListener(object, onMove, onPinch)
         previousX = x
         previousY = y
         if onMove then
-          onMove(deltaX, deltaY)
+          onMove(object, deltaX, deltaY)
         end
 
         if numberOfEvents > 1 then
@@ -122,14 +127,14 @@ local function createMoveAndPinchListener(object, onMove, onPinch)
           previousDistanceY = distanceY
           previousTotalDistance = totalDistance
           if onPinch then
-            onPinch(deltaDistanceX, deltaDistanceY, deltaTotalDistance)
+            onPinch(object, deltaDistanceX, deltaDistanceY, deltaTotalDistance)
           end
         end
 
       elseif phase == "ended" or phase == "cancelled" then
+        object.isFocus[currentEvent.id] = nil
         if numberOfEvents == 1 then
-          display.getCurrentStage():setFocus(nil)
-          object.isFocus = false
+          display.getCurrentStage():setFocus(object, nil)
         elseif numberOfEvents == 2 then
           local remainingEvent = index == 1 and secondEvent or firstEvent
           previousX = remainingEvent.x

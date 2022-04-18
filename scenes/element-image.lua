@@ -34,7 +34,7 @@ local function goBack()
   navigation.gotoCustomizeLevel(level)
 end
 
-local function onMove(deltaX, deltaY)
+local function onMove(_, deltaX, deltaY)
   local containerBounds = frontContainer.contentBounds
   local photoBounds = backPhoto.contentBounds
   deltaX = photoBounds.xMax + deltaX < containerBounds.xMax and containerBounds.xMax - photoBounds.xMax or deltaX
@@ -46,7 +46,7 @@ local function onMove(deltaX, deltaY)
   frontPhoto:translate(deltaX, deltaY)
 end
 
-local function onPinch(deltaDistanceX, deltaDistanceY)
+local function onPinch(_, deltaDistanceX, deltaDistanceY)
   local minXScale = frontContainer.width / backPhoto.width
   local minYScale = frontContainer.height / backPhoto.height
   local xScale = math.min(4, math.max(minXScale, frontPhoto.xScale + deltaDistanceX / backPhoto.width))
@@ -128,7 +128,7 @@ function scene:show(event)
       frontContainer.maskScaleY = frontContainer.height / 394
     end
 
-    onPinch(0, 0)
+    onPinch(background, 0, 0)
 
   elseif event.phase == "did" then
     if not utils.isSimulator() then
