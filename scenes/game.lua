@@ -34,8 +34,7 @@ local function gameOver()
     numberOfStars = 1
   end
 
-  -- TODO Changer pour place dans level
-  level.world:saveLevelScore(level.name, numberOfShots, numberOfStars)
+  level:saveScore(numberOfShots, numberOfStars)
 
   -- TODO A positionner dans navigation
   composer.showOverlay("scenes.game-over", {

@@ -12,14 +12,15 @@ local version = utils.loadJson("version.json", system.DocumentsDirectory)
 
 if version.number == nil then
   local oldScores = utils.loadJson("scores.json", system.DocumentsDirectory)
-  local newScores = { ["builtIn"] = { ["01"] = {} } }
+  local newScores = {}
   for levelName, levelScore in pairs(oldScores) do
     if levelName:match("^%d+$") then
       local levelNumber = tonumber(levelName)
-      newScores["builtIn"]["01"][string.format("%02d", levelNumber)] = levelScore
+      newScores[string.format("%02d", levelNumber)] = levelScore
     end
   end
-  utils.saveJson(newScores, "scores.json", system.DocumentsDirectory)
+  utils.mkdir(system.DocumentsDirectory, "worlds", "builtIn", "01")
+  utils.saveJson(newScores, "worlds/builtIn/01/scores.json", system.DocumentsDirectory)
 
   utils.mkdir(system.DocumentsDirectory, "elements", "builtIn", "01")
   for levelNumber = 1, 10 do

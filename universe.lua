@@ -32,8 +32,8 @@ universe.worlds = function()
       worlds[worldNumber] = worldClass:new(worldName, true)
     end
 
-    if utils.fileExists("worlds", system.DocumentsDirectory) then
-      local userWorldsDirectoryPath = system.pathForFile("worlds", system.DocumentsDirectory)
+    if utils.fileExists("worlds/user", system.DocumentsDirectory) then
+      local userWorldsDirectoryPath = system.pathForFile("worlds/user", system.DocumentsDirectory)
       for filename in lfs.dir(userWorldsDirectoryPath) do
         local worldName = filename:match("^(%d+)%.json$")
         if worldName then

@@ -1,22 +1,10 @@
 local levelClass = require "classes.level"
 local utils = require "modules.utils"
 
-local cachedScores = nil
 local worldClass = {}
-
-local function loadScores()
-  cachedScores = cachedScores or utils.loadJson("scores.json", system.DocumentsDirectory)
-  return cachedScores
-end
-
-local function saveScores(scores)
-  utils.saveJson(scores, "scores.json", system.DocumentsDirectory)
-  cachedScores = scores
-end
 
 function worldClass:new(name, isBuiltIn)
   local object = {}
-  object.baseDirectory = isBuiltIn and system.ResourceDirectory or system.DocumentsDirectory
   object.isBuiltIn = isBuiltIn
   object.name = name
   object.type = isBuiltIn and "builtIn" or "user"
@@ -28,7 +16,12 @@ end
 function worldClass:levels()
   if self._levels == nil then
     self._levels = {}
-    local configuration = utils.loadJson("worlds/" .. self.name .. ".json", self.baseDirectory)
+    local configuration
+    if self.isBuiltIn then
+      configuration = utils.loadJson("worlds/" .. self.name .. ".json", system.ResourceDirectory)
+    else
+      configuration = utils.loadJson("worlds/user/" .. self.name .. ".json", system.DocumentsDirectory)
+    end
     for index = 1, #configuration.levels do
       self._levels[index] = levelClass:new(self, configuration.levels[index])
     end
@@ -37,7 +30,16 @@ function worldClass:levels()
 end
 
 function worldClass:scores()
-  return utils.nestedGetOrDefault(loadScores(), self.type, self.name, {})
+  if self._scores == nil then
+    self._scores = utils.loadJson("worlds/" .. self.type .. "/" .. self.name .. "/scores.json", system.DocumentsDirectory)
+  end
+  return self._scores
+end
+
+function worldClass:saveScores(scores)
+  utils.mkdir(system.DocumentsDirectory, "worlds", self.type, self.name)
+  utils.saveJson(scores, "worlds/" .. self.type .. "/" .. self.name .. "/scores.json", system.DocumentsDirectory)
+  self._scores = scores
 end
 
 function worldClass:progress()
@@ -61,17 +63,6 @@ function worldClass:progress()
 
   local progress = (numberOfFinishedLevels / numberOfLevels) * 25 + (totalNumberOfStars / (numberOfLevels * 3)) * 75
   return progress, worldNumberOfStars
-end
-
--- TODO Move to level class
-function worldClass:saveLevelScore(levelName, numberOfShots, numberOfStars)
-  local scores = loadScores()
-  local levelScore = utils.nestedGetOrSet(scores, self.type, self.name, levelName, {})
-  if levelScore.numberOfShots == nil or levelScore.numberOfShots > numberOfShots then
-    levelScore.numberOfShots = numberOfShots
-    levelScore.numberOfStars = numberOfStars
-    saveScores(scores)
-  end
 end
 
 return worldClass
