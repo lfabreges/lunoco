@@ -142,7 +142,8 @@ function scene:show(event)
     components.newObjectButton(newWorldContainer, {
       onRelease = function()
         local world = universe.newWorld()
-        navigation.gotoLevelEditor(world, "1")
+        local level = world:newLevel()
+        navigation.gotoLevelEditor(level)
       end,
       scrollview = scrollview,
     })

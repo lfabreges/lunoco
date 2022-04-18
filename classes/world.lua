@@ -22,11 +22,27 @@ function worldClass:levels()
     else
       configuration = utils.loadJson("worlds/user/" .. self.name .. ".json", system.DocumentsDirectory)
     end
-    for index = 1, #configuration.levels do
-      self._levels[index] = levelClass:new(self, configuration.levels[index])
+    if configuration.levels then
+      for index = 1, #configuration.levels do
+        self._levels[index] = levelClass:new(self, configuration.levels[index])
+      end
     end
   end
   return self._levels
+end
+
+function worldClass:newLevel()
+  local levels = self:levels()
+  local newLevelNumber = 1
+  for _, level in pairs(levels) do
+    local levelNumber = tonumber(level.name)
+    if levelNumber >= newLevelNumber then
+      newLevelNumber = levelNumber + 1
+    end
+  end
+  local newLevel = levelClass:new(self, tostring(newLevelNumber))
+  self._levels[#self._levels + 1] = newLevel
+  return newLevel
 end
 
 function worldClass:scores()

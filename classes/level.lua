@@ -25,6 +25,19 @@ function levelClass:configuration()
         system.DocumentsDirectory
       )
     end
+    -- TODO A voir si à positionner ailleurs ?
+    if not self._configuration.ball then
+      self._configuration.ball = { x = 150, y = 460 }
+    end
+    if not self._configuration.stars then
+      self._configuration.stars = { one = 6, two = 4, three = 2 }
+    end
+    if not self._configuration.obstacles then
+      self._configuration.obstacles = {}
+    end
+    if not self._configuration.targets then
+      self._configuration.targets = {}
+    end
   end
   return self._configuration
 end
@@ -69,6 +82,14 @@ function levelClass:saveImage(object, imageName)
   self:removeImage(imageName)
   local imageNames = self:imageNames()
   imageNames[imageName] = filename
+end
+
+function levelClass:saveScore(numberOfShots, numberOfStars)
+  local worldScores = self.world:scores()
+  if worldScores[self.name] == nil or worldScores[self.name].numberOfShots > numberOfShots then
+    worldScores[self.name] = { numberOfShots = numberOfShots, numberOfStars = numberOfStars }
+    self.world:saveScores(worldScores)
+  end
 end
 
 function levelClass:newBackground(parent, width, height)
@@ -137,14 +158,6 @@ function levelClass:newTarget(parent, targetType, width, height)
   local target = display.newImageRect(parent, imageName, imageBaseDir, width, height)
   target.isDefault = isDefault
   return target
-end
-
-function levelClass:saveScore(numberOfShots, numberOfStars)
-  local worldScores = self.world:scores()
-  if worldScores[self.name] == nil or worldScores[self.name].numberOfShots > numberOfShots then
-    worldScores[self.name] = { numberOfShots = numberOfShots, numberOfStars = numberOfStars }
-    self.world:saveScores(worldScores)
-  end
 end
 
 return levelClass

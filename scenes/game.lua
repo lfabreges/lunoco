@@ -1,12 +1,12 @@
 local components = require "modules.components"
 local composer = require "composer"
+local game = require "modules.game"
 local levelClass = require "classes.level"
 local navigation = require "modules.navigation"
 local utils = require "modules.utils"
 
 local ball = nil
 local ballImpulseForce = nil
-local config = nil
 local fromMKS = physics.fromMKS
 local gravityX = 0
 local gravityY = 9.8
@@ -22,12 +22,13 @@ local sounds = {
 }
 
 local function gameOver()
+  local configuration = level:configuration()
   local numberOfStars = 0
-  if numberOfShots <= config.stars.three then
+  if numberOfShots <= configuration.stars.three then
     numberOfStars = 3
-  elseif numberOfShots <= config.stars.two then
+  elseif numberOfShots <= configuration.stars.two then
     numberOfStars = 2
-  elseif numberOfShots <= config.stars.one then
+  elseif numberOfShots <= configuration.stars.one then
     numberOfStars = 1
   end
   level:saveScore(numberOfShots, numberOfStars)
@@ -45,122 +46,40 @@ end
 
 function scene:create(event)
   level = event.params.level
-  config = level:configuration()
 
-  physics.start()
-  physics.pause()
+  local objects = game.createLevel(self.view, level)
   physics.setGravity(gravityX, gravityY)
-
-  self:createFrame()
-  self:createBackground()
-  self:createObstacles()
-  self:createTargets()
-  self:createBall()
-
+  ball = objects.ball
   numberOfShots = 0
-end
 
-function scene:createBackground()
-  local background = level:newBackground(self.view, 300, 460)
-  background.anchorX = 0
-  background.anchorY = 0
-  background:translate(10, 10)
-end
-
-function scene:createBall()
-  ball = level:newBall(self.view, 30, 30)
-
-  ball.x = 10 + config.ball.x
-  ball.y = 10 + config.ball.y - 15
-
-  ball.postCollision = function(self, event)
+  ball.postCollision = function(_, event)
     if event.force >= 2 then
       utils.playAudio(sounds.collision, event.force / 100)
     end
   end
 
-  physics.addBody(ball, { radius = ball.width / 2 - 1, density = 1.0, friction = 0.3, bounce = 0.5 })
   ball.angularDamping = 3.0
-
+  ball.isBullet = true
   ball:addEventListener("postCollision")
-end
 
-function scene:createFrame()
-  local frame = level:newFrame(self.view, display.actualContentWidth, display.actualContentHeight)
-  frame.anchorX = 0
-  frame.anchorY = 0
-  frame.x = display.screenOriginX
-  frame.y = display.screenOriginY
+  local numberOfTargets = #objects.targets
 
-  physics.addBody(frame, "static", {
-    density = 1.0,
-    friction = 0.5,
-    bounce = 0.5,
-    chain = { -150, -230, 150, -230, 150, 230, -150, 230 },
-    connectFirstAndLastChainVertex = true,
-  })
-end
-
-function scene:createObstacles()
-  for _, config in ipairs(config.obstacles) do
-    if config.type == "corner" then
-      local corner = level:newObstacleCorner(self.view, config.width, config.height)
-      corner.x = 10 + config.x + corner.width / 2
-      corner.y = 10 + config.y + corner.height / 2
-      corner.rotation = config.rotation
-
-      local chain = {
-        -50, -50, -49, -44, -47, -38, -45, -33, -41, -26, -35, -17, -27, -7, -20, 1, -14, 8,
-        -8, 14, -1, 20, 7, 27, 17, 35, 26, 41, 33, 45, 38, 47, 44, 49, 50, 50, -50, 50, -50, -50
-      }
-
-      local scaledChain = {}
-
-      for i = 1, #chain, 2 do
-        scaledChain[i] = chain[i] * config.width / 100
-        scaledChain[i + 1] = chain[i + 1] * config.height / 100
-      end
-
-      physics.addBody(corner, "static", { density = 1.0, friction = 0.3, bounce = 0.5, chain = scaledChain })
-
-    elseif config.type:starts("horizontal-barrier") or config.type:starts("vertical-barrier") then
-      local barrier = level:newObstacleBarrier(self.view, config.type, config.width, config.height)
-      barrier.anchorChildren = true
-      barrier.anchorX = 0
-      barrier.anchorY = 0
-      barrier.x = 10 + config.x
-      barrier.y = 10 + config.y
-
-      physics.addBody(barrier, "static", { density = 1.0, friction = 0.3, bounce = 0.5 })
-    end
-  end
-end
-
-function scene:createTargets()
-  local numberOfTargets = 0
-
-  for _, config in ipairs(config.targets) do
-    local target = level:newTarget(self.view, config.type, config.width, config.height)
-    target.anchorChildren = true
-    target.anchorX = 0
-    target.anchorY = 0
-    target.x = 10 + config.x
-    target.y = 10 + config.y
-
+  for index = 1, numberOfTargets do
+    local target = objects.targets[index]
     local targetResistance = 8
 
-    if config.type == "easy" then
-      targetResistance = targetResistance / 2
-    elseif config.type == "hard" then
+    if target.type == "easy" then
+      targetResistance = targetResistance * 0.5
+    elseif target.type == "hard" then
       targetResistance = targetResistance * 2
     end
 
-    target.postCollision = function(self, event)
+    target.postCollision = function(_, event)
       if event.force < targetResistance then
-        return false
+        return
       end
 
-      transition.to(self, { time = 100, alpha = 0.1, onComplete = physics.removeBody } )
+      transition.to(target, { time = 100, alpha = 0.1, onComplete = physics.removeBody })
       target:removeEventListener("postCollision")
       numberOfTargets = numberOfTargets - 1
       utils.playAudio(sounds.targetDestroyed, 1.0)
@@ -170,8 +89,6 @@ function scene:createTargets()
       end
     end
 
-    numberOfTargets = numberOfTargets + 1
-    physics.addBody(target, "static", { density = 1.0, friction = 0.3, bounce = 0.5 })
     target:addEventListener("postCollision")
   end
 end
@@ -266,8 +183,6 @@ function scene:hide(event)
     audio.stop()
     physics.stop()
     transition.cancel()
-    ball = nil
-    predictedBallPath = nil
     composer.removeScene("scenes.game")
   end
 end
