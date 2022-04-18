@@ -26,6 +26,7 @@ function levelClass:configuration()
       )
     end
     -- TODO A voir si à positionner ailleurs ?
+    -- Poser une fonction de validation ?
     if not self._configuration.ball then
       self._configuration.ball = { x = 150, y = 460 }
     end
@@ -42,6 +43,15 @@ function levelClass:configuration()
   return self._configuration
 end
 
+function levelClass:image(imageName, defaultImageName)
+  local imageNames = self:imageNames()
+  if imageNames[imageName] then
+    return imageNames[imageName], system.DocumentsDirectory, false
+  else
+    return defaultImageName, system.ResourceDirectory, true
+  end
+end
+
 function levelClass:imageNames()
   if self._imageNames == nil then
     self._imageNames = {}
@@ -56,15 +66,6 @@ function levelClass:imageNames()
     end
   end
   return self._imageNames
-end
-
-function levelClass:image(imageName, defaultImageName)
-  local imageNames = self:imageNames()
-  if imageNames[imageName] then
-    return imageNames[imageName], system.DocumentsDirectory, false
-  else
-    return defaultImageName, system.ResourceDirectory, true
-  end
 end
 
 function levelClass:removeImage(imageName)
@@ -90,6 +91,106 @@ function levelClass:saveScore(numberOfShots, numberOfStars)
     worldScores[self.name] = { numberOfShots = numberOfShots, numberOfStars = numberOfStars }
     self.world:saveScores(worldScores)
   end
+end
+
+function levelClass:createElements(parent)
+  local configuration = self:configuration()
+  local elements = { obstacles = {}, targets = {} }
+
+  local frame = self:newFrame(parent, display.actualContentWidth, display.actualContentHeight)
+  frame.anchorX = 0
+  frame.anchorY = 0
+  frame.x = display.screenOriginX
+  frame.y = display.screenOriginY
+  elements.frame = frame
+
+  local background = self:newBackground(parent, 300, 460)
+  background.anchorX = 0
+  background.anchorY = 0
+  background:translate(10, 10)
+  elements.background = background
+
+  for index, configuration in ipairs(configuration.obstacles) do
+    if configuration.type == "corner" then
+      local corner = self:newObstacleCorner(parent, configuration.width, configuration.height)
+      corner.x = 10 + configuration.x + corner.width / 2
+      corner.y = 10 + configuration.y + corner.height / 2
+      corner.rotation = configuration.rotation
+      corner.type = configuration.type
+      elements.obstacles[index] = corner
+    elseif configuration.type:starts("horizontal-barrier") or configuration.type:starts("vertical-barrier") then
+      local barrier = self:newObstacleBarrier(parent, configuration.type, configuration.width, configuration.height)
+      barrier.anchorChildren = true
+      barrier.anchorX = 0
+      barrier.anchorY = 0
+      barrier.x = 10 + configuration.x
+      barrier.y = 10 + configuration.y
+      barrier.type = configuration.type
+      elements.obstacles[index] = barrier
+    end
+  end
+
+  for index, configuration in ipairs(configuration.targets) do
+    local target = self:newTarget(parent, configuration.type, configuration.width, configuration.height)
+    target.anchorChildren = true
+    target.anchorX = 0
+    target.anchorY = 0
+    target.x = 10 + configuration.x
+    target.y = 10 + configuration.y
+    target.type = configuration.type
+    elements.targets[index] = target
+  end
+
+  local ball = self:newBall(parent, 30, 30)
+  ball.x = 10 + configuration.ball.x
+  ball.y = 10 + configuration.ball.y - 15
+  elements.ball = ball
+
+  return elements
+end
+
+function levelClass:createConfiguration(elements)
+  local configuration = { obstacles = {}, targets = {} }
+
+  configuration.ball = {
+    x = elements.ball.x - 10,
+    y = elements.ball.y + 5,
+  }
+
+  for index = 1, #elements.obstacles do
+    local obstacle = elements.obstacles[index]
+    if obstacle.type == "corner" then
+      configuration.obstacles[index] = {
+        type = obstacle.type,
+        x = obstacle.x - 10 - obstacle.width / 2,
+        y = obstacle.y - 10 - obstacle.height / 2,
+        width = obstacle.width,
+        height = obstacle.height,
+        rotation = obstacle.rotation,
+      }
+    elseif obstacle.type:starts("horizontal-barrier") or obstacle.type:starts("vertical-barrier") then
+      configuration.obstacles[index] = {
+        type = obstacle.type,
+        x = obstacle.x - 10,
+        y = obstacle.y - 10,
+        width = obstacle.width,
+        height = obstacle.height,
+      }
+    end
+  end
+
+  for index = 1, #elements.targets do
+    local target = elements.targets[index]
+    configuration.targets[index] = {
+      type = target.type,
+      x = target.x - 10,
+      y = target.y - 10,
+      width = target.width,
+      height = target.height,
+    }
+  end
+
+  return configuration
 end
 
 function levelClass:newBackground(parent, width, height)

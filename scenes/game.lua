@@ -1,6 +1,5 @@
 local components = require "modules.components"
 local composer = require "composer"
-local game = require "modules.game"
 local navigation = require "modules.navigation"
 local utils = require "modules.utils"
 
@@ -36,7 +35,7 @@ function scene:create(event)
   physics.pause()
   physics.setGravity(gravityX, gravityY)
 
-  elements = game.createLevelElements(self.view, level)
+  elements = level:createElements(self.view)
   numberOfShots = 0
 
   self:configureBall()

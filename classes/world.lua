@@ -45,18 +45,6 @@ function worldClass:newLevel()
   return newLevel
 end
 
-function worldClass:scores()
-  if self._scores == nil then
-    self._scores = utils.loadJson(self.directory .. "/scores.json", system.DocumentsDirectory)
-  end
-  return self._scores
-end
-
-function worldClass:saveScores(scores)
-  utils.saveJson(scores, self.directory .. "/scores.json", system.DocumentsDirectory)
-  self._scores = scores
-end
-
 function worldClass:progress()
   local scores = self:scores()
   local levels = self:levels()
@@ -78,6 +66,18 @@ function worldClass:progress()
 
   local progress = (numberOfFinishedLevels / numberOfLevels) * 25 + (totalNumberOfStars / (numberOfLevels * 3)) * 75
   return progress, worldNumberOfStars
+end
+
+function worldClass:scores()
+  if self._scores == nil then
+    self._scores = utils.loadJson(self.directory .. "/scores.json", system.DocumentsDirectory)
+  end
+  return self._scores
+end
+
+function worldClass:saveScores(scores)
+  utils.saveJson(scores, self.directory .. "/scores.json", system.DocumentsDirectory)
+  self._scores = scores
 end
 
 return worldClass

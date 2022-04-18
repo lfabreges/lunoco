@@ -1,5 +1,4 @@
 local composer = require "composer"
-local game = require "modules.game"
 
 local elements = nil
 local level = nil
@@ -7,8 +6,7 @@ local scene = composer.newScene()
 
 function scene:create(event)
   level = event.params.level
-
-  elements = game.createLevelElements(self.view, level)
+  elements = level:createElements(self.view)
 
   elements.ball.touch = function(ball, event)
     if event.phase == "began" then
