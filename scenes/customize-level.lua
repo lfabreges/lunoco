@@ -286,17 +286,9 @@ end
 
 function scene:show(event)
   if event.phase == "will" then
-    local isNewLevel = false
-
-    if level then
-      -- TODO Faire la différence sur les nom ou ajouter une fonction compare
-      isNewLevel = level ~= event.params.level
-    end
-
+    local isNewLevel = level and level ~= event.params.level
     level = event.params.level
-
     self:createElementView()
-
     if isNewLevel then
       scrollview:scrollTo("top", { time = 0 })
     end
