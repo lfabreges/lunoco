@@ -1,12 +1,11 @@
 local components = require "modules.components"
 local composer = require "composer"
 local game = require "modules.game"
-local levelClass = require "classes.level"
 local navigation = require "modules.navigation"
 local utils = require "modules.utils"
 
-local ball = nil
 local ballImpulseForce = nil
+local elements = nil
 local fromMKS = physics.fromMKS
 local gravityX = 0
 local gravityY = 9.8
@@ -21,20 +20,6 @@ local sounds = {
   targetDestroyed = audio.loadSound("sounds/target-destroyed.wav"),
 }
 
-local function gameOver()
-  local configuration = level:configuration()
-  local numberOfStars = 0
-  if numberOfShots <= configuration.stars.three then
-    numberOfStars = 3
-  elseif numberOfShots <= configuration.stars.two then
-    numberOfStars = 2
-  elseif numberOfShots <= configuration.stars.one then
-    numberOfStars = 1
-  end
-  level:saveScore(numberOfShots, numberOfStars)
-  navigation.showGameOver(level, numberOfShots, numberOfStars)
-end
-
 local function takeLevelScreenshot()
   local screenshot = display.captureBounds(display.currentStage.contentBounds)
   local screenshotScale = screenshot.xScale * 0.33
@@ -47,10 +32,26 @@ end
 function scene:create(event)
   level = event.params.level
 
-  local objects = game.createLevel(self.view, level)
+  physics.start()
+  physics.pause()
   physics.setGravity(gravityX, gravityY)
-  ball = objects.ball
+
+  elements = game.createLevelElements(self.view, level)
   numberOfShots = 0
+
+  self:configureBall()
+  self:configureFrame()
+  self:configureObstacles()
+  self:configureTargets()
+end
+
+function scene:configureBall()
+  local ball = elements.ball
+
+  physics.addBody(ball, { bounce = 0.5, density = 1.0, friction = 0.3, radius = ball.width / 2 - 1 })
+
+  ball.angularDamping = 3.0
+  ball.isBullet = true
 
   ball.postCollision = function(_, event)
     if event.force >= 2 then
@@ -58,24 +59,53 @@ function scene:create(event)
     end
   end
 
-  ball.angularDamping = 3.0
-  ball.isBullet = true
   ball:addEventListener("postCollision")
+end
 
-  local numberOfTargets = #objects.targets
+function scene:configureFrame()
+  physics.addBody(elements.frame, "static", {
+    bounce = 0.5,
+    density = 1.0,
+    friction = 0.5,
+    chain = { -150, -230, 150, -230, 150, 230, -150, 230 },
+    connectFirstAndLastChainVertex = true,
+  })
+end
+
+function scene:configureObstacles()
+  for index = 1, #elements.obstacles do
+    local obstacle = elements.obstacles[index]
+
+    if obstacle.type == "corner" then
+      local chain = {
+        -50, -50, -49, -44, -47, -38, -45, -33, -41, -26, -35, -17, -27, -7, -20, 1, -14, 8,
+        -8, 14, -1, 20, 7, 27, 17, 35, 26, 41, 33, 45, 38, 47, 44, 49, 50, 50, -50, 50, -50, -50
+      }
+
+      for i = 1, #chain, 2 do
+        chain[i] = chain[i] * obstacle.width / 100
+        chain[i + 1] = chain[i + 1] * obstacle.height / 100
+      end
+
+      physics.addBody(obstacle, "static", { bounce = 0.5, density = 1.0, friction = 0.3, chain = chain })
+
+    elseif obstacle.type:starts("horizontal-barrier") or obstacle.type:starts("vertical-barrier") then
+      physics.addBody(obstacle, "static", { bounce = 0.5, density = 1.0, friction = 0.3 })
+    end
+  end
+end
+
+function scene:configureTargets()
+  local numberOfTargets = #elements.targets
 
   for index = 1, numberOfTargets do
-    local target = objects.targets[index]
-    local targetResistance = 8
+    local target = elements.targets[index]
+    target.resistance = ({ easy = 4, normal = 8, hard = 16 })[target.type]
 
-    if target.type == "easy" then
-      targetResistance = targetResistance * 0.5
-    elseif target.type == "hard" then
-      targetResistance = targetResistance * 2
-    end
+    physics.addBody(target, "static", { bounce = 0.5, density = 1.0, friction = 0.3 })
 
     target.postCollision = function(_, event)
-      if event.force < targetResistance then
+      if event.force < target.resistance then
         return
       end
 
@@ -85,7 +115,7 @@ function scene:create(event)
       utils.playAudio(sounds.targetDestroyed, 1.0)
 
       if (numberOfTargets == 0) then
-        gameOver()
+        self:gameOver()
       end
     end
 
@@ -113,8 +143,8 @@ function scene:lateUpdate()
 
   for step = 0, numberOfSteps, 1 do
     local time = step * timeStepInterval
-    local stepX = ball.x + time * ballImpulseForce.x + 0.5 * fromMKS("velocity", gravityX) * (time * time)
-    local stepY = ball.y + time * ballImpulseForce.y + 0.5 * fromMKS("velocity", gravityY) * (time * time)
+    local stepX = elements.ball.x + time * ballImpulseForce.x + 0.5 * fromMKS("velocity", gravityX) * (time * time)
+    local stepY = elements.ball.y + time * ballImpulseForce.y + 0.5 * fromMKS("velocity", gravityY) * (time * time)
 
     if step > 0 and physics.rayCast(prevStepX, prevStepY, stepX, stepY, "any") then
       break
@@ -142,7 +172,7 @@ function scene:touch(event)
     predictedBallPath = nil
     if event.phase == "ended" then
       if _ballImpulseForce.hasEnoughForce then
-        ball:setLinearVelocity(_ballImpulseForce.x, _ballImpulseForce.y)
+        elements.ball:setLinearVelocity(_ballImpulseForce.x, _ballImpulseForce.y)
         numberOfShots = numberOfShots + 1
         utils.playAudio(sounds.ball, 0.4)
       elseif event.y <= display.screenOriginY + display.actualContentHeight * 0.4 then
@@ -167,12 +197,30 @@ function scene:resume()
   audio.resume()
 end
 
+function scene:gameOver()
+  local configuration = level:configuration()
+  local numberOfStars = 0
+
+  if numberOfShots <= configuration.stars.three then
+    numberOfStars = 3
+  elseif numberOfShots <= configuration.stars.two then
+    numberOfStars = 2
+  elseif numberOfShots <= configuration.stars.one then
+    numberOfStars = 1
+  end
+
+  level:saveScore(numberOfShots, numberOfStars)
+  navigation.showGameOver(level, numberOfShots, numberOfStars)
+end
+
 function scene:show(event)
   if event.phase == "did" then
-    Runtime:addEventListener("lateUpdate", scene)
-    Runtime:addEventListener("touch", scene)
-    physics.start()
-    timer.performWithDelay(0, takeLevelScreenshot)
+    timer.performWithDelay(0, function()
+      takeLevelScreenshot()
+      Runtime:addEventListener("lateUpdate", scene)
+      Runtime:addEventListener("touch", scene)
+      physics.start()
+    end)
   end
 end
 

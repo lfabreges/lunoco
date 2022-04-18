@@ -13,14 +13,6 @@ local function createBall(parent, level)
   local ball = level:newBall(parent, 30, 30)
   ball.x = 10 + configuration.ball.x
   ball.y = 10 + configuration.ball.y - 15
-
-  physics.addBody(ball, {
-    bounce = 0.5,
-    density = 1.0,
-    friction = 0.3,
-    radius = ball.width / 2 - 1,
-  })
-
   return ball
 end
 
@@ -30,22 +22,12 @@ local function createFrame(parent, level)
   frame.anchorY = 0
   frame.x = display.screenOriginX
   frame.y = display.screenOriginY
-
-  physics.addBody(frame, "static", {
-    bounce = 0.5,
-    density = 1.0,
-    friction = 0.5,
-    chain = { -150, -230, 150, -230, 150, 230, -150, 230 },
-    connectFirstAndLastChainVertex = true,
-  })
-
   return frame
 end
 
 local function createObstacles(parent, level)
   local configuration = level:configuration()
   local obstacles = {}
-
   for index, configuration in ipairs(configuration.obstacles) do
     if configuration.type == "corner" then
       local corner = level:newObstacleCorner(parent, configuration.width, configuration.height)
@@ -54,23 +36,6 @@ local function createObstacles(parent, level)
       corner.rotation = configuration.rotation
       corner.type = configuration.type
       obstacles[index] = corner
-
-      local chain = {
-        -50, -50, -49, -44, -47, -38, -45, -33, -41, -26, -35, -17, -27, -7, -20, 1, -14, 8,
-        -8, 14, -1, 20, 7, 27, 17, 35, 26, 41, 33, 45, 38, 47, 44, 49, 50, 50, -50, 50, -50, -50
-      }
-      for i = 1, #chain, 2 do
-        chain[i] = chain[i] * corner.width / 100
-        chain[i + 1] = chain[i + 1] * corner.height / 100
-      end
-
-      physics.addBody(corner, "static", {
-        bounce = 0.5,
-        density = 1.0,
-        friction = 0.3,
-        chain = chain,
-      })
-
     elseif configuration.type:starts("horizontal-barrier") or configuration.type:starts("vertical-barrier") then
       local barrier = level:newObstacleBarrier(parent, configuration.type, configuration.width, configuration.height)
       barrier.anchorChildren = true
@@ -80,22 +45,14 @@ local function createObstacles(parent, level)
       barrier.y = 10 + configuration.y
       barrier.type = configuration.type
       obstacles[index] = barrier
-
-      physics.addBody(barrier, "static", {
-        bounce = 0.5,
-        density = 1.0,
-        friction = 0.3,
-      })
     end
   end
-
   return obstacles
 end
 
 local function createTargets(parent, level)
   local configuration = level:configuration()
   local targets = {}
-
   for index, configuration in ipairs(configuration.targets) do
     local target = level:newTarget(parent, configuration.type, configuration.width, configuration.height)
     target.anchorChildren = true
@@ -105,53 +62,29 @@ local function createTargets(parent, level)
     target.y = 10 + configuration.y
     target.type = configuration.type
     targets[index] = target
-
-    physics.addBody(target, "static", {
-      bounce = 0.5,
-      density = 1.0,
-      friction = 0.3,
-    })
   end
-
   return targets
 end
 
-game.createLevel = function(parent, level)
+game.createLevelElements = function(parent, level)
   local configuration = level:configuration()
-  local objects = {}
-
-  physics.start()
-  physics.pause()
-
-  objects.frame = createFrame(parent, level)
-  objects.background = createBackground(parent, level)
-  objects.obstacles = createObstacles(parent, level)
-  objects.targets = createTargets(parent, level)
-  objects.ball = createBall(parent, level)
-
-  return objects
+  local elements = {}
+  elements.frame = createFrame(parent, level)
+  elements.background = createBackground(parent, level)
+  elements.obstacles = createObstacles(parent, level)
+  elements.targets = createTargets(parent, level)
+  elements.ball = createBall(parent, level)
+  return elements
 end
 
-game.createLevelConfiguration = function(objects)
+game.createLevelConfiguration = function(elements)
   local configuration = {}
-
-  configuration.ball = {
-    x = objects.ball.x - 10,
-    y = objects.ball.y + 5,
-  }
-
-  -- TODO à personnaliser
-  configuration.stars = {
-    one = 2,
-    two = 4,
-    three = 6,
-  }
-
+  configuration.ball = { x = elements.ball.x - 10, y = elements.ball.y + 5 }
   configuration.obstacles = {}
   configuration.targets = {}
 
-  for index = 1, #objects.obstacles do
-    local obstacle = objects.obstacles[index]
+  for index = 1, #elements.obstacles do
+    local obstacle = elements.obstacles[index]
     if obstacle.type == "corner" then
       configuration.obstacles[index] = {
         type = obstacle.type,
@@ -172,8 +105,8 @@ game.createLevelConfiguration = function(objects)
     end
   end
 
-  for index = 1, #objects.targets do
-    local target = objects.targets[index]
+  for index = 1, #elements.targets do
+    local target = elements.targets[index]
     configuration.targets[index] = {
       type = target.type,
       x = target.x - 10,
