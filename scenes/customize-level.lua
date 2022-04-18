@@ -8,10 +8,9 @@ local utils = require "modules.utils"
 local widget = require "widget"
 
 local elementView = nil
-local levelName = nil
+local level = nil
 local scene = composer.newScene()
 local scrollview = nil
-local world = nil
 
 local customizableElementTypes = {
   "background",
@@ -72,7 +71,7 @@ local function capturePhoto(onComplete, shouldRequestAppPermission)
 end
 
 local function elementTypesFromLevelConfig()
-  local config = world:levelConfiguration(levelName)
+  local config = level:configuration()
   local hashSet = { ["background"] = true, ["frame"] = true, ["ball"] = true }
   local elementTypes = {}
 
@@ -101,26 +100,26 @@ local function elementTypesFromLevelConfig()
 end
 
 local function goBack()
-  navigation.gotoGame(world, levelName)
+  navigation.gotoGame(level)
 end
 
 local function newElement(parent, elementType)
   local element = nil
 
   if elementType == "background" then
-    element = elements.newBackground(parent, world, levelName, 32, 50)
+    element = elements.newBackground(parent, level, 32, 50)
   elseif elementType == "ball" then
-    element = elements.newBall(parent, world, levelName, 50, 50)
+    element = elements.newBall(parent, level, 50, 50)
   elseif elementType == "frame" then
-    element = elements.newFrame(parent, world, levelName, 50, 50)
+    element = elements.newFrame(parent, level, 50, 50)
   elseif elementType == "obstacle-corner" then
-    element = elements.newObstacleCorner(parent, world, levelName, 50, 50)
+    element = elements.newObstacleCorner(parent, level, 50, 50)
   elseif elementType:starts("obstacle-horizontal-barrier") then
-    element = elements.newObstacleBarrier(parent, world, levelName, elementType:sub(10), 50, 20)
+    element = elements.newObstacleBarrier(parent, level, elementType:sub(10), 50, 20)
   elseif elementType:starts("obstacle-vertical-barrier") then
-    element = elements.newObstacleBarrier(parent, world, levelName, elementType:sub(10), 20, 50)
+    element = elements.newObstacleBarrier(parent, level, elementType:sub(10), 20, 50)
   elseif elementType:starts("target-") then
-    element = elements.newTarget(parent, world, levelName, elementType:sub(8), 50, 50)
+    element = elements.newTarget(parent, level, elementType:sub(8), 50, 50)
   end
 
   return element
@@ -216,7 +215,7 @@ function scene:createElementView()
       )
 
       local onCapturePhotoOrSelectPhotoComplete = function(filename)
-        navigation.gotoElementImage(world, levelName, elementType, filename)
+        navigation.gotoElementImage(level, elementType, filename)
       end
 
       local selectPhotoButton = components.newImageButton(
@@ -265,7 +264,7 @@ function scene:createElementView()
           40,
           {
             onRelease = function()
-              images.removeLevelImage(world, levelName, elementType)
+              images.removeLevelImage(level, elementType)
               local defaultElement = newElement(elementGroup, elementType)
               defaultElement.x = element.x
               defaultElement.y = element.y
@@ -291,12 +290,12 @@ function scene:show(event)
   if event.phase == "will" then
     local isNewLevel = false
 
-    if world and levelName then
-      isNewLevel = world ~= event.params.world or levelName ~= event.params.levelName
+    if level then
+      -- TODO Faire la différence sur les nom ou ajouter une fonction compare
+      isNewLevel = level ~= event.params.level
     end
 
-    world = event.params.world
-    levelName = event.params.levelName
+    level = event.params.level
 
     self:createElementView()
 

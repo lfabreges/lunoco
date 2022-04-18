@@ -1,3 +1,4 @@
+local levelClass = require "classes.level"
 local utils = require "modules.utils"
 
 local cachedScores = nil
@@ -24,16 +25,15 @@ function worldClass:new(name, isBuiltIn)
   return object
 end
 
-function worldClass:levelConfiguration(levelName)
-  return utils.loadJson("worlds/" .. self.name .. "/" .. levelName .. ".json", self.baseDirectory)
-end
-
-function worldClass:levelNames()
-  if self._levelNames == nil then
+function worldClass:levels()
+  if self._levels == nil then
+    self._levels = {}
     local configuration = utils.loadJson("worlds/" .. self.name .. ".json", self.baseDirectory)
-    self._levelNames = configuration.levels
+    for index = 1, #configuration.levels do
+      self._levels[index] = levelClass:new(self, configuration.levels[index])
+    end
   end
-  return self._levelNames
+  return self._levels
 end
 
 function worldClass:scores()
@@ -42,15 +42,15 @@ end
 
 function worldClass:progress()
   local scores = self:scores()
-  local levelNames = self:levelNames()
-  local numberOfLevels = #levelNames
+  local levels = self:levels()
+  local numberOfLevels = #levels
   local numberOfFinishedLevels = 0
   local totalNumberOfStars = 0
   local worldNumberOfStars = 3
 
-  for _, levelName in pairs(levelNames) do
-    if scores[levelName] then
-      local levelNumberOfStars = scores[levelName].numberOfStars
+  for _, level in pairs(levels) do
+    if scores[level.name] then
+      local levelNumberOfStars = scores[level.name].numberOfStars
       numberOfFinishedLevels = numberOfFinishedLevels + 1
       totalNumberOfStars = totalNumberOfStars + levelNumberOfStars
       worldNumberOfStars = math.min(worldNumberOfStars, levelNumberOfStars)
@@ -63,6 +63,7 @@ function worldClass:progress()
   return progress, worldNumberOfStars
 end
 
+-- TODO Move to level class
 function worldClass:saveLevelScore(levelName, numberOfShots, numberOfStars)
   local scores = loadScores()
   local levelScore = utils.nestedGetOrSet(scores, self.type, self.name, levelName, {})

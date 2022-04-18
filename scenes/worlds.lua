@@ -4,6 +4,7 @@ local i18n = require "modules.i18n"
 local images = require "modules.images"
 local navigation = require "modules.navigation"
 local universe = require "universe"
+local utils = require "modules.utils"
 local widget = require "widget"
 
 local content = nil
@@ -58,14 +59,15 @@ function scene:show(event)
     content = components.newGroup(scrollview)
 
     for _, world in ipairs(worlds) do
-      local worldLevelNames = world:levelNames()
+      local worldLevels = world:levels()
       local worldProgress, worldNumberOfStars = world:progress()
       local worldButtonContainer = display.newContainer(content, 280, 105)
 
       for levelNumber = 1, 5 do
         -- TODO Pour traiter le cas où le niveau n'existe pas un peu mieux
-        local levelName = worldLevelNames[levelNumber] or "unknown"
-        local levelImageName = images.levelImageName(world, levelName, "screenshot")
+        local levelClass = require "classes.level"
+        local level = worldLevels[levelNumber] or levelClass:new(world, "unknown")
+        local levelImageName = images.levelImageName(level, "screenshot")
         local levelImageBaseDir = system.DocumentsDirectory
 
         if not levelImageName then

@@ -14,9 +14,8 @@ local elementType = nil
 local filename = nil
 local frontContainer = nil
 local frontPhoto = nil
-local levelName = nil
+local level = nil
 local scene = composer.newScene()
-local world = nil
 
 local elements = {
   ["background"] = { width = 200, height = 306 },
@@ -33,7 +32,7 @@ local elements = {
 }
 
 local function goBack()
-  navigation.gotoCustomizeLevel(world, levelName)
+  navigation.gotoCustomizeLevel(level)
 end
 
 local function onMove(deltaX, deltaY)
@@ -64,9 +63,9 @@ end
 local function saveImage()
   local b = frontContainer.contentBounds
   local elementCapture = display.captureBounds({ xMin = b.xMin, xMax = b.xMax - 1, yMin = b.yMin, yMax = b.yMax - 1 })
-  images.saveLevelImage(elementCapture, world, levelName, elementType)
+  images.saveLevelImage(elementCapture, level, elementType)
   display.remove(elementCapture)
-  navigation.gotoCustomizeLevel(world, levelName)
+  navigation.gotoCustomizeLevel(level)
 end
 
 function scene:create(event)
@@ -90,8 +89,7 @@ end
 
 function scene:show(event)
   if event.phase == "will" then
-    world = event.params.world
-    levelName = event.params.levelName
+    level = event.params.level
     elementType = event.params.elementType
     filename = event.params.filename
 

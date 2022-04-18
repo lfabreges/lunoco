@@ -5,16 +5,15 @@ local navigation = require "modules.navigation"
 
 local scene = composer.newScene()
 
-local levelName = nil
+local level = nil
 local shouldResumeGame = false
-local world = nil
 
 local function gotoCustomizeLevel()
-  navigation.gotoCustomizeLevel(world, levelName)
+  navigation.gotoCustomizeLevel(level)
 end
 
 local function gotoLevels()
-  navigation.gotoLevels(world)
+  navigation.gotoLevels(level.world)
 end
 
 local function resumeGame()
@@ -23,7 +22,7 @@ local function resumeGame()
 end
 
 local function retryLevel()
-  navigation.reloadGame(world, levelName)
+  navigation.reloadGame(level)
 end
 
 function scene:create(event)
@@ -65,8 +64,7 @@ end
 
 function scene:show(event)
   if event.phase == "will" then
-    world = event.params.world
-    levelName = event.params.levelName
+    level = event.params.level
     shouldResumeGame = false
   end
 end

@@ -2,6 +2,7 @@ local components = require "modules.components"
 local composer = require "composer"
 local elements = require "modules.elements"
 local images = require "modules.images"
+local levelClass = require "classes.level"
 local navigation = require "modules.navigation"
 local utils = require "modules.utils"
 
@@ -11,11 +12,10 @@ local config = nil
 local fromMKS = physics.fromMKS
 local gravityX = 0
 local gravityY = 9.8
-local levelName = nil
+local level = nil
 local numberOfShots = nil
 local predictedBallPath = nil
 local scene = composer.newScene()
-local world = nil
 
 local sounds = {
   ball = audio.loadSound("sounds/ball.wav"),
@@ -34,15 +34,16 @@ local function gameOver()
     numberOfStars = 1
   end
 
-  world:saveLevelScore(levelName, numberOfShots, numberOfStars)
+  -- TODO Changer pour place dans level
+  level.world:saveLevelScore(level.name, numberOfShots, numberOfStars)
 
+  -- TODO A positionner dans navigation
   composer.showOverlay("scenes.game-over", {
     isModal = true,
     effect = "crossFade",
     time = 500,
     params = {
-      world = world,
-      levelName = levelName,
+      level = level,
       numberOfShots = numberOfShots,
       numberOfStars = numberOfStars,
     },
@@ -54,14 +55,13 @@ local function takeLevelScreenshot()
   local screenshotScale = screenshot.xScale * 0.33
   screenshot.xScale = screenshotScale
   screenshot.yScale = screenshotScale
-  images.saveLevelImage(screenshot, world, levelName, "screenshot")
+  images.saveLevelImage(screenshot, level, "screenshot")
   display.remove(screenshot)
 end
 
 function scene:create(event)
-  world = event.params.world
-  levelName = event.params.levelName
-  config = world:levelConfiguration(levelName)
+  level = event.params.level
+  config = level:configuration()
 
   physics.start()
   physics.pause()
@@ -77,14 +77,14 @@ function scene:create(event)
 end
 
 function scene:createBackground()
-  local background = elements.newBackground(self.view, world, levelName, 300, 460)
+  local background = elements.newBackground(self.view, level, 300, 460)
   background.anchorX = 0
   background.anchorY = 0
   background:translate(10, 10)
 end
 
 function scene:createBall()
-  ball = elements.newBall(self.view, world, levelName, 30, 30)
+  ball = elements.newBall(self.view, level, 30, 30)
 
   ball.x = 10 + config.ball.x
   ball.y = 10 + config.ball.y - 15
@@ -102,7 +102,7 @@ function scene:createBall()
 end
 
 function scene:createFrame()
-  local frame = elements.newFrame(self.view, world, levelName, display.actualContentWidth, display.actualContentHeight)
+  local frame = elements.newFrame(self.view, level, display.actualContentWidth, display.actualContentHeight)
   frame.anchorX = 0
   frame.anchorY = 0
   frame.x = display.screenOriginX
@@ -120,7 +120,7 @@ end
 function scene:createObstacles()
   for _, config in ipairs(config.obstacles) do
     if config.type == "corner" then
-      local corner = elements.newObstacleCorner(self.view, world, levelName, config.width, config.height)
+      local corner = elements.newObstacleCorner(self.view, level, config.width, config.height)
       corner.x = 10 + config.x + corner.width / 2
       corner.y = 10 + config.y + corner.height / 2
       corner.rotation = config.rotation
@@ -140,7 +140,7 @@ function scene:createObstacles()
       physics.addBody(corner, "static", { density = 1.0, friction = 0.3, bounce = 0.5, chain = scaledChain })
 
     elseif config.type:starts("horizontal-barrier") or config.type:starts("vertical-barrier") then
-      local barrier = elements.newObstacleBarrier(self.view, world, levelName, config.type, config.width, config.height)
+      local barrier = elements.newObstacleBarrier(self.view, level, config.type, config.width, config.height)
       barrier.anchorChildren = true
       barrier.anchorX = 0
       barrier.anchorY = 0
@@ -156,7 +156,7 @@ function scene:createTargets()
   local numberOfTargets = 0
 
   for _, config in ipairs(config.targets) do
-    local target = elements.newTarget(self.view, world, levelName, config.type, config.width, config.height)
+    local target = elements.newTarget(self.view, level, config.type, config.width, config.height)
     target.anchorChildren = true
     target.anchorX = 0
     target.anchorY = 0
@@ -258,9 +258,10 @@ end
 function scene:pause()
   audio.pause()
   physics.pause()
+  -- TODO A positionner dans navigation
   composer.showOverlay("scenes.pause", {
     isModal = true,
-    params = { world = world, levelName = levelName },
+    params = { level = level },
   })
 end
 

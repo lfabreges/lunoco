@@ -16,8 +16,8 @@ local function goBack()
   navigation.gotoWorlds()
 end
 
-local function startLevel(levelName)
-  navigation.gotoGame(world, levelName)
+local function startLevel(level)
+  navigation.gotoGame(level)
 end
 
 function scene:create(event)
@@ -69,17 +69,17 @@ function scene:show(event)
     local centerX = scrollview.width * 0.5
     local spaceWidth = (display.actualContentWidth - 240) / 3
     local y = 0
-    local worldLevelNames = world:levelNames()
+    local worldLevels = world:levels()
     local worldProgress = world:progress()
     local worldScores = world:scores()
 
     content = components.newGroup(scrollview)
     worldProgressText.text = i18n.t("progress", worldProgress)
 
-    for levelNumber, levelName in ipairs(worldLevelNames) do
+    for levelNumber, level in ipairs(worldLevels) do
       local isEven = levelNumber % 2 == 0
       local levelImage = nil
-      local levelImageName = images.levelImageName(world, levelName, "screenshot")
+      local levelImageName = images.levelImageName(level, "screenshot")
       local levelImageBaseDir = system.DocumentsDirectory
 
       if not levelImageName then
@@ -93,15 +93,15 @@ function scene:show(event)
         levelImageBaseDir,
         120,
         180,
-        { onRelease = function() startLevel(levelName) end, scrollview = scrollview }
+        { onRelease = function() startLevel(level) end, scrollview = scrollview }
       )
 
       levelButton.anchorY = 0
       levelButton.y = y
       levelButton.x = isEven and centerX + 60 + spaceWidth / 2 or centerX - 60 - spaceWidth / 2
 
-      if worldScores[levelName] then
-        local numberOfStars = worldScores[levelName].numberOfStars
+      if worldScores[level.name] then
+        local numberOfStars = worldScores[level.name].numberOfStars
 
         for starCount = 1, 3 do
           local isFullStar = numberOfStars >= starCount

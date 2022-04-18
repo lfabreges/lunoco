@@ -4,16 +4,16 @@ local utils = require "modules.utils"
 local images = {}
 local levelImageNames = {}
 
-local function loadLevelImageNames(world, levelName)
-  local imageNames = utils.nestedGet(levelImageNames, world.type, world.name, levelName)
+local function loadLevelImageNames(level)
+  local imageNames = utils.nestedGet(levelImageNames, level.world.type, level.world.name, level.name)
 
   if imageNames then
     return imageNames
   else
-    imageNames = utils.nestedSet(levelImageNames, world.type, world.name, levelName, {})
+    imageNames = utils.nestedSet(levelImageNames, level.world.type, level.world.name, level.name, {})
   end
 
-  local levelDirectoryName = "elements/" .. world.type .. "/" .. world.name .. "/" .. levelName
+  local levelDirectoryName = "elements/" .. level.world.type .. "/" .. level.world.name .. "/" .. level.name
 
   if utils.fileExists(levelDirectoryName, system.DocumentsDirectory) then
     local path = system.pathForFile(levelDirectoryName, system.DocumentsDirectory)
@@ -28,30 +28,30 @@ local function loadLevelImageNames(world, levelName)
   return imageNames
 end
 
-images.levelImageName = function(world, levelName, imageName)
-  local levelImageNames = loadLevelImageNames(world, levelName)
+images.levelImageName = function(level, imageName)
+  local levelImageNames = loadLevelImageNames(level)
   return levelImageNames[imageName] and levelImageNames[imageName] or nil
 end
 
-images.removeLevelImage = function(world, levelName, imageName)
-  local levelImageName = images.levelImageName(world, levelName, imageName)
+images.removeLevelImage = function(level, imageName)
+  local levelImageName = images.levelImageName(level, imageName)
   if levelImageName then
-    local levelImageNames = loadLevelImageNames(world, levelName)
+    local levelImageNames = loadLevelImageNames(level)
     local filepath = system.pathForFile(levelImageName, system.DocumentsDirectory)
     os.remove(filepath)
     levelImageNames[imageName] = nil
   end
 end
 
-images.saveLevelImage = function(object, world, levelName, imageName)
-  utils.mkdir(system.DocumentsDirectory, "elements", world.type, world.name, levelName)
+images.saveLevelImage = function(object, level, imageName)
+  utils.mkdir(system.DocumentsDirectory, "elements", level.world.type, level.world.name, level.name)
 
-  local levelDirectoryName = "elements/" .. world.type .. "/" .. world.name .. "/" .. levelName
+  local levelDirectoryName = "elements/" .. level.world.type .. "/" .. level.world.name .. "/" .. level.name
   local filename = levelDirectoryName .. "/" .. imageName .. ".nocache." .. math.random() .. ".png"
   display.save(object, { filename = filename, captureOffscreenArea = true })
-  images.removeLevelImage(world, levelName, imageName)
+  images.removeLevelImage(level, imageName)
 
-  local levelImageNames = loadLevelImageNames(world, levelName)
+  local levelImageNames = loadLevelImageNames(level)
   levelImageNames[imageName] = filename
 end
 

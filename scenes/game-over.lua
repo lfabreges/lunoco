@@ -5,12 +5,11 @@ local navigation = require "modules.navigation"
 local utils = require "modules.utils"
 
 local finishedInText = nil
-local levelName = nil
+local level = nil
 local numberOfShots = nil
 local numberOfStars = nil
 local scene = composer.newScene()
 local stars = nil
-local world = nil
 
 local sounds = {
   starEmpty = audio.loadSound("sounds/star-empty.wav"),
@@ -27,11 +26,11 @@ local function displayStars(event)
 end
 
 local function gotoLevels()
-  navigation.gotoLevels(world)
+  navigation.gotoLevels(level.world)
 end
 
 local function retryLevel()
-  navigation.reloadGame(world, levelName)
+  navigation.reloadGame(level)
 end
 
 function scene:create(event)
@@ -58,8 +57,7 @@ end
 
 function scene:show(event)
   if event.phase == "will" then
-    world = event.params.world
-    levelName = event.params.levelName
+    level = event.params.level
     numberOfShots = event.params.numberOfShots
     numberOfStars = event.params.numberOfStars
     finishedInText.text = i18n.p("finished_in", numberOfShots)

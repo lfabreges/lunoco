@@ -1,14 +1,12 @@
 local composer = require "composer"
 
 local config = nil
-local levelName = nil
+local level = nil
 local scene = composer.newScene()
-local world = nil
 
 function scene:create(event)
-  world = event.params.world
-  levelName = event.params.levelName
-  config = world:levelConfiguration(levelName)
+  level = event.params.level
+  config = level:configuration()
 end
 
 function scene:hide(event)
