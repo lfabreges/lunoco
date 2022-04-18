@@ -58,12 +58,13 @@ function scene:show(event)
     content = components.newGroup(scrollview)
 
     for _, world in ipairs(worlds) do
-      local worldLevels = world:levels()
+      local worldLevelNames = world:levelNames()
       local worldProgress, worldNumberOfStars = world:progress()
       local worldButtonContainer = display.newContainer(content, 280, 105)
 
       for levelNumber = 1, 5 do
-        local levelName = worldLevels[levelNumber] or "unknown"
+        -- TODO Pour traiter le cas où le niveau n'existe pas un peu mieux
+        local levelName = worldLevelNames[levelNumber] or "unknown"
         local levelImageName = images.levelImageName(world, levelName, "screenshot")
         local levelImageBaseDir = system.DocumentsDirectory
 
@@ -135,7 +136,14 @@ function scene:show(event)
     newWorldBackground:setStrokeColor(0.5, 0.5, 0.5, 0.75)
 
     display.newImageRect(newWorldContainer, "images/icons/plus.png", 50, 50)
-    components.newObjectButton(newWorldContainer, { onRelease = function() navigation.gotoLevels("user") end })
+
+    components.newObjectButton(newWorldContainer, {
+      onRelease = function()
+        local world = universe.newWorld()
+        navigation.gotoLevelEditor(world, "1")
+      end,
+      scrollview = scrollview,
+    })
   end
 end
 

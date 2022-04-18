@@ -13,11 +13,53 @@ end
 
 utils.mkdir = function(baseDirectory, ...)
   local baseDirectoryPath = system.pathForFile(nil, baseDirectory)
+  local numberOfArguments = select("#", ...)
   lfs.chdir(baseDirectoryPath)
-  for _, directoryName in ipairs({ ... }) do
+  for index = 1, numberOfArguments do
+    local directoryName = select(index, ...)
     lfs.mkdir(directoryName)
     lfs.chdir(directoryName)
   end
+end
+
+utils.nestedGet = function(object, ...)
+  local numberOfArguments = select("#", ...)
+  local nestedValue = object
+  for index = 1, numberOfArguments do
+    if type(nestedValue) ~= "table" then
+      return nil
+    end
+    nestedValue = nestedValue[select(index, ...)]
+  end
+  return nestedValue
+end
+
+utils.nestedSet = function(object, ...)
+  local numberOfArguments = select("#", ...)
+  local nestedFieldName = select(numberOfArguments - 1, ...)
+  local value = select(numberOfArguments, ...)
+  local nestedObject = object
+  for index = 1, numberOfArguments - 2 do
+    local argument = select(index, ...)
+    if nestedObject[argument] == nil then
+      nestedObject[argument] = {}
+    end
+    nestedObject = nestedObject[argument]
+  end
+  nestedObject[nestedFieldName] = value
+  return value
+end
+
+utils.nestedGetOrDefault = function(object, ...)
+  local numberOfArguments = select("#", ...)
+  local value = utils.nestedGet(object, unpack({ ... }, 1, numberOfArguments - 1))
+  return value or select(numberOfArguments, ...)
+end
+
+utils.nestedGetOrSet = function(object, ...)
+  local numberOfArguments = select("#", ...)
+  local value = utils.nestedGet(object, unpack({ ... }, 1, numberOfArguments - 1))
+  return value or utils.nestedSet(object, unpack({ ... }))
 end
 
 utils.isAndroid = function()
@@ -26,10 +68,6 @@ end
 
 utils.isSimulator = function()
   return environment == "simulator"
-end
-
-utils.loadLevelConfig = function(world, levelName)
-  return utils.loadJson("worlds/" .. world.name .. "/" .. levelName .. ".json", world.baseDirectory)
 end
 
 utils.loadJson = function(filename, baseDirectory)

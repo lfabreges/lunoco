@@ -15,42 +15,42 @@ end
 
 function worldClass:new(name, isBuiltIn)
   local object = {}
-
   object.baseDirectory = isBuiltIn and system.ResourceDirectory or system.DocumentsDirectory
-  object.category = isBuiltIn and "builtIn" or "user"
   object.isBuiltIn = isBuiltIn
   object.name = name
-
+  object.type = isBuiltIn and "builtIn" or "user"
   setmetatable(object, self)
   self.__index = self
-
   return object
 end
 
-function worldClass:levels()
-  if self._levels == nil then
+function worldClass:levelConfiguration(levelName)
+  return utils.loadJson("worlds/" .. self.name .. "/" .. levelName .. ".json", self.baseDirectory)
+end
+
+function worldClass:levelNames()
+  if self._levelNames == nil then
     local configuration = utils.loadJson("worlds/" .. self.name .. ".json", self.baseDirectory)
-    self._levels = configuration.levels
+    self._levelNames = configuration.levels
   end
-  return self._levels
+  return self._levelNames
 end
 
 function worldClass:scores()
-  local scores = loadScores()
-  return scores[self.category] and scores[self.category][self.name] or {}
+  return utils.nestedGetOrDefault(loadScores(), self.type, self.name, {})
 end
 
 function worldClass:progress()
-  local worldScores = self:scores()
-  local worldLevels = self:levels()
-  local numberOfLevels = #worldLevels
+  local scores = self:scores()
+  local levelNames = self:levelNames()
+  local numberOfLevels = #levelNames
   local numberOfFinishedLevels = 0
   local totalNumberOfStars = 0
   local worldNumberOfStars = 3
 
-  for _, levelName in pairs(worldLevels) do
-    if worldScores[levelName] then
-      local levelNumberOfStars = worldScores[levelName].numberOfStars
+  for _, levelName in pairs(levelNames) do
+    if scores[levelName] then
+      local levelNumberOfStars = scores[levelName].numberOfStars
       numberOfFinishedLevels = numberOfFinishedLevels + 1
       totalNumberOfStars = totalNumberOfStars + levelNumberOfStars
       worldNumberOfStars = math.min(worldNumberOfStars, levelNumberOfStars)
@@ -59,21 +59,16 @@ function worldClass:progress()
     end
   end
 
-  local worldProgress = (numberOfFinishedLevels / numberOfLevels) * 25
-  worldProgress = worldProgress + (totalNumberOfStars / (numberOfLevels * 3)) * 75
-
-  return worldProgress, worldNumberOfStars
+  local progress = (numberOfFinishedLevels / numberOfLevels) * 25 + (totalNumberOfStars / (numberOfLevels * 3)) * 75
+  return progress, worldNumberOfStars
 end
 
 function worldClass:saveLevelScore(levelName, numberOfShots, numberOfStars)
   local scores = loadScores()
-  scores[self.category] = scores[self.category] or {}
-  scores[self.category][self.name] = scores[self.category][self.name] or {}
-
-  local levelScore = scores[self.category][self.name][levelName]
-
-  if not levelScore or levelScore.numberOfShots > numberOfShots then
-    scores[self.category][self.name][levelName] = { numberOfShots = numberOfShots, numberOfStars = numberOfStars }
+  local levelScore = utils.nestedGetOrSet(scores, self.type, self.name, levelName, {})
+  if levelScore.numberOfShots == nil or levelScore.numberOfShots > numberOfShots then
+    levelScore.numberOfShots = numberOfShots
+    levelScore.numberOfStars = numberOfStars
     saveScores(scores)
   end
 end

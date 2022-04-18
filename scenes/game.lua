@@ -8,13 +8,12 @@ local utils = require "modules.utils"
 local ball = nil
 local ballImpulseForce = nil
 local config = nil
+local fromMKS = physics.fromMKS
 local gravityX = 0
 local gravityY = 9.8
-local level = nil
 local levelName = nil
 local numberOfShots = nil
 local predictedBallPath = nil
-local scale = 30
 local scene = composer.newScene()
 local world = nil
 
@@ -59,13 +58,14 @@ local function takeLevelScreenshot()
   display.remove(screenshot)
 end
 
-function scene:createLevel()
+function scene:create(event)
+  world = event.params.world
+  levelName = event.params.levelName
+  config = world:levelConfiguration(levelName)
+
   physics.start()
   physics.pause()
-  physics.setScale(scale)
   physics.setGravity(gravityX, gravityY)
-
-  level = components.newGroup(self.view)
 
   self:createFrame()
   self:createBackground()
@@ -77,14 +77,14 @@ function scene:createLevel()
 end
 
 function scene:createBackground()
-  local background = elements.newBackground(level, world, levelName, 300, 460)
+  local background = elements.newBackground(self.view, world, levelName, 300, 460)
   background.anchorX = 0
   background.anchorY = 0
   background:translate(10, 10)
 end
 
 function scene:createBall()
-  ball = elements.newBall(level, world, levelName, 30, 30)
+  ball = elements.newBall(self.view, world, levelName, 30, 30)
 
   ball.x = 10 + config.ball.x
   ball.y = 10 + config.ball.y - 15
@@ -102,7 +102,7 @@ function scene:createBall()
 end
 
 function scene:createFrame()
-  local frame = elements.newFrame(level, world, levelName, display.actualContentWidth, display.actualContentHeight)
+  local frame = elements.newFrame(self.view, world, levelName, display.actualContentWidth, display.actualContentHeight)
   frame.anchorX = 0
   frame.anchorY = 0
   frame.x = display.screenOriginX
@@ -120,7 +120,7 @@ end
 function scene:createObstacles()
   for _, config in ipairs(config.obstacles) do
     if config.type == "corner" then
-      local corner = elements.newObstacleCorner(level, world, levelName, config.width, config.height)
+      local corner = elements.newObstacleCorner(self.view, world, levelName, config.width, config.height)
       corner.x = 10 + config.x + corner.width / 2
       corner.y = 10 + config.y + corner.height / 2
       corner.rotation = config.rotation
@@ -140,7 +140,7 @@ function scene:createObstacles()
       physics.addBody(corner, "static", { density = 1.0, friction = 0.3, bounce = 0.5, chain = scaledChain })
 
     elseif config.type:starts("horizontal-barrier") or config.type:starts("vertical-barrier") then
-      local barrier = elements.newObstacleBarrier(level, world, levelName, config.type, config.width, config.height)
+      local barrier = elements.newObstacleBarrier(self.view, world, levelName, config.type, config.width, config.height)
       barrier.anchorChildren = true
       barrier.anchorX = 0
       barrier.anchorY = 0
@@ -156,7 +156,7 @@ function scene:createTargets()
   local numberOfTargets = 0
 
   for _, config in ipairs(config.targets) do
-    local target = elements.newTarget(level, world, levelName, config.type, config.width, config.height)
+    local target = elements.newTarget(self.view, world, levelName, config.type, config.width, config.height)
     target.anchorChildren = true
     target.anchorX = 0
     target.anchorY = 0
@@ -203,7 +203,7 @@ function scene:lateUpdate()
     return
   end
 
-  predictedBallPath = components.newGroup(level)
+  predictedBallPath = components.newGroup(self.view)
 
   local timeStepInterval = 0.05
   local numberOfSteps = 1 / timeStepInterval
@@ -212,8 +212,8 @@ function scene:lateUpdate()
 
   for step = 0, numberOfSteps, 1 do
     local time = step * timeStepInterval
-    local stepX = ball.x + time * ballImpulseForce.x + 0.5 * gravityX * scale * (time * time)
-    local stepY = ball.y + time * ballImpulseForce.y + 0.5 * gravityY * scale * (time * time)
+    local stepX = ball.x + time * ballImpulseForce.x + 0.5 * fromMKS("velocity", gravityX) * (time * time)
+    local stepY = ball.y + time * ballImpulseForce.y + 0.5 * fromMKS("velocity", gravityY) * (time * time)
 
     if step > 0 and physics.rayCast(prevStepX, prevStepY, stepX, stepY, "any") then
       break
@@ -270,12 +270,7 @@ function scene:resume()
 end
 
 function scene:show(event)
-  if event.phase == "will" then
-    world = event.params.world
-    levelName = event.params.levelName
-    config = utils.loadLevelConfig(world, levelName)
-    self:createLevel()
-  elseif event.phase == "did" then
+  if event.phase == "did" then
     Runtime:addEventListener("lateUpdate", scene)
     Runtime:addEventListener("touch", scene)
     physics.start()
@@ -290,10 +285,9 @@ function scene:hide(event)
     audio.stop()
     physics.stop()
     transition.cancel()
-    display.remove(level)
     ball = nil
-    level = nil
     predictedBallPath = nil
+    composer.removeScene("scenes.game")
   end
 end
 
@@ -304,6 +298,7 @@ function scene:destroy(event)
   end
 end
 
+scene:addEventListener("create", scene)
 scene:addEventListener("show", scene)
 scene:addEventListener("hide", scene)
 scene:addEventListener("destroy", scene)

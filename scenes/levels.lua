@@ -69,13 +69,14 @@ function scene:show(event)
     local centerX = scrollview.width * 0.5
     local spaceWidth = (display.actualContentWidth - 240) / 3
     local y = 0
+    local worldLevelNames = world:levelNames()
     local worldProgress = world:progress()
     local worldScores = world:scores()
 
     content = components.newGroup(scrollview)
     worldProgressText.text = i18n.t("progress", worldProgress)
 
-    for levelNumber, levelName in ipairs(world:levels()) do
+    for levelNumber, levelName in ipairs(worldLevelNames) do
       local isEven = levelNumber % 2 == 0
       local levelImage = nil
       local levelImageName = images.levelImageName(world, levelName, "screenshot")

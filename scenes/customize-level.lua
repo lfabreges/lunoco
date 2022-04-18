@@ -72,7 +72,7 @@ local function capturePhoto(onComplete, shouldRequestAppPermission)
 end
 
 local function elementTypesFromLevelConfig()
-  local config = utils.loadLevelConfig(world, levelName)
+  local config = world:levelConfiguration(levelName)
   local hashSet = { ["background"] = true, ["frame"] = true, ["ball"] = true }
   local elementTypes = {}
 
