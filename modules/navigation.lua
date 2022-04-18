@@ -72,4 +72,17 @@ navigation.reloadGame = function(level)
   })
 end
 
+navigation.showGameOver = function(level, numberOfShots, numberOfStars)
+  composer.showOverlay("scenes.game-over", {
+    isModal = true,
+    effect = defaultEffect,
+    time = defaultTime,
+    params = {
+      level = level,
+      numberOfShots = numberOfShots,
+      numberOfStars = numberOfStars,
+    },
+  })
+end
+
 return navigation

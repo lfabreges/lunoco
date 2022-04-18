@@ -23,7 +23,6 @@ local sounds = {
 
 local function gameOver()
   local numberOfStars = 0
-
   if numberOfShots <= config.stars.three then
     numberOfStars = 3
   elseif numberOfShots <= config.stars.two then
@@ -31,20 +30,8 @@ local function gameOver()
   elseif numberOfShots <= config.stars.one then
     numberOfStars = 1
   end
-
   level:saveScore(numberOfShots, numberOfStars)
-
-  -- TODO A positionner dans navigation
-  composer.showOverlay("scenes.game-over", {
-    isModal = true,
-    effect = "crossFade",
-    time = 500,
-    params = {
-      level = level,
-      numberOfShots = numberOfShots,
-      numberOfStars = numberOfStars,
-    },
-  })
+  navigation.showGameOver(level, numberOfShots, numberOfStars)
 end
 
 local function takeLevelScreenshot()
@@ -255,11 +242,7 @@ end
 function scene:pause()
   audio.pause()
   physics.pause()
-  -- TODO A positionner dans navigation
-  composer.showOverlay("scenes.pause", {
-    isModal = true,
-    params = { level = level },
-  })
+  composer.showOverlay("scenes.pause", { isModal = true, params = { level = level } })
 end
 
 function scene:resume()
