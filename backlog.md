@@ -4,7 +4,6 @@
 * Ajouter un éditeur de niveau en réutilisant la logique du jeu, dans une scène à part ?
 * Simplifier une partie du code si pertinent avec un removeScene dans le hide
 * Tester la migration des anciennes données
-* Déplacer images et elements modules dans la classe level ?
 
 # Modes de jeu
 * Ajouter la possibilité de speedrun un niveau

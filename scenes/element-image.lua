@@ -1,7 +1,6 @@
 local components = require "modules.components"
 local composer = require "composer"
 local i18n = require "modules.i18n"
-local images = require "modules.images"
 local multitouch = require "libraries.multitouch"
 local navigation = require "modules.navigation"
 local utils = require "modules.utils"
@@ -63,7 +62,7 @@ end
 local function saveImage()
   local b = frontContainer.contentBounds
   local elementCapture = display.captureBounds({ xMin = b.xMin, xMax = b.xMax - 1, yMin = b.yMin, yMax = b.yMax - 1 })
-  images.saveLevelImage(elementCapture, level, elementType)
+  level:saveElementImage(elementCapture, elementType)
   display.remove(elementCapture)
   navigation.gotoCustomizeLevel(level)
 end

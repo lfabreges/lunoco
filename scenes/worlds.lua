@@ -1,7 +1,6 @@
 local components = require "modules.components"
 local composer = require "composer"
 local i18n = require "modules.i18n"
-local images = require "modules.images"
 local navigation = require "modules.navigation"
 local universe = require "universe"
 local utils = require "modules.utils"
@@ -67,13 +66,7 @@ function scene:show(event)
         -- TODO Pour traiter le cas où le niveau n'existe pas un peu mieux
         local levelClass = require "classes.level"
         local level = worldLevels[levelNumber] or levelClass:new(world, "unknown")
-        local levelImageName = images.levelImageName(level, "screenshot")
-        local levelImageBaseDir = system.DocumentsDirectory
-
-        if not levelImageName then
-          levelImageName = "images/level-unknown.png"
-          levelImageBaseDir = system.ResourceDirectory
-        end
+        local levelImageName, levelImageBaseDir = level:elementImage("screenshot", "images/level-unknown.png")
 
         local levelImage = display.newImageRect(worldButtonContainer, levelImageName, levelImageBaseDir, 70, 105)
         levelImage.anchorX = 0

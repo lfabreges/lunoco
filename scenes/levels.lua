@@ -1,7 +1,6 @@
 local components = require "modules.components"
 local composer = require "composer"
 local i18n = require "modules.i18n"
-local images = require "modules.images"
 local navigation = require "modules.navigation"
 local universe = require "universe"
 local widget = require "widget"
@@ -78,14 +77,7 @@ function scene:show(event)
 
     for levelNumber, level in ipairs(worldLevels) do
       local isEven = levelNumber % 2 == 0
-      local levelImage = nil
-      local levelImageName = images.levelImageName(level, "screenshot")
-      local levelImageBaseDir = system.DocumentsDirectory
-
-      if not levelImageName then
-        levelImageName = "images/level-unknown.png"
-        levelImageBaseDir = system.ResourceDirectory
-      end
+      local levelImageName, levelImageBaseDir = level:elementImage("screenshot", "images/level-unknown.png")
 
       local levelButton = components.newImageButton(
         content,

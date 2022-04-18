@@ -1,8 +1,6 @@
 local components = require "modules.components"
 local composer = require "composer"
-local elements = require "modules.elements"
 local i18n = require "modules.i18n"
-local images = require "modules.images"
 local navigation = require "modules.navigation"
 local utils = require "modules.utils"
 local widget = require "widget"
@@ -107,19 +105,19 @@ local function newElement(parent, elementType)
   local element = nil
 
   if elementType == "background" then
-    element = elements.newBackground(parent, level, 32, 50)
+    element = level:newBackground(parent, 32, 50)
   elseif elementType == "ball" then
-    element = elements.newBall(parent, level, 50, 50)
+    element = level:newBall(parent, 50, 50)
   elseif elementType == "frame" then
-    element = elements.newFrame(parent, level, 50, 50)
+    element = level:newFrame(parent, 50, 50)
   elseif elementType == "obstacle-corner" then
-    element = elements.newObstacleCorner(parent, level, 50, 50)
+    element = level:newObstacleCorner(parent, 50, 50)
   elseif elementType:starts("obstacle-horizontal-barrier") then
-    element = elements.newObstacleBarrier(parent, level, elementType:sub(10), 50, 20)
+    element = level:newObstacleBarrier(parent, elementType:sub(10), 50, 20)
   elseif elementType:starts("obstacle-vertical-barrier") then
-    element = elements.newObstacleBarrier(parent, level, elementType:sub(10), 20, 50)
+    element = level:newObstacleBarrier(parent, elementType:sub(10), 20, 50)
   elseif elementType:starts("target-") then
-    element = elements.newTarget(parent, level, elementType:sub(8), 50, 50)
+    element = level:newTarget(parent, elementType:sub(8), 50, 50)
   end
 
   return element
@@ -264,7 +262,7 @@ function scene:createElementView()
           40,
           {
             onRelease = function()
-              images.removeLevelImage(level, elementType)
+              level:removeElementImage(elementType)
               local defaultElement = newElement(elementGroup, elementType)
               defaultElement.x = element.x
               defaultElement.y = element.y
