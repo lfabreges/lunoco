@@ -16,9 +16,11 @@ utils.mkdir = function(baseDirectory, ...)
   local numberOfArguments = select("#", ...)
   lfs.chdir(baseDirectoryPath)
   for index = 1, numberOfArguments do
-    local directoryName = select(index, ...)
-    lfs.mkdir(directoryName)
-    lfs.chdir(directoryName)
+    local argument = select(index, ...)
+    for directoryName in string.gmatch(argument, "([^/]+)") do
+      lfs.mkdir(directoryName)
+      lfs.chdir(directoryName)
+    end
   end
 end
 
@@ -62,14 +64,6 @@ utils.nestedGetOrSet = function(object, ...)
   return value or utils.nestedSet(object, unpack({ ... }))
 end
 
-utils.isAndroid = function()
-  return platform == "android"
-end
-
-utils.isSimulator = function()
-  return environment == "simulator"
-end
-
 utils.loadJson = function(filename, baseDirectory)
   local filepath = system.pathForFile(filename, baseDirectory or system.ResourceDirectory)
   if filepath then
@@ -88,6 +82,14 @@ utils.saveJson = function(content, filename, baseDirectory)
     file:write(json.prettify(content))
     io.close(file)
   end
+end
+
+utils.isAndroid = function()
+  return platform == "android"
+end
+
+utils.isSimulator = function()
+  return environment == "simulator"
 end
 
 utils.playAudio = function(handle, volume)

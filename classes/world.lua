@@ -4,10 +4,10 @@ local utils = require "modules.utils"
 local worldClass = {}
 
 function worldClass:new(name, isBuiltIn)
-  local object = {}
-  object.isBuiltIn = isBuiltIn
-  object.name = name
-  object.type = isBuiltIn and "builtIn" or "user"
+  local object = { isBuiltIn = isBuiltIn, name = name }
+  local category = isBuiltIn and "builtIn" or "user"
+  object.directory = "worlds/" .. category .. "/" .. name
+  utils.mkdir(system.DocumentsDirectory, object.directory)
   setmetatable(object, self)
   self.__index = self
   return object
@@ -31,14 +31,13 @@ end
 
 function worldClass:scores()
   if self._scores == nil then
-    self._scores = utils.loadJson("worlds/" .. self.type .. "/" .. self.name .. "/scores.json", system.DocumentsDirectory)
+    self._scores = utils.loadJson(self.directory .. "/scores.json", system.DocumentsDirectory)
   end
   return self._scores
 end
 
 function worldClass:saveScores(scores)
-  utils.mkdir(system.DocumentsDirectory, "worlds", self.type, self.name)
-  utils.saveJson(scores, "worlds/" .. self.type .. "/" .. self.name .. "/scores.json", system.DocumentsDirectory)
+  utils.saveJson(scores, self.directory .. "/scores.json", system.DocumentsDirectory)
   self._scores = scores
 end
 

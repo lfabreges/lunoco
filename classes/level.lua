@@ -4,9 +4,9 @@ local utils = require "modules.utils"
 local levelClass = {}
 
 function levelClass:new(world, name)
-  local object = {}
-  object.name = name
-  object.world = world
+  local object = { name = name, world = world }
+  object.directory = world.directory .. "/" .. name
+  utils.mkdir(system.DocumentsDirectory, object.directory)
   setmetatable(object, self)
   self.__index = self
   return object
@@ -32,13 +32,12 @@ end
 function levelClass:elementImageNames()
   if self._elementImageNames == nil then
     self._elementImageNames = {}
-    local levelDirectoryName = "worlds/" .. self.world.type .. "/" .. self.world.name .. "/" .. self.name
-    if utils.fileExists(levelDirectoryName, system.DocumentsDirectory) then
-      local path = system.pathForFile(levelDirectoryName, system.DocumentsDirectory)
+    if utils.fileExists(self.directory, system.DocumentsDirectory) then
+      local path = system.pathForFile(self.directory, system.DocumentsDirectory)
       for filename in lfs.dir(path) do
         local imageName, elementType = filename:match("^((.+)%.nocache%..+%.png)$")
         if imageName then
-          self._elementImageNames[elementType] = levelDirectoryName .. "/" .. imageName
+          self._elementImageNames[elementType] = self.directory .. "/" .. imageName
         end
       end
     end
@@ -65,9 +64,7 @@ function levelClass:removeElementImage(elementType)
 end
 
 function levelClass:saveElementImage(object, elementType)
-  utils.mkdir(system.DocumentsDirectory, "worlds", self.world.type, self.world.name, self.name)
-  local levelDirectoryName = "worlds/" .. self.world.type .. "/" .. self.world.name .. "/" .. self.name
-  local filename = levelDirectoryName .. "/" .. elementType .. ".nocache." .. math.random() .. ".png"
+  local filename = self.directory .. "/" .. elementType .. ".nocache." .. math.random() .. ".png"
   display.save(object, { filename = filename, captureOffscreenArea = true })
   self:removeElementImage(elementType)
   local elementImageNames = self:elementImageNames()
