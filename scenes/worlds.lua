@@ -64,14 +64,12 @@ function scene:show(event)
 
       for levelNumber = 1, 5 do
         local level = worldLevels[levelNumber]
-
         if level then
           local levelImageName, levelImageBaseDir = level:image("screenshot", "images/level-unknown.png")
           local levelImage = display.newImageRect(worldButtonContainer, levelImageName, levelImageBaseDir, 70, 105)
           levelImage.anchorX = 0
           levelImage.anchorY = 0
           levelImage.x = (levelNumber - 1) * 52.5
-
           if levelNumber > 1 then
             levelImage.fill.effect = "filter.linearWipe"
             levelImage.fill.effect.direction = { -1, 0 }
@@ -79,8 +77,14 @@ function scene:show(event)
             levelImage.fill.effect.progress = 0.5
           end
         else
-          -- TODO Pour traiter le cas où le niveau n'existe pas un peu mieux
-          -- levelImageName, levelImageBaseDir = "images/level-unknown.png", system.ResourceDirectory
+          local x = (levelNumber - 1) * 52.5
+          local width = worldButtonContainer.width - x
+          local noMoreLevelBackground = display.newRect(worldButtonContainer, x, 0, width, 105)
+          noMoreLevelBackground.anchorX = 0
+          noMoreLevelBackground.anchorY = 0
+          noMoreLevelBackground.isVisible = false
+          noMoreLevelBackground.isHitTestable = true
+          break
         end
       end
 
