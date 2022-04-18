@@ -69,15 +69,14 @@ components.newObjectButton = function(object, options)
   local function onButtonTouch(event)
     if event.phase == "began" then
       display.getCurrentStage():setFocus(object, event.id)
-      object.isFocus = object.isFocus or {}
-      object.isFocus[event.id] = true
+      object.isFocus = true
       setOverState()
       if options.onEvent then
         options.onEvent(event)
       elseif options.onPress then
         options.onPress(event)
       end
-    elseif object.isFocus and object.isFocus[event.id] then
+    elseif object.isFocus then
       if event.phase == "moved" then
         if options.scrollview and math.abs(event.y - event.yStart) > 5 then
           setDefaultState()
@@ -99,10 +98,8 @@ components.newObjectButton = function(object, options)
           options.onEvent(event)
         end
         setDefaultState()
-        object.isFocus[event.id] = nil
-        if not next(object.isFocus) then
-          display.getCurrentStage():setFocus(object, nil)
-        end
+        object.isFocus = false
+        display.getCurrentStage():setFocus(object, nil)
       end
     end
     return true
