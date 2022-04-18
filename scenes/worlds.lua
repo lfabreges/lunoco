@@ -63,21 +63,24 @@ function scene:show(event)
       local worldButtonContainer = display.newContainer(content, 280, 105)
 
       for levelNumber = 1, 5 do
-        -- TODO Pour traiter le cas où le niveau n'existe pas un peu mieux
-        local levelClass = require "classes.level"
-        local level = worldLevels[levelNumber] or levelClass:new(world, "unknown")
-        local levelImageName, levelImageBaseDir = level:elementImage("screenshot", "images/level-unknown.png")
+        local level = worldLevels[levelNumber]
 
-        local levelImage = display.newImageRect(worldButtonContainer, levelImageName, levelImageBaseDir, 70, 105)
-        levelImage.anchorX = 0
-        levelImage.anchorY = 0
-        levelImage.x = (levelNumber - 1) * 52.5
+        if level then
+          local levelImageName, levelImageBaseDir = level:image("screenshot", "images/level-unknown.png")
+          local levelImage = display.newImageRect(worldButtonContainer, levelImageName, levelImageBaseDir, 70, 105)
+          levelImage.anchorX = 0
+          levelImage.anchorY = 0
+          levelImage.x = (levelNumber - 1) * 52.5
 
-        if levelNumber > 1 then
-          levelImage.fill.effect = "filter.linearWipe"
-          levelImage.fill.effect.direction = { -1, 0 }
-          levelImage.fill.effect.smoothness = 0.75
-          levelImage.fill.effect.progress = 0.5
+          if levelNumber > 1 then
+            levelImage.fill.effect = "filter.linearWipe"
+            levelImage.fill.effect.direction = { -1, 0 }
+            levelImage.fill.effect.smoothness = 0.75
+            levelImage.fill.effect.progress = 0.5
+          end
+        else
+          -- TODO Pour traiter le cas où le niveau n'existe pas un peu mieux
+          -- levelImageName, levelImageBaseDir = "images/level-unknown.png", system.ResourceDirectory
         end
       end
 

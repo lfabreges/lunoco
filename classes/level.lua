@@ -29,57 +29,57 @@ function levelClass:configuration()
   return self._configuration
 end
 
-function levelClass:elementImageNames()
-  if self._elementImageNames == nil then
-    self._elementImageNames = {}
+function levelClass:imageNames()
+  if self._imageNames == nil then
+    self._imageNames = {}
     if utils.fileExists(self.directory, system.DocumentsDirectory) then
       local path = system.pathForFile(self.directory, system.DocumentsDirectory)
       for filename in lfs.dir(path) do
-        local imageName, elementType = filename:match("^((.+)%.nocache%..+%.png)$")
-        if imageName then
-          self._elementImageNames[elementType] = self.directory .. "/" .. imageName
+        local nocacheImageName, imageName = filename:match("^((.+)%.nocache%..+%.png)$")
+        if nocacheImageName then
+          self._imageNames[imageName] = self.directory .. "/" .. nocacheImageName
         end
       end
     end
   end
-  return self._elementImageNames
+  return self._imageNames
 end
 
-function levelClass:elementImage(elementType, defaultElementImageName)
-  local elementImageNames = self:elementImageNames()
-  if elementImageNames[elementType] then
-    return elementImageNames[elementType], system.DocumentsDirectory, false
+function levelClass:image(imageName, defaultImageName)
+  local imageNames = self:imageNames()
+  if imageNames[imageName] then
+    return imageNames[imageName], system.DocumentsDirectory, false
   else
-    return defaultElementImageName, system.ResourceDirectory, true
+    return defaultImageName, system.ResourceDirectory, true
   end
 end
 
-function levelClass:removeElementImage(elementType)
-  local elementImageNames = self:elementImageNames()
-  if elementImageNames[elementType] then
-    local filepath = system.pathForFile(elementImageNames[elementType], system.DocumentsDirectory)
+function levelClass:removeImage(imageName)
+  local imageNames = self:imageNames()
+  if imageNames[imageName] then
+    local filepath = system.pathForFile(imageNames[imageName], system.DocumentsDirectory)
     os.remove(filepath)
-    elementImageNames[elementType] = nil
+    imageNames[imageName] = nil
   end
 end
 
-function levelClass:saveElementImage(object, elementType)
-  local filename = self.directory .. "/" .. elementType .. ".nocache." .. math.random() .. ".png"
+function levelClass:saveImage(object, imageName)
+  local filename = self.directory .. "/" .. imageName .. ".nocache." .. math.random() .. ".png"
   display.save(object, { filename = filename, captureOffscreenArea = true })
-  self:removeElementImage(elementType)
-  local elementImageNames = self:elementImageNames()
-  elementImageNames[elementType] = filename
+  self:removeImage(imageName)
+  local imageNames = self:imageNames()
+  imageNames[imageName] = filename
 end
 
 function levelClass:newBackground(parent, width, height)
-  local imageName, imageBaseDir, isDefault = self:elementImage("background", "images/elements/background.png")
+  local imageName, imageBaseDir, isDefault = self:image("background", "images/elements/background.png")
   local background = display.newImageRect(parent, imageName, imageBaseDir, width, height)
   background.isDefault = isDefault
   return background
 end
 
 function levelClass:newBall(parent, width, height)
-  local imageName, imageBaseDir, isDefault = self:elementImage("ball", "images/elements/ball.png")
+  local imageName, imageBaseDir, isDefault = self:image("ball", "images/elements/ball.png")
   local ball = display.newImageRect(parent, imageName, imageBaseDir, width, height)
   local ballMask = graphics.newMask("images/elements/ball-mask.png")
   ball:setMask(ballMask)
@@ -90,7 +90,7 @@ function levelClass:newBall(parent, width, height)
 end
 
 function levelClass:newFrame(parent, width, height)
-  local imageName, imageBaseDir, isDefault = self:elementImage("frame", "images/elements/frame.png")
+  local imageName, imageBaseDir, isDefault = self:image("frame", "images/elements/frame.png")
   local frame = display.newContainer(parent, width, height)
   local imageWidth = math.min(128, width)
   local imageHeight = math.min(128, height)
@@ -109,7 +109,7 @@ function levelClass:newFrame(parent, width, height)
 end
 
 function levelClass:newObstacleBarrier(parent, barrierType, width, height)
-  local imageName, imageBaseDir, isDefault = self:elementImage(
+  local imageName, imageBaseDir, isDefault = self:image(
     "obstacle-" .. barrierType,
     "images/elements/" .. barrierType .. ".png"
   )
@@ -119,7 +119,7 @@ function levelClass:newObstacleBarrier(parent, barrierType, width, height)
 end
 
 function levelClass:newObstacleCorner(parent, width, height)
-  local imageName, imageBaseDir, isDefault = self:elementImage("obstacle-corner", "images/elements/corner.png")
+  local imageName, imageBaseDir, isDefault = self:image("obstacle-corner", "images/elements/corner.png")
   local corner = display.newImageRect(parent, imageName, imageBaseDir, width, height)
   local cornerMask = graphics.newMask("images/elements/corner-mask.png")
   corner:setMask(cornerMask)
@@ -130,7 +130,7 @@ function levelClass:newObstacleCorner(parent, width, height)
 end
 
 function levelClass:newTarget(parent, targetType, width, height)
-  local imageName, imageBaseDir, isDefault = self:elementImage(
+  local imageName, imageBaseDir, isDefault = self:image(
     "target-" .. targetType,
     "images/elements/target-" .. targetType .. ".png"
   )

@@ -77,7 +77,7 @@ function scene:show(event)
 
     for levelNumber, level in ipairs(worldLevels) do
       local isEven = levelNumber % 2 == 0
-      local levelImageName, levelImageBaseDir = level:elementImage("screenshot", "images/level-unknown.png")
+      local levelImageName, levelImageBaseDir = level:image("screenshot", "images/level-unknown.png")
 
       local levelButton = components.newImageButton(
         content,

@@ -62,7 +62,7 @@ end
 local function saveImage()
   local b = frontContainer.contentBounds
   local elementCapture = display.captureBounds({ xMin = b.xMin, xMax = b.xMax - 1, yMin = b.yMin, yMax = b.yMax - 1 })
-  level:saveElementImage(elementCapture, elementType)
+  level:saveImage(elementCapture, elementType)
   display.remove(elementCapture)
   navigation.gotoCustomizeLevel(level)
 end

@@ -262,7 +262,7 @@ function scene:createElementView()
           40,
           {
             onRelease = function()
-              level:removeElementImage(elementType)
+              level:removeImage(elementType)
               local defaultElement = newElement(elementGroup, elementType)
               defaultElement.x = element.x
               defaultElement.y = element.y

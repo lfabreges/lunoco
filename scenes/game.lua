@@ -52,7 +52,7 @@ local function takeLevelScreenshot()
   local screenshotScale = screenshot.xScale * 0.33
   screenshot.xScale = screenshotScale
   screenshot.yScale = screenshotScale
-  level:saveElementImage(screenshot, "screenshot")
+  level:saveImage(screenshot, "screenshot")
   display.remove(screenshot)
 end
 
