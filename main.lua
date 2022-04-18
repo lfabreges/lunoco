@@ -11,6 +11,8 @@ native.setProperty("preferredScreenEdgesDeferringSystemGestures", true)
 local version = utils.loadJson("version.json", system.DocumentsDirectory)
 
 if version.number == nil then
+  utils.mkdir(system.DocumentsDirectory, "worlds", "builtIn", "01")
+
   local oldScores = utils.loadJson("scores.json", system.DocumentsDirectory)
   local newScores = {}
   for levelName, levelScore in pairs(oldScores) do
@@ -19,16 +21,14 @@ if version.number == nil then
       newScores[string.format("%02d", levelNumber)] = levelScore
     end
   end
-  utils.mkdir(system.DocumentsDirectory, "worlds", "builtIn", "01")
   utils.saveJson(newScores, "worlds/builtIn/01/scores.json", system.DocumentsDirectory)
 
-  utils.mkdir(system.DocumentsDirectory, "elements", "builtIn", "01")
   for levelNumber = 1, 10 do
     local levelName = string.format("%03d", levelNumber)
     if utils.fileExists(levelName, system.DocumentsDirectory) then
       local oldFilePath = system.pathForFile(levelName, system.DocumentsDirectory)
       local newFilePath = system.pathForFile(
-        "elements/builtIn/01/" .. string.format("%02d", levelNumber),
+        "worlds/builtIn/01/" .. string.format("%02d", levelNumber),
         system.DocumentsDirectory
       )
       os.rename(oldFilePath, newFilePath)

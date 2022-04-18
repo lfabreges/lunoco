@@ -32,7 +32,7 @@ end
 function levelClass:elementImageNames()
   if self._elementImageNames == nil then
     self._elementImageNames = {}
-    local levelDirectoryName = "elements/" .. self.world.type .. "/" .. self.world.name .. "/" .. self.name
+    local levelDirectoryName = "worlds/" .. self.world.type .. "/" .. self.world.name .. "/" .. self.name
     if utils.fileExists(levelDirectoryName, system.DocumentsDirectory) then
       local path = system.pathForFile(levelDirectoryName, system.DocumentsDirectory)
       for filename in lfs.dir(path) do
@@ -65,8 +65,8 @@ function levelClass:removeElementImage(elementType)
 end
 
 function levelClass:saveElementImage(object, elementType)
-  utils.mkdir(system.DocumentsDirectory, "elements", self.world.type, self.world.name, self.name)
-  local levelDirectoryName = "elements/" .. self.world.type .. "/" .. self.world.name .. "/" .. self.name
+  utils.mkdir(system.DocumentsDirectory, "worlds", self.world.type, self.world.name, self.name)
+  local levelDirectoryName = "worlds/" .. self.world.type .. "/" .. self.world.name .. "/" .. self.name
   local filename = levelDirectoryName .. "/" .. elementType .. ".nocache." .. math.random() .. ".png"
   display.save(object, { filename = filename, captureOffscreenArea = true })
   self:removeElementImage(elementType)
