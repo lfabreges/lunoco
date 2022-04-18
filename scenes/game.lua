@@ -174,7 +174,7 @@ function scene:touch(event)
         elements.ball:setLinearVelocity(_ballImpulseForce.x, _ballImpulseForce.y)
         numberOfShots = numberOfShots + 1
         utils.playAudio(sounds.ball, 0.4)
-      elseif event.y <= display.screenOriginY + display.actualContentHeight * 0.4 then
+      elseif event.y <= display.screenOriginY + display.actualContentHeight * 0.33 then
         self:pause()
       end
     end

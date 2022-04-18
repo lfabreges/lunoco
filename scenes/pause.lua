@@ -30,12 +30,12 @@ function scene:create(event)
   local screenHeight = display.actualContentHeight
 
   local resumeBackground = components.newBackground(self.view)
-  resumeBackground.height = screenHeight * 0.4
+  resumeBackground.height = screenHeight * 0.33
   resumeBackground:setFillColor(1, 1, 1, 0.9)
 
   local remainingBackground = components.newBackground(self.view)
-  remainingBackground.y = screenY + screenHeight * 0.4
-  remainingBackground.height = screenHeight * 0.6
+  remainingBackground.y = screenY + resumeBackground.height
+  remainingBackground.height = screenHeight - resumeBackground.height
   remainingBackground:setFillColor(0, 0, 0, 0.9)
 
   local resumeButtonGroup = components.newGroup(self.view)
@@ -45,21 +45,21 @@ function scene:create(event)
   resumeButtonArea.isHitTestable = true
   local resumeButton = components.newObjectButton(resumeButtonGroup, { onRelease = resumeGame })
   resumeButton.x = display.contentCenterX
-  resumeButton.y = screenY + screenHeight * 0.2
+  resumeButton.y = screenY + resumeBackground.height * 0.5
 
   local retryButton = components.newTextButton(self.view, i18n.t("retry"), 160, 40, { onRelease = retryLevel })
   retryButton.x = display.contentCenterX
-  retryButton.y = screenY + screenHeight * 0.7 - 60
+  retryButton.y = remainingBackground.y + remainingBackground.height * 0.5 - 60
 
   local levelsButton = components.newTextButton(self.view, i18n.t("levels"), 160, 40, { onRelease = gotoLevels })
   levelsButton.x = display.contentCenterX
-  levelsButton.y = screenY + screenHeight * 0.7
+  levelsButton.y = retryButton.y + 60
 
   local customizeButton = components.newTextButton(self.view, i18n.t("customize"), 160, 40, {
     onRelease = gotoCustomizeLevel,
   })
   customizeButton.x = display.contentCenterX
-  customizeButton.y = screenY + screenHeight * 0.7 + 60
+  customizeButton.y = levelsButton.y + 60
 end
 
 function scene:show(event)

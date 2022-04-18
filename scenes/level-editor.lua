@@ -6,14 +6,6 @@ local elements = nil
 local level = nil
 local scene = composer.newScene()
 
-local function isWithinBounds(object, event)
-  local bounds = object.contentBounds
-  local x = event.x
-  local y = event.y
-	local isWithinBounds = true
-	return bounds.xMin <= x and bounds.xMax >= x and bounds.yMin <= y and bounds.yMax >= y
-end
-
 local function onMove(element, deltaX, deltaY)
   local elementBounds = element.contentBounds
   local levelBounds = elements.background.contentBounds
