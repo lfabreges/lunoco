@@ -136,10 +136,11 @@ end
 
 function levelClass:createConfiguration(elements)
   local configuration = { obstacles = {}, targets = {} }
+  local round = math.round
 
   configuration.ball = {
-    x = elements.ball.x - 10,
-    y = elements.ball.y + 5,
+    x = round(elements.ball.x - 10),
+    y = round(elements.ball.y + 5),
   }
 
   for index = 1, #elements.obstacles do
@@ -147,19 +148,19 @@ function levelClass:createConfiguration(elements)
     if obstacle.type == "corner" then
       configuration.obstacles[index] = {
         type = obstacle.type,
-        x = obstacle.x - 10 - obstacle.width / 2,
-        y = obstacle.y - 10 - obstacle.height / 2,
-        width = obstacle.width,
-        height = obstacle.height,
-        rotation = obstacle.rotation,
+        x = round(obstacle.x - 10 - obstacle.width / 2),
+        y = round(obstacle.y - 10 - obstacle.height / 2),
+        width = round(obstacle.width),
+        height = round(obstacle.height),
+        rotation = round(obstacle.rotation),
       }
     elseif obstacle.type:starts("horizontal-barrier") or obstacle.type:starts("vertical-barrier") then
       configuration.obstacles[index] = {
         type = obstacle.type,
-        x = obstacle.x - 10,
-        y = obstacle.y - 10,
-        width = obstacle.width,
-        height = obstacle.height,
+        x = round(obstacle.x - 10),
+        y = round(obstacle.y - 10),
+        width = round(obstacle.width),
+        height = round(obstacle.height),
       }
     end
   end
@@ -168,10 +169,10 @@ function levelClass:createConfiguration(elements)
     local target = elements.targets[index]
     configuration.targets[index] = {
       type = target.type,
-      x = target.x - 10,
-      y = target.y - 10,
-      width = target.width,
-      height = target.height,
+      x = round(target.x - 10),
+      y = round(target.y - 10),
+      width = round(target.width),
+      height = round(target.height),
     }
   end
 
@@ -197,6 +198,7 @@ function levelClass:newBackground(parent, width, height)
   local imageName, imageBaseDir, isDefault = self:image("background", "images/elements/background.png")
   local background = display.newImageRect(parent, imageName, imageBaseDir, width, height)
   background.isDefault = isDefault
+  background.family = "root"
   background.type = "background"
   return background
 end
@@ -209,6 +211,7 @@ function levelClass:newBall(parent, width, height)
   ball.maskScaleX = ball.width / 394
   ball.maskScaleY = ball.height / 394
   ball.isDefault = isDefault
+  ball.family = "root"
   ball.type = "ball"
   return ball
 end
@@ -227,6 +230,7 @@ function levelClass:newFrame(parent, width, height)
     end
   end
   frame.isDefault = isDefault
+  frame.family = "root"
   frame.type = "frame"
   return frame
 end
@@ -238,6 +242,7 @@ function levelClass:newObstacleBarrier(parent, barrierType, width, height)
   )
   local barrier = display.newImageRect(parent, imageName, imageBaseDir, width, height)
   barrier.isDefault = isDefault
+  barrier.family = "obstacle"
   barrier.type = barrierType
   return barrier
 end
@@ -250,6 +255,7 @@ function levelClass:newObstacleCorner(parent, width, height)
   corner.maskScaleX = corner.width / 394
   corner.maskScaleY = corner.height / 394
   corner.isDefault = isDefault
+  corner.family = "obstacle"
   corner.type = "corner"
   return corner
 end
@@ -261,6 +267,7 @@ function levelClass:newTarget(parent, targetType, width, height)
   )
   local target = display.newImageRect(parent, imageName, imageBaseDir, width, height)
   target.isDefault = isDefault
+  target.family = "target"
   target.type = targetType
   return target
 end

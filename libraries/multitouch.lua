@@ -84,6 +84,19 @@ local function createMoveAndPinchListener(object, onMove, onPinch)
 
     elseif object.isFocus then
       if phase == "moved" then
+        if numberOfEvents > 1 then
+          local distanceX, distanceY, totalDistance = calculateDistances(firstEvent, secondEvent)
+          local deltaDistanceX = distanceX - previousDistanceX
+          local deltaDistanceY = distanceY - previousDistanceY
+          local deltaTotalDistance = totalDistance - previousTotalDistance
+          previousDistanceX = distanceX
+          previousDistanceY = distanceY
+          previousTotalDistance = totalDistance
+          if onPinch then
+            onPinch(object, deltaDistanceX, deltaDistanceY, deltaTotalDistance)
+          end
+        end
+
         local x, y
         if numberOfEvents == 1 then
           x = firstEvent.x
@@ -97,19 +110,6 @@ local function createMoveAndPinchListener(object, onMove, onPinch)
         previousY = y
         if onMove then
           onMove(object, deltaX, deltaY)
-        end
-
-        if numberOfEvents > 1 then
-          local distanceX, distanceY, totalDistance = calculateDistances(firstEvent, secondEvent)
-          local deltaDistanceX = distanceX - previousDistanceX
-          local deltaDistanceY = distanceY - previousDistanceY
-          local deltaTotalDistance = totalDistance - previousTotalDistance
-          previousDistanceX = distanceX
-          previousDistanceY = distanceY
-          previousTotalDistance = totalDistance
-          if onPinch then
-            onPinch(object, deltaDistanceX, deltaDistanceY, deltaTotalDistance)
-          end
         end
 
       elseif phase == "ended" or phase == "cancelled" then

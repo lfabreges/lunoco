@@ -11,6 +11,25 @@ utils.fileExists = function(filename, baseDirectory)
   return os.rename(filepath, filepath) and true or false
 end
 
+utils.isAndroid = function()
+  return platform == "android"
+end
+
+utils.isSimulator = function()
+  return environment == "simulator"
+end
+
+utils.loadJson = function(filename, baseDirectory)
+  local filepath = system.pathForFile(filename, baseDirectory or system.ResourceDirectory)
+  if filepath then
+    local content = json.decodeFile(filepath)
+    if content then
+      return content
+    end
+  end
+  return {}
+end
+
 utils.mkdir = function(baseDirectory, ...)
   local baseDirectoryPath = system.pathForFile(nil, baseDirectory)
   local numberOfArguments = select("#", ...)
@@ -24,6 +43,7 @@ utils.mkdir = function(baseDirectory, ...)
   end
 end
 
+
 utils.nestedGet = function(object, ...)
   local numberOfArguments = select("#", ...)
   local nestedValue = object
@@ -34,6 +54,18 @@ utils.nestedGet = function(object, ...)
     nestedValue = nestedValue[select(index, ...)]
   end
   return nestedValue
+end
+
+utils.nestedGetOrDefault = function(object, ...)
+  local numberOfArguments = select("#", ...)
+  local value = utils.nestedGet(object, unpack({ ... }, 1, numberOfArguments - 1))
+  return value or select(numberOfArguments, ...)
+end
+
+utils.nestedGetOrSet = function(object, ...)
+  local numberOfArguments = select("#", ...)
+  local value = utils.nestedGet(object, unpack({ ... }, 1, numberOfArguments - 1))
+  return value or utils.nestedSet(object, unpack({ ... }))
 end
 
 utils.nestedSet = function(object, ...)
@@ -52,46 +84,6 @@ utils.nestedSet = function(object, ...)
   return value
 end
 
-utils.nestedGetOrDefault = function(object, ...)
-  local numberOfArguments = select("#", ...)
-  local value = utils.nestedGet(object, unpack({ ... }, 1, numberOfArguments - 1))
-  return value or select(numberOfArguments, ...)
-end
-
-utils.nestedGetOrSet = function(object, ...)
-  local numberOfArguments = select("#", ...)
-  local value = utils.nestedGet(object, unpack({ ... }, 1, numberOfArguments - 1))
-  return value or utils.nestedSet(object, unpack({ ... }))
-end
-
-utils.loadJson = function(filename, baseDirectory)
-  local filepath = system.pathForFile(filename, baseDirectory or system.ResourceDirectory)
-  if filepath then
-    local content = json.decodeFile(filepath)
-    if content then
-      return content
-    end
-  end
-  return {}
-end
-
-utils.saveJson = function(content, filename, baseDirectory)
-  local filepath = system.pathForFile(filename, baseDirectory or system.ResourceDirectory)
-  local file = io.open(filepath, "w")
-  if file then
-    file:write(json.prettify(content))
-    io.close(file)
-  end
-end
-
-utils.isAndroid = function()
-  return platform == "android"
-end
-
-utils.isSimulator = function()
-  return environment == "simulator"
-end
-
 utils.playAudio = function(handle, volume)
   local freeChannel = audio.findFreeChannel()
   audio.setVolume(volume or 1.0, { channel = freeChannel })
@@ -103,6 +95,15 @@ utils.printMemoryUsage = function()
   local textureMemoryUsed = system.getInfo("textureMemoryUsed") / 1000000
   print("System", "Memory Used:", string.format("%.03f", systemMemoryUsed), "Mb")
   print("Texture", "Memory Used:", string.format("%.03f", textureMemoryUsed), "Mb")
+end
+
+utils.saveJson = function(content, filename, baseDirectory)
+  local filepath = system.pathForFile(filename, baseDirectory or system.ResourceDirectory)
+  local file = io.open(filepath, "w")
+  if file then
+    file:write(json.prettify(content))
+    io.close(file)
+  end
 end
 
 return utils

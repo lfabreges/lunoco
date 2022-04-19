@@ -8,17 +8,77 @@ local elementBar = nil
 local elements = nil
 local level = nil
 local levelView = nil
+local max = math.max
+local min = math.min
 local scene = composer.newScene()
 
 local elementDefaults = {
-  ["obstacle-corner"] = { width = 80, height = 80 },
-  ["obstacle-horizontal-barrier"] = { width = 100, height = 30 },
-  ["obstacle-horizontal-barrier-large"] = { width = 150, height = 30 },
-  ["obstacle-vertical-barrier"] = { width = 30, height = 100 },
-  ["obstacle-vertical-barrier-large"] = { width = 30, height = 200 },
-  ["target-easy"] = { width = 40, height = 40 },
-  ["target-normal"] = { width = 40, height = 40 },
-  ["target-hard"] = { width = 40, height = 40 },
+  ["obstacle-corner"] = {
+    width = 80,
+    height = 80,
+    minWidth = 40,
+    minHeight = 40,
+    maxWidth = 150,
+    maxHeight = 150,
+    canRotate = true,
+    shouldMaintainAspectRatio = true,
+  },
+  ["obstacle-horizontal-barrier"] = {
+    width = 100,
+    height = 30,
+    minWidth = 20,
+    minHeight = 10,
+    maxWidth = 150,
+    maxHeight = 60,
+  },
+  ["obstacle-horizontal-barrier-large"] = {
+    width = 150,
+    height = 30,
+    minWidth = 100,
+    minHeight = 20,
+    maxWidth = 300,
+    maxHeight = 120,
+  },
+  ["obstacle-vertical-barrier"] = {
+    width = 30,
+    height = 100,
+    minWidth = 10,
+    minHeight = 20,
+    maxWidth = 60,
+    maxHeight = 150,
+  },
+  ["obstacle-vertical-barrier-large"] = {
+    width = 30,
+    height = 200,
+    minWidth = 20,
+    minHeight = 100,
+    maxWidth = 150,
+    maxHeight = 460,
+  },
+  ["target-easy"] = {
+    width = 40,
+    height = 40,
+    minWidth = 20,
+    minHeight = 20,
+    maxWidth = 120,
+    maxHeight = 120,
+  },
+  ["target-normal"] = {
+    width = 40,
+    height = 40,
+    minWidth = 20,
+    minHeight = 20,
+    maxWidth = 120,
+    maxHeight = 120,
+  },
+  ["target-hard"] = {
+    width = 40,
+    height = 40,
+    minWidth = 20,
+    minHeight = 20,
+    maxWidth = 120,
+    maxHeight = 120,
+  },
 }
 
 local elementTypes = {
@@ -54,24 +114,20 @@ local function onMove(element, deltaX, deltaY)
   element:translate(deltaX, deltaY)
 end
 
-local function newLevelElement(elementType)
-  local element = newElement(levelView, elementType)
-  local defaults = elementDefaults[elementType]
+local function onPinch(element, deltaDistanceX, deltaDistanceY, deltaTotalDistance)
+  local defaults = elementDefaults[element.family .. "-" .. element.type]
 
-  element.maskScaleX = element.maskScaleX and element.maskScaleX * (defaults.width / element.width) or 0
-  element.maskScaleY = element.maskScaleY and element.maskScaleY * (defaults.height / element.height) or 0
-  element.width = defaults.width
-  element.height = defaults.height
-  level:positionElement(element, 150 - element.width * 0.5, 230 - element.height * 0.5)
-
-  if element.type:starts("target-") then
-    elements.targets[#elements.targets + 1] = element
-  else
-    elements.obstacles[#elements.obstacles + 1] = element
+  -- TODO A tester pour le coin, peut-être nécessaire de ralentir car la valeur sera plus grande que
+  -- simplement pour un X par exemple, à voir
+  if defaults.shouldMaintainAspectRatio then
+    deltaDistanceX = deltaTotalDistance
+    deltaDistanceY = deltaTotalDistance
   end
 
-  multitouch.addMoveAndPinchListener(element, onMove)
-  transition.from(element, { alpha = 0, time = 100 })
+  element.width = min(defaults.maxWidth, max(defaults.minWidth, element.width + deltaDistanceX))
+  element.height = min(defaults.maxHeight, max(defaults.minHeight, element.height + deltaDistanceY))
+  element.maskScaleX = element.maskScaleX and element.width / 394 or 0
+  element.maskScaleY = element.maskScaleY and element.height / 394 or 0
 end
 
 function scene:create(event)
@@ -79,18 +135,66 @@ function scene:create(event)
 
   levelView = components.newGroup(self.view)
   elements = level:createElements(levelView)
+  self:configureElement(elements.ball)
 
-  -- TODO Configurer tous les touch, etc. en auto à la création mais aussi à l'ajout, etc.
-  multitouch.addMoveAndPinchListener(elements.ball, onMove)
+  for _, element in pairs(elements.obstacles) do
+    self:configureElement(element)
+  end
+  for _, element in pairs(elements.targets) do
+    self:configureElement(element)
+  end
 
   scene:createElementBar()
+
+  -- TODO Pour du debug uniquement ? Sinon gérer le cancel dans le hide
+  --[[timer.performWithDelay(5000, function()
+    local configuration = level:createConfiguration(elements)
+    utils.saveJson(configuration, level.world.directory .. "/" .. level.name .. ".json", system.DocumentsDirectory)
+
+    local worldConfig = utils.loadJson(level.world.directory .. ".json", system.DocumentsDirectory)
+    worldConfig.levels = worldConfig.levels or {}
+
+    local levelIndex = nil
+
+    for index, levelName in ipairs(worldConfig.levels) do
+      if levelName == level.name then
+        levelIndex = index
+        break
+      end
+    end
+
+    worldConfig.levels[levelIndex or #worldConfig.levels + 1] = level.name
+    utils.saveJson(worldConfig, level.world.directory .. ".json", system.DocumentsDirectory)
+  end, -1)]]
 end
 
 function scene:createElementBar()
+  local middleGround = display.newRect(self.view, 0, 0, display.actualContentWidth, display.actualContentHeight)
+  middleGround.anchorX = 0
+  middleGround.anchorY = 0
+  middleGround.isVisible = false
+  middleGround.isHitTestable = true
+
+  middleGround:addEventListener("tap", function(event)
+    if event.numTaps == 2 and not elementBar.isOpened then
+      elementBar.open()
+    end
+    return true
+  end)
+
+  middleGround:addEventListener("touch", function(event)
+    if event.phase == "began" and elementBar.isOpened then
+      elementBar.close()
+    end
+    return false
+  end)
+
   elementBar = components.newGroup(self.view)
 
   local elementBarBackground = components.newBackground(elementBar)
   elementBarBackground.width = 106
+  elementBarBackground:addEventListener("tap", function() return true end)
+  elementBarBackground:addEventListener("touch", function() return true end)
 
   local elementBarHandle = components.newGroup(elementBar)
   elementBarHandle.x = elementBarBackground.x + 100
@@ -115,12 +219,18 @@ function scene:createElementBar()
     transition.to(elementBar, { x = elementBarMaxX, time = 100 })
     elementBar.isOpened = true
   end
+
   elementBar.close = function()
     transition.to(elementBar, { x = elementBarMinX, time = 100 })
     elementBar.isOpened = false
   end
+
   elementBar.toggle = function()
-    if elementBar.isOpened then elementBar.close() else elementBar.open() end
+    if elementBar.isOpened then
+      elementBar.close()
+    else
+      elementBar.open()
+    end
   end
 
   elementBarHandleBackground:addEventListener("touch", function(event)
@@ -161,6 +271,7 @@ function scene:createElementBar()
     topPadding = 10 + (elements.background.y - screenY),
     bottomPadding = 10 + (screenY + screenHeight) - (elements.background.y + elements.background.height),
   })
+
   elementBar:insert(scrollview)
 
   local scrollviewContent = components.newGroup(scrollview)
@@ -187,12 +298,41 @@ function scene:createElementBar()
     element.y = frame.y + frame.height * 0.5
 
     local elementButton = components.newObjectButton(elementGroup, {
-      onRelease = function() newLevelElement(elementType) end,
+      onRelease = function() scene:newLevelElement(elementType) end,
       scrollview = scrollview,
     })
 
     y = y + frame.height + 10
   end
+end
+
+function scene:configureElement(element)
+  if element.family == "obstacle" or element.family == "target" then
+    multitouch.addMoveAndPinchListener(element, onMove, onPinch)
+  else
+    multitouch.addMoveAndPinchListener(element, onMove)
+  end
+end
+
+function scene:newLevelElement(elementType)
+  local element = newElement(levelView, elementType)
+  local defaults = elementDefaults[elementType]
+
+  element.width = defaults.width
+  element.height = defaults.height
+  element.maskScaleX = element.maskScaleX and element.width / 394 or 0
+  element.maskScaleY = element.maskScaleY and element.height / 394 or 0
+
+  level:positionElement(element, 150 - element.width * 0.5, 230 - element.height * 0.5)
+
+  if elementType:starts("target-") then
+    elements.targets[#elements.targets + 1] = element
+  else
+    elements.obstacles[#elements.obstacles + 1] = element
+  end
+
+  transition.from(element, { alpha = 0, time = 100 })
+  self:configureElement(element)
 end
 
 -- TODO
@@ -203,29 +343,24 @@ end
 
 -- Lorsqu'un élément est sélectionné, il faut la possibilité de pouvoir le supprimer, à voir comment
 -- faire au mieux. En tapant à côté la sélection est perdue
+-- Par exemple une petite barre s'affiche à droite de l'élément, à gauche lorsqu'il est trop à droite
+-- Cela permet de locker l'élément pour ne plus le bouger, cela permet de le supprimer, etc.
 
-function scene:tap(event)
-  if event.numTaps == 2 then
-    -- TODO Le tap vient prendre le dessus sur le touch de la scrollview entre autres
-    -- Travailler plutot au niveau background
-    -- Lorsque la barre est ouverte un simple clic en dehors permet de fermer la barre
-    elementBar.toggle()
-  end
-  return true
-end
+-- Reste à pouvoir sauvegarder le niveau, le supprimer et configurer le nombre de coups pour les étoiles
+
+-- Permettre le pinch plus large lorsqu'un item est sélectionné ?
+-- Difficile sinon parfois d'aller chercher l'élément pour ensuite le manipuler lorsqu'il est petit
 
 function scene:show(event)
   if event.phase == "did" then
     if not utils.isSimulator() then
       system.activate("multitouch")
     end
-    Runtime:addEventListener("tap", scene)
   end
 end
 
 function scene:hide(event)
   if event.phase == "will" then
-    Runtime:removeEventListener("tap", scene)
     if not utils.isSimulator() then
       system.deactivate("multitouch")
     end
