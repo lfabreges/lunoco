@@ -10,6 +10,17 @@ local level = nil
 local levelView = nil
 local scene = composer.newScene()
 
+local elementDefaults = {
+  ["obstacle-corner"] = { width = 80, height = 80 },
+  ["obstacle-horizontal-barrier"] = { width = 100, height = 30 },
+  ["obstacle-horizontal-barrier-large"] = { width = 150, height = 30 },
+  ["obstacle-vertical-barrier"] = { width = 30, height = 100 },
+  ["obstacle-vertical-barrier-large"] = { width = 30, height = 200 },
+  ["target-easy"] = { width = 40, height = 40 },
+  ["target-normal"] = { width = 40, height = 40 },
+  ["target-hard"] = { width = 40, height = 40 },
+}
+
 local elementTypes = {
   "obstacle-corner",
   "obstacle-horizontal-barrier",
@@ -41,6 +52,26 @@ local function onMove(element, deltaX, deltaY)
   deltaY = elementBounds.yMax + deltaY > levelBounds.yMax and levelBounds.yMax - elementBounds.yMax or deltaY
   deltaY = elementBounds.yMin + deltaY < levelBounds.yMin and levelBounds.yMin - elementBounds.yMin or deltaY
   element:translate(deltaX, deltaY)
+end
+
+local function newLevelElement(elementType)
+  local element = newElement(levelView, elementType)
+  local defaults = elementDefaults[elementType]
+
+  element.maskScaleX = element.maskScaleX and element.maskScaleX * (defaults.width / element.width) or 0
+  element.maskScaleY = element.maskScaleY and element.maskScaleY * (defaults.height / element.height) or 0
+  element.width = defaults.width
+  element.height = defaults.height
+  level:positionElement(element, 150 - element.width * 0.5, 230 - element.height * 0.5)
+
+  if element.type:starts("target-") then
+    elements.targets[#elements.targets + 1] = element
+  else
+    elements.obstacles[#elements.obstacles + 1] = element
+  end
+
+  multitouch.addMoveAndPinchListener(element, onMove)
+  transition.from(element, { alpha = 0, time = 100 })
 end
 
 function scene:create(event)
@@ -89,23 +120,18 @@ function scene:createElementBar()
     elementBar.isOpened = false
   end
   elementBar.toggle = function()
-    if elementBar.isOpened then
-      elementBar.close()
-    else
-      elementBar.open()
-    end
+    if elementBar.isOpened then elementBar.close() else elementBar.open() end
   end
 
   elementBarHandleBackground:addEventListener("touch", function(event)
-    if event.phase == "began" or (event.phase == "moved" and not elementBarHandleBackground.isFocus) then
+    if event.phase == "began" then
       transition.cancel(elementBar)
       display.getCurrentStage():setFocus(elementBarHandleBackground, event.id)
       elementBarHandleBackground.isFocus = true
       elementBar.xStart = elementBar.x
-      elementBar.touchEventXStart = event.x
     elseif elementBarHandleBackground.isFocus then
       if event.phase == "moved" then
-        local x = elementBar.xStart + (event.x - elementBar.touchEventXStart)
+        local x = elementBar.xStart + (event.x - event.xStart)
         elementBar.x = x < elementBarMinX and elementBarMinX or x > elementBarMaxX and elementBarMaxX or x
       elseif event.phase == "ended" or event.phase == "cancelled" then
         display.getCurrentStage():setFocus(elementBarHandleBackground, nil)
@@ -161,10 +187,7 @@ function scene:createElementBar()
     element.y = frame.y + frame.height * 0.5
 
     local elementButton = components.newObjectButton(elementGroup, {
-      onRelease = function()
-        local newLevelElement = newElement(levelView, elementType)
-        level:positionElement(newLevelElement, 140, 200)
-      end,
+      onRelease = function() newLevelElement(elementType) end,
       scrollview = scrollview,
     })
 
@@ -183,6 +206,9 @@ end
 
 function scene:tap(event)
   if event.numTaps == 2 then
+    -- TODO Le tap vient prendre le dessus sur le touch de la scrollview entre autres
+    -- Travailler plutot au niveau background
+    -- Lorsque la barre est ouverte un simple clic en dehors permet de fermer la barre
     elementBar.toggle()
   end
   return true
