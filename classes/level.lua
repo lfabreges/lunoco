@@ -105,45 +105,30 @@ function levelClass:createElements(parent)
   elements.frame = frame
 
   local background = self:newBackground(parent, 300, 460)
-  background.anchorX = 0
-  background.anchorY = 0
-  background:translate(10, 10)
+  self:positionElement(background, 0, 0)
   elements.background = background
 
   for index, configuration in ipairs(configuration.obstacles) do
     if configuration.type == "corner" then
       local corner = self:newObstacleCorner(parent, configuration.width, configuration.height)
-      corner.x = 10 + configuration.x + corner.width / 2
-      corner.y = 10 + configuration.y + corner.height / 2
+      self:positionElement(corner, configuration.x, configuration.y)
       corner.rotation = configuration.rotation
-      corner.type = configuration.type
       elements.obstacles[index] = corner
     elseif configuration.type:starts("horizontal-barrier") or configuration.type:starts("vertical-barrier") then
       local barrier = self:newObstacleBarrier(parent, configuration.type, configuration.width, configuration.height)
-      barrier.anchorChildren = true
-      barrier.anchorX = 0
-      barrier.anchorY = 0
-      barrier.x = 10 + configuration.x
-      barrier.y = 10 + configuration.y
-      barrier.type = configuration.type
+      self:positionElement(barrier, configuration.x, configuration.y)
       elements.obstacles[index] = barrier
     end
   end
 
   for index, configuration in ipairs(configuration.targets) do
     local target = self:newTarget(parent, configuration.type, configuration.width, configuration.height)
-    target.anchorChildren = true
-    target.anchorX = 0
-    target.anchorY = 0
-    target.x = 10 + configuration.x
-    target.y = 10 + configuration.y
-    target.type = configuration.type
+    self:positionElement(target, configuration.x, configuration.y)
     elements.targets[index] = target
   end
 
   local ball = self:newBall(parent, 30, 30)
-  ball.x = 10 + configuration.ball.x
-  ball.y = 10 + configuration.ball.y - 15
+  self:positionElement(ball, configuration.ball.x, configuration.ball.y)
   elements.ball = ball
 
   return elements
@@ -193,10 +178,26 @@ function levelClass:createConfiguration(elements)
   return configuration
 end
 
+function levelClass:positionElement(element, x, y)
+  if element.type == "ball" then
+    element.x = 10 + x
+    element.y = 10 + y - element.height * 0.5
+  elseif element.type == "corner" then
+    element.x = 10 + x + element.width * 0.5
+    element.y = 10 + y + element.height * 0.5
+  else
+    element.anchorX = 0
+    element.anchorY = 0
+    element.x = 10 + x
+    element.y = 10 + y
+  end
+end
+
 function levelClass:newBackground(parent, width, height)
   local imageName, imageBaseDir, isDefault = self:image("background", "images/elements/background.png")
   local background = display.newImageRect(parent, imageName, imageBaseDir, width, height)
   background.isDefault = isDefault
+  background.type = "background"
   return background
 end
 
@@ -208,6 +209,7 @@ function levelClass:newBall(parent, width, height)
   ball.maskScaleX = ball.width / 394
   ball.maskScaleY = ball.height / 394
   ball.isDefault = isDefault
+  ball.type = "ball"
   return ball
 end
 
@@ -216,7 +218,6 @@ function levelClass:newFrame(parent, width, height)
   local frame = display.newContainer(parent, width, height)
   local imageWidth = math.min(128, width)
   local imageHeight = math.min(128, height)
-
   for x = 0, width, 128 do
     for y = 0, height, 128 do
       local frameImage = display.newImageRect(frame, imageName, imageBaseDir, imageWidth, imageHeight)
@@ -225,8 +226,8 @@ function levelClass:newFrame(parent, width, height)
       frameImage.yScale = y % 256 == 0 and 1 or -1
     end
   end
-
   frame.isDefault = isDefault
+  frame.type = "frame"
   return frame
 end
 
@@ -237,6 +238,7 @@ function levelClass:newObstacleBarrier(parent, barrierType, width, height)
   )
   local barrier = display.newImageRect(parent, imageName, imageBaseDir, width, height)
   barrier.isDefault = isDefault
+  barrier.type = barrierType
   return barrier
 end
 
@@ -248,6 +250,7 @@ function levelClass:newObstacleCorner(parent, width, height)
   corner.maskScaleX = corner.width / 394
   corner.maskScaleY = corner.height / 394
   corner.isDefault = isDefault
+  corner.type = "corner"
   return corner
 end
 
@@ -258,6 +261,7 @@ function levelClass:newTarget(parent, targetType, width, height)
   )
   local target = display.newImageRect(parent, imageName, imageBaseDir, width, height)
   target.isDefault = isDefault
+  target.type = targetType
   return target
 end
 

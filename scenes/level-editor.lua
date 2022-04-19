@@ -4,6 +4,7 @@ local multitouch = require "libraries.multitouch"
 local utils = require "modules.utils"
 local widget = require "widget"
 
+local elementBar = nil
 local elements = nil
 local level = nil
 local levelView = nil
@@ -55,9 +56,7 @@ function scene:create(event)
 end
 
 function scene:createElementBar()
-  local elementBar = components.newGroup(self.view)
-  local screenY = display.screenOriginY
-  local screenHeight = display.actualContentHeight
+  elementBar = components.newGroup(self.view)
 
   local elementBarBackground = components.newBackground(elementBar)
   elementBarBackground.width = 106
@@ -79,6 +78,23 @@ function scene:createElementBar()
   local elementBarMaxX = elementBar.x
 
   elementBar.x = elementBarMinX
+  elementBar.isOpened = false
+
+  elementBar.open = function()
+    transition.to(elementBar, { x = elementBarMaxX, time = 100 })
+    elementBar.isOpened = true
+  end
+  elementBar.close = function()
+    transition.to(elementBar, { x = elementBarMinX, time = 100 })
+    elementBar.isOpened = false
+  end
+  elementBar.toggle = function()
+    if elementBar.isOpened then
+      elementBar.close()
+    else
+      elementBar.open()
+    end
+  end
 
   elementBarHandleBackground:addEventListener("touch", function(event)
     if event.phase == "began" or (event.phase == "moved" and not elementBarHandleBackground.isFocus) then
@@ -94,12 +110,19 @@ function scene:createElementBar()
       elseif event.phase == "ended" or event.phase == "cancelled" then
         display.getCurrentStage():setFocus(elementBarHandleBackground, nil)
         elementBarHandleBackground.isFocus = false
-        local deltaX = elementBar.x - elementBar.xStart
-        local xEnd = deltaX > 20 and elementBarMaxX or deltaX < -20 and elementBarMinX or elementBar.xStart
-        transition.to(elementBar, { x = xEnd, time = 100 })
+        if math.abs(elementBar.x - elementBar.xStart) > 20 then
+          elementBar.toggle()
+        elseif elementBar.isOpened then
+          elementBar.open()
+        else
+          elementBar.close()
+        end
       end
     end
   end)
+
+  local screenY = display.screenOriginY
+  local screenHeight = display.actualContentHeight
 
   local scrollview = widget.newScrollView({
     left = elementBarBackground.x,
@@ -139,7 +162,8 @@ function scene:createElementBar()
 
     local elementButton = components.newObjectButton(elementGroup, {
       onRelease = function()
-        print("bob")
+        local newLevelElement = newElement(levelView, elementType)
+        level:positionElement(newLevelElement, 140, 200)
       end,
       scrollview = scrollview,
     })
@@ -148,8 +172,7 @@ function scene:createElementBar()
   end
 end
 
--- TODO Afficher la barre des éléments avec un swipe, avec un double tap (pareil pour fermer)
--- Ajouter un indicateur visuel au bord pour montrer que l'on peut swipe
+-- TODO
 
 -- Pour la selection, lorsque l'utilisateur clique sur un élément il est sélectionné, à ce moment
 -- un marchingAnts est affiché autour de l'élément à parti d'un rounded Rect transparent
@@ -158,16 +181,25 @@ end
 -- Lorsqu'un élément est sélectionné, il faut la possibilité de pouvoir le supprimer, à voir comment
 -- faire au mieux. En tapant à côté la sélection est perdue
 
+function scene:tap(event)
+  if event.numTaps == 2 then
+    elementBar.toggle()
+  end
+  return true
+end
+
 function scene:show(event)
   if event.phase == "did" then
     if not utils.isSimulator() then
       system.activate("multitouch")
     end
+    Runtime:addEventListener("tap", scene)
   end
 end
 
 function scene:hide(event)
   if event.phase == "will" then
+    Runtime:removeEventListener("tap", scene)
     if not utils.isSimulator() then
       system.deactivate("multitouch")
     end

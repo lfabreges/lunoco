@@ -224,9 +224,11 @@ function scene:show(event)
 end
 
 function scene:hide(event)
-  if event.phase == "did" then
+  if event.phase == "will" then
     Runtime:removeEventListener("touch", scene)
     Runtime:removeEventListener("lateUpdate", scene)
+    display.remove(predictedBallPath)
+  elseif event.phase == "did" then
     audio.stop()
     physics.stop()
     transition.cancelAll()
