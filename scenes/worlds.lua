@@ -152,7 +152,7 @@ end
 
 function scene:hide(event)
   if event.phase == "did" then
-    transition.cancel()
+    transition.cancelAll()
     display.remove(content)
     content = nil
   end

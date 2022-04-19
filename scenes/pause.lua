@@ -75,7 +75,7 @@ function scene:hide(event)
       event.parent:resume()
     end
   elseif event.phase == "did" then
-    transition.cancel()
+    transition.cancelAll()
   end
 end
 

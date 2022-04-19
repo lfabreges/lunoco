@@ -229,7 +229,7 @@ function scene:hide(event)
     Runtime:removeEventListener("lateUpdate", scene)
     audio.stop()
     physics.stop()
-    transition.cancel()
+    transition.cancelAll()
     composer.removeScene("scenes.game")
   end
 end

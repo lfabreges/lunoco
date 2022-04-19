@@ -3,6 +3,8 @@
 * Permettre à l'utilisateur de créer un nouveau niveau dans son propre monde
 * Simplifier une partie du code si pertinent avec un removeScene dans le hide
 * Ajouter des checks dès que les données proviennent de systemDocument ?
+* Revoir les padding de scrollview en horizontal parce qu'ils ne servent à rien en l'état, uniquement en cas de scroll
+* Ajouter un tutorial avec les icones de swipe, etc. disponibles
 
 # Modes de jeu
 * Ajouter la possibilité de speedrun un niveau

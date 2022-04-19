@@ -145,7 +145,7 @@ function scene:hide(event)
       system.deactivate("multitouch")
     end
   elseif event.phase == "did" then
-    transition.cancel()
+    transition.cancelAll()
     display.remove(backPhoto)
     display.remove(backPhotoBackground)
     display.remove(frontContainer)

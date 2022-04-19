@@ -72,7 +72,7 @@ function scene:hide(event)
     timer.cancel("displayStars")
     audio.stop()
   elseif event.phase == "did" then
-    transition.cancel()
+    transition.cancelAll()
     display.remove(stars)
     stars = nil
   end
