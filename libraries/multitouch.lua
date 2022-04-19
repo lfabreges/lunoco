@@ -15,52 +15,38 @@ local function createEventListener(listener)
   local numberOfEvents = 0
   local touchEvents = {}
 
+  local function callListener(event, index)
+    return listener({
+      phase = event.phase,
+      index = index,
+      numberOfEvents = numberOfEvents,
+      events = touchEvents,
+    })
+  end
+
   local function onTouch(event)
     local isHandled = false
-
     if event.phase == "began" then
-      touchEvents[#touchEvents + 1] = event
-      numberOfEvents = numberOfEvents + 1
-      isHandled = listener({
-        phase = "began",
-        index = numberOfEvents,
-        numberOfEvents = numberOfEvents,
-        events = touchEvents,
-      })
-
-    elseif event.phase == "moved" then
-      for index = 1, #touchEvents do
-        local touchEvent = touchEvents[index]
-        if event.id == touchEvent.id then
-          touchEvents[index] = event
-          isHandled = listener({
-            phase = "moved",
-            index = index,
-            numberOfEvents = numberOfEvents,
-            events = touchEvents,
-          })
+      numberOfEvents = #touchEvents + 1
+      touchEvents[numberOfEvents] = event
+      isHandled = callListener(event, numberOfEvents)
+    else
+      local currentEventIndex = nil
+      for index = 1, numberOfEvents do
+        if event.id == touchEvents[index].id then
+          currentEventIndex = index
           break
         end
       end
-
-    elseif event.phase == "ended" or event.phase == "cancelled" then
-      for index = 1, #touchEvents do
-        local touchEvent = touchEvents[index]
-        if event.id == touchEvent.id then
-          touchEvents[index] = event
-          isHandled = listener({
-            phase = event.phase,
-            index = index,
-            numberOfEvents = numberOfEvents,
-            events = touchEvents,
-          })
+      if currentEventIndex then
+        touchEvents[currentEventIndex] = event
+        isHandled = callListener(event, currentEventIndex)
+        if event.phase == "ended" or event.phase == "cancelled" then
           numberOfEvents = numberOfEvents - 1
-          table.remove(touchEvents, index)
-          break
+          table.remove(touchEvents, currentEventIndex)
         end
       end
     end
-
     return isHandled
   end
 
