@@ -63,6 +63,7 @@ end
 
 function scene:show(event)
   if event.phase == "will" then
+    local isNewWorld = world and world ~= event.params.world
     world = event.params.world
 
     local centerX = scrollview.width * 0.5
@@ -110,8 +111,9 @@ function scene:show(event)
       end
     end
 
-    -- TODO Préserver le scroll si de retour d'un niveau en cours de jeu
-    scrollview:scrollTo("top", { time = 0 })
+    if isNewWorld then
+      scrollview:scrollTo("top", { time = 0 })
+    end
   end
 end
 
