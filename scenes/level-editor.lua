@@ -146,8 +146,8 @@ local function onMoveAndPinch(event)
     element.xDeltaCorrection = (element.anchorX - 0.5) * (newWidth - element.contentWidthStart)
     element.yDeltaCorrection = (element.anchorY - 0.5) * (newHeight - element.contentHeightStart)
 
-    element.handle.path.width = element.contentWidth + element.handle.strokeWidth * 0.5
-    element.handle.path.height = element.contentHeight + element.handle.strokeWidth * 0.5
+    element.handle.path.width = element.contentWidth + 40
+    element.handle.path.height = element.contentHeight + 40
   end
 
   element.x = element.xStart + event.xDelta + element.xDeltaCorrection
@@ -352,7 +352,7 @@ function scene:configureElement(element)
   element:addEventListener("touch", function(event)
     if event.phase == "began" then
       if selectedElement == element then
-        return true
+        return false
       end
 
       clearElementSelection()
@@ -361,21 +361,28 @@ function scene:configureElement(element)
         levelView,
         element.contentBounds.xMin + element.contentWidth * 0.5,
         element.contentBounds.yMin + element.contentHeight * 0.5,
-        element.contentWidth + 20,
-        element.contentHeight + 20,
-        1
+        element.contentWidth + 40,
+        element.contentHeight + 40,
+        10
       )
 
-      handle.stroke = { type = "gradient", color1 = { 0.5, 0.5, 0.5, 0 }, color2 = { 0.5, 0.5, 0.5, 0.5 } }
-      handle.strokeWidth = 40
-      handle.isHitTestable = true
-      handle:setFillColor(0, 0, 0, 0)
+      display.setDefault("textureWrapX", "repeat")
+      display.setDefault("textureWrapY", "repeat")
+      handle.fill = { type = "image", filename = "images/background.png" }
+      handle.fill.a = 0.5
+      handle.strokeWidth = 1
+      display.setDefault("textureWrapX", "clampToEdge")
+      display.setDefault("textureWrapY", "clampToEdge")
 
+      element:toFront()
       selectedElement = element
       selectedElement.handle = handle
       handle.element = element
 
       multitouch.addMoveAndPinchListener(handle, { onFocus = onFocus, onMoveAndPinch = onMoveAndPinch })
+
+      event.target = handle
+      handle:dispatchEvent(event)
     end
     return true
   end)
@@ -404,11 +411,6 @@ end
 -- Ajouter peut-être un swipe à 3 doigts pour ouvrir la barre latérale ?
 -- Avec le double tap elle s'ouvrait trop souvent sans le vouloir
 -- Et avec une largeur de 10 sur un petit téléphone pas évident de la récupérer
-
--- Revoir le handle des éléments, ça peut se faire avec un roundedrect sans stroke
--- Appliquer un effet generator radial pour mettre en transparence depuis le milieu, etc.
--- Ajouter un stroke blanc pour gérer les fonds d'écran et aller chercher un contraste
--- Possible même de mettre la photo de background pour le handle du coup, et là ça gère la fougère
 
 -- Lorsqu'un élément est sélectionné, il faut la possibilité de pouvoir le supprimer, à voir comment
 -- faire au mieux. En tapant à côté la sélection est perdue
