@@ -169,8 +169,7 @@ local function onMoveAndPinch(event)
     element.y = element.y - (elementBounds.yMin - levelBounds.yMin)
   end
 
-  element.handle.x = element.contentBounds.xMin + element.contentWidth * 0.5
-  element.handle.y = element.contentBounds.yMin + element.contentHeight * 0.5
+  element.handle.x, element.handle.y = element:localToContent(0, 0)
 end
 
 function scene:create(event)
@@ -178,13 +177,13 @@ function scene:create(event)
 
   levelView = components.newGroup(self.view)
   elements = level:createElements(levelView)
-  self:configureElement(elements.ball)
+  scene:configureElement(elements.ball)
 
   for _, element in pairs(elements.obstacles) do
-    self:configureElement(element)
+    scene:configureElement(element)
   end
   for _, element in pairs(elements.targets) do
-    self:configureElement(element)
+    scene:configureElement(element)
   end
 
   scene:createSideBar()
@@ -348,7 +347,15 @@ function scene:createSideBar()
     element.y = frame.y + frame.height * 0.5
 
     local elementButton = components.newObjectButton(elementGroup, {
-      onRelease = function() scene:newLevelElement(elementType) end,
+      onRelease = function()
+        local newElement = scene:newLevelElement(elementType)
+        local fromXScale = element.width / newElement.width
+        local fromYScale = element.height / newElement.height
+        local fromX = (newElement.anchorX - element.anchorX) * element.contentWidth
+        local fromY = (newElement.anchorY - element.anchorX) * element.contentHeight
+        fromX, fromY = element:localToContent(fromX, fromY)
+        transition.from(newElement, { xScale = fromXScale, yScale = fromYScale, x = fromX, y = fromY, time = 100 })
+      end,
       scrollview = scrollview,
     })
 
@@ -405,6 +412,7 @@ function scene:newLevelElement(elementType)
   element.xScale = defaults.width / element.width
   element.yScale = defaults.height / element.height
   level:positionElement(element, 150 - element.contentWidth * 0.5, 230 - element.contentHeight * 0.5)
+  scene:configureElement(element)
 
   if elementType:starts("target-") then
     elements.targets[#elements.targets + 1] = element
@@ -412,15 +420,12 @@ function scene:newLevelElement(elementType)
     elements.obstacles[#elements.obstacles + 1] = element
   end
 
-  transition.from(element, { alpha = 0, time = 100 })
-  self:configureElement(element)
+  return element
 end
 
 -- TODO
 
--- Ajouter peut-être un swipe à 3 doigts pour ouvrir la barre latérale ?
--- Avec le double tap elle s'ouvrait trop souvent sans le vouloir
--- Et avec une largeur de 10 sur un petit téléphone pas évident de la récupérer
+-- Ajouter une aide au lancement pour indiquer le double tap afin d'ouvrir la sideBar
 
 -- Lorsqu'un élément est sélectionné, il faut la possibilité de pouvoir le supprimer, à voir comment
 -- faire au mieux. En tapant à côté la sélection est perdue
