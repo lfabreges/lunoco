@@ -47,46 +47,45 @@ local function onFocus(event)
   end
 end
 
-local function onMove(event)
-  local containerBounds = frontContainer.contentBounds
+local function onMoveAndPinch(event)
+  if event.xDistanceDelta then
+    local minXScale = frontContainer.width / backPhoto.width
+    local minYScale = frontContainer.height / backPhoto.height
+    local xScale = min(4, max(minXScale, backPhoto.xScaleStart + event.xDistanceDelta / backPhoto.width))
+    local yScale = min(4, max(minYScale, backPhoto.yScaleStart + event.yDistanceDelta / backPhoto.height))
+    backPhoto.xScale = xScale
+    backPhoto.yScale = yScale
+    backPhotoBackground.xScale = xScale
+    backPhotoBackground.yScale = yScale
+    frontPhoto.xScale = xScale
+    frontPhoto.yScale = yScale
+  end
 
   backPhoto.x = backPhoto.xStart + event.xDelta
   backPhoto.y = backPhoto.yStart + event.yDelta
 
   local backPhotoBounds = backPhoto.contentBounds
-  local deltaX = 0
-  local deltaY = 0
+  local containerBounds = frontContainer.contentBounds
+  local xDeltaCorrection = 0
+  local yDeltaCorrection = 0
 
   if backPhotoBounds.xMax < containerBounds.xMax then
-    deltaX = containerBounds.xMax - backPhotoBounds.xMax
+    xDeltaCorrection = containerBounds.xMax - backPhotoBounds.xMax
   elseif backPhotoBounds.xMin > containerBounds.xMin then
-    deltaX = containerBounds.xMin - backPhotoBounds.xMin
+    xDeltaCorrection = containerBounds.xMin - backPhotoBounds.xMin
   end
   if backPhotoBounds.yMax < containerBounds.yMax then
-    deltaY = containerBounds.yMax - backPhotoBounds.yMax
+    yDeltaCorrection = containerBounds.yMax - backPhotoBounds.yMax
   elseif backPhotoBounds.yMin > containerBounds.yMin then
-    deltaY = containerBounds.yMin - backPhotoBounds.yMin
+    yDeltaCorrection = containerBounds.yMin - backPhotoBounds.yMin
   end
 
-  backPhoto.x = backPhoto.x + deltaX
-  backPhoto.y = backPhoto.y + deltaY
-  backPhotoBackground.x = backPhotoBackground.xStart + event.xDelta + deltaX
-  backPhotoBackground.y = backPhotoBackground.yStart + event.yDelta + deltaY
-  frontPhoto.x = frontPhoto.xStart + event.xDelta + deltaX
-  frontPhoto.y = frontPhoto.yStart + event.yDelta + deltaY
-end
-
-local function onPinch(event)
-  local minXScale = frontContainer.width / backPhoto.width
-  local minYScale = frontContainer.height / backPhoto.height
-  local xScale = min(4, max(minXScale, backPhoto.xScaleStart + event.xDelta / backPhoto.width))
-  local yScale = min(4, max(minYScale, backPhoto.yScaleStart + event.yDelta / backPhoto.height))
-  backPhoto.xScale = xScale
-  backPhoto.yScale = yScale
-  backPhotoBackground.xScale = xScale
-  backPhotoBackground.yScale = yScale
-  frontPhoto.xScale = xScale
-  frontPhoto.yScale = yScale
+  backPhoto.x = backPhoto.x + xDeltaCorrection
+  backPhoto.y = backPhoto.y + yDeltaCorrection
+  backPhotoBackground.x = backPhotoBackground.xStart + event.xDelta + xDeltaCorrection
+  backPhotoBackground.y = backPhotoBackground.yStart + event.yDelta + yDeltaCorrection
+  frontPhoto.x = frontPhoto.xStart + event.xDelta + xDeltaCorrection
+  frontPhoto.y = frontPhoto.yStart + event.yDelta + yDeltaCorrection
 end
 
 local function saveImage()
@@ -160,7 +159,7 @@ function scene:show(event)
 
   elseif event.phase == "did" then
     utils.activateMultitouch()
-    multitouch.addMoveAndPinchListener(background, { onFocus = onFocus, onMove = onMove, onPinch = onPinch })
+    multitouch.addMoveAndPinchListener(background, { onFocus = onFocus, onMoveAndPinch = onMoveAndPinch })
   end
 end
 

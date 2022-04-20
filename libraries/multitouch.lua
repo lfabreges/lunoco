@@ -3,11 +3,11 @@ local multitouch = {}
 local abs = math.abs
 
 local function calculateDistanceDelta(firstEvent, secondEvent)
-  local startDistanceX = abs(firstEvent.xStart - secondEvent.xStart)
-  local startDistanceY = abs(firstEvent.yStart - secondEvent.yStart)
-  local currentDistanceX = abs(firstEvent.x - secondEvent.x)
-  local currentDistanceY = abs(firstEvent.y - secondEvent.y)
-  return currentDistanceX - startDistanceX, currentDistanceY - startDistanceY
+  local xDistanceStart = abs(firstEvent.xStart - secondEvent.xStart)
+  local yDistanceStart = abs(firstEvent.yStart - secondEvent.yStart)
+  local xDistance = abs(firstEvent.x - secondEvent.x)
+  local yDistance = abs(firstEvent.y - secondEvent.y)
+  return xDistance - xDistanceStart, yDistance - yDistanceStart
 end
 
 local function calculateMiddle(firstCoordinates, secondCoordinates)
@@ -57,23 +57,23 @@ local function createEventListener(listener)
 end
 
 local function createMoveAndPinchListener(object, options)
-  local cumulatedDistanceX
-  local cumulatedDistanceY
-  local middleStartX
-  local middleStartY
+  local xDistanceCumulated
+  local yDistanceCumulated
+  local xMoveStart
+  local yMoveStart
 
-  local function updateCumulatedDistance(oldFirstEvent, oldSecondEvent, newFirstEvent, newSecondEvent)
-    local oldDeltaX, oldDeltaY = calculateDistanceDelta(oldFirstEvent, oldSecondEvent)
-    local newDeltaX, newDeltaY = calculateDistanceDelta(newFirstEvent, newSecondEvent)
-    cumulatedDistanceX = cumulatedDistanceX + oldDeltaX - newDeltaX
-    cumulatedDistanceY = cumulatedDistanceY + oldDeltaY - newDeltaY
+  local function updateDistanceCumulated(oldFirstEvent, oldSecondEvent, newFirstEvent, newSecondEvent)
+    local xOldDistanceDelta, yOldDistanceDelta = calculateDistanceDelta(oldFirstEvent, oldSecondEvent)
+    local xNewDistanceDelta, yNewDistanceDelta = calculateDistanceDelta(newFirstEvent, newSecondEvent)
+    xDistanceCumulated = xDistanceCumulated + xOldDistanceDelta - xNewDistanceDelta
+    yDistanceCumulated = yDistanceCumulated + yOldDistanceDelta - yNewDistanceDelta
   end
 
-  local function updateMiddleStart(oldFirstEvent, oldSecondEvent, newFirstEvent, newSecondEvent)
-    local oldMiddleX, oldMiddleY = calculateMiddle(oldFirstEvent, oldSecondEvent)
-    local newMiddleX, newMiddleY = calculateMiddle(newFirstEvent, newSecondEvent)
-    middleStartX = middleStartX + newMiddleX - oldMiddleX
-    middleStartY = middleStartY + newMiddleY - oldMiddleY
+  local function updateMoveStart(oldFirstEvent, oldSecondEvent, newFirstEvent, newSecondEvent)
+    local xOldMiddle, yOldMiddle = calculateMiddle(oldFirstEvent, oldSecondEvent)
+    local xNewMiddle, yNewMiddle = calculateMiddle(newFirstEvent, newSecondEvent)
+    xMoveStart = xMoveStart + xNewMiddle - xOldMiddle
+    yMoveStart = yMoveStart + yNewMiddle - yOldMiddle
   end
 
   local function onMultitouch(event)
@@ -91,37 +91,34 @@ local function createMoveAndPinchListener(object, options)
       if index == 1 then
         display.getCurrentStage():setFocus(object)
         object.isFocus = true
-        cumulatedDistanceX = 0
-        cumulatedDistanceY = 0
-        middleStartX = firstEvent.x
-        middleStartY = firstEvent.y
+        xDistanceCumulated = 0
+        yDistanceCumulated = 0
+        xMoveStart = firstEvent.x
+        yMoveStart = firstEvent.y
         if options.onFocus then
           options.onFocus({ target = object })
         end
       elseif index == 2 then
-        updateMiddleStart(firstEvent, firstEvent, firstEvent, secondEvent)
-        updateCumulatedDistance(firstEvent, firstEvent, firstEvent, secondEvent)
+        updateMoveStart(firstEvent, firstEvent, firstEvent, secondEvent)
+        updateDistanceCumulated(firstEvent, firstEvent, firstEvent, secondEvent)
       end
     elseif object.isFocus then
       if phase == "moved" then
-        if options.onPinch and numberOfEvents > 1 then
-          local xDelta, yDelta = calculateDistanceDelta(firstEvent, secondEvent)
-          xDelta = xDelta + cumulatedDistanceX
-          yDelta = yDelta + cumulatedDistanceY
-          options.onPinch({ xDelta = xDelta, yDelta = yDelta, target = object })
-        end
-        if options.onMove then
+        if options.onMoveAndPinch then
           if numberOfEvents == 1 then
-            options.onMove({
-              xDelta = firstEvent.x - middleStartX,
-              yDelta = firstEvent.y - middleStartY,
+            options.onMoveAndPinch({
+              xDelta = firstEvent.x - xMoveStart,
+              yDelta = firstEvent.y - yMoveStart,
               target = object,
             })
           else
-            local middleX, middleY = calculateMiddle(firstEvent, secondEvent)
-            options.onMove({
-              xDelta = middleX - middleStartX,
-              yDelta = middleY - middleStartY,
+            local xMiddle, yMiddle = calculateMiddle(firstEvent, secondEvent)
+            local xDistanceDelta, yDistanceDelta = calculateDistanceDelta(firstEvent, secondEvent)
+            options.onMoveAndPinch({
+              xDelta = xMiddle - xMoveStart,
+              yDelta = yMiddle - yMoveStart,
+              xDistanceDelta = xDistanceDelta + xDistanceCumulated,
+              yDistanceDelta = yDistanceDelta + yDistanceCumulated,
               target = object,
             })
           end
@@ -136,8 +133,8 @@ local function createMoveAndPinchListener(object, options)
         else
           local remainingEvent = index == 1 and secondEvent or firstEvent
           local otherEvent = numberOfEvents == 2 and remainingEvent or event.events[3]
-          updateMiddleStart(firstEvent, secondEvent, remainingEvent, otherEvent)
-          updateCumulatedDistance(firstEvent, secondEvent, remainingEvent, otherEvent)
+          updateMoveStart(firstEvent, secondEvent, remainingEvent, otherEvent)
+          updateDistanceCumulated(firstEvent, secondEvent, remainingEvent, otherEvent)
         end
       end
     end

@@ -119,15 +119,39 @@ local function onFocus(event)
   local element = event.target.element
   element.xStart = element.x
   element.yStart = element.y
+  element.xDeltaCorrection = 0
+  element.yDeltaCorrection = 0
   element.contentWidthStart = element.contentWidth
   element.contentHeightStart = element.contentHeight
 end
 
-local function onMove(event)
+local function onMoveAndPinch(event)
   local element = event.target.element
+  local defaults = elementDefaults[element.family .. "-" .. element.type]
+  local xDeltaCorrection = 0
+  local yDeltaCorrection = 0
 
-  element.x = element.xStart + event.xDelta
-  element.y = element.yStart + event.yDelta
+  if event.xDistanceDelta and (element.family == "obstacle" or element.family == "target") then
+    local minWidth = defaults.minWidth
+    local maxWidth = defaults.maxWidth
+    local minHeight = defaults.minHeight
+    local maxHeight = defaults.maxHeight
+    local newWidth = min(maxWidth, max(minWidth, element.contentWidthStart + event.xDistanceDelta))
+    local newHeight = min(maxHeight, max(minHeight, element.contentHeightStart + event.yDistanceDelta))
+    newWidth = newWidth - newWidth % 5
+    newHeight = newHeight - newHeight % 5
+
+    element.xScale = newWidth / element.width
+    element.yScale = newHeight / element.height
+    element.xDeltaCorrection = (element.anchorX - 0.5) * (newWidth - element.contentWidthStart)
+    element.yDeltaCorrection = (element.anchorY - 0.5) * (newHeight - element.contentHeightStart)
+
+    element.handle.path.width = element.contentWidth + element.handle.strokeWidth * 0.5
+    element.handle.path.height = element.contentHeight + element.handle.strokeWidth * 0.5
+  end
+
+  element.x = element.xStart + event.xDelta + element.xDeltaCorrection
+  element.y = element.yStart + event.yDelta + element.yDeltaCorrection
   element.x = element.x - element.x % 5
   element.y = element.y - element.y % 5
 
@@ -145,21 +169,6 @@ local function onMove(event)
     element.y = element.y - (elementBounds.yMin - levelBounds.yMin)
   end
 
-  element.handle.x = element.contentBounds.xMin + element.contentWidth * 0.5
-  element.handle.y = element.contentBounds.yMin + element.contentHeight * 0.5
-end
-
-local function onPinch(event)
-  local element = event.target.element
-  local defaults = elementDefaults[element.family .. "-" .. element.type]
-  local width = min(defaults.maxWidth, max(defaults.minWidth, element.contentWidthStart + event.xDelta))
-  local height = min(defaults.maxHeight, max(defaults.minHeight, element.contentHeightStart + event.yDelta))
-  width = width - width % 5
-  height = height - height % 5
-  element.xScale = width / element.width
-  element.yScale = height / element.height
-  element.handle.path.width = element.contentWidth + element.handle.strokeWidth * 0.5
-  element.handle.path.height = element.contentHeight + element.handle.strokeWidth * 0.5
   element.handle.x = element.contentBounds.xMin + element.contentWidth * 0.5
   element.handle.y = element.contentBounds.yMin + element.contentHeight * 0.5
 end
@@ -366,12 +375,7 @@ function scene:configureElement(element)
       selectedElement.handle = handle
       handle.element = element
 
-      multitouch.addMoveAndPinchListener(handle, {
-        onBlur = onBlur,
-        onFocus = onFocus,
-        onMove = onMove,
-        onPinch = (element.family == "obstacle" or element.family == "target") and onPinch or nil,
-      })
+      multitouch.addMoveAndPinchListener(handle, { onFocus = onFocus, onMoveAndPinch = onMoveAndPinch })
     end
     return true
   end)
@@ -400,6 +404,11 @@ end
 -- Ajouter peut-être un swipe à 3 doigts pour ouvrir la barre latérale ?
 -- Avec le double tap elle s'ouvrait trop souvent sans le vouloir
 -- Et avec une largeur de 10 sur un petit téléphone pas évident de la récupérer
+
+-- Revoir le handle des éléments, ça peut se faire avec un roundedrect sans stroke
+-- Appliquer un effet generator radial pour mettre en transparence depuis le milieu, etc.
+-- Ajouter un stroke blanc pour gérer les fonds d'écran et aller chercher un contraste
+-- Possible même de mettre la photo de background pour le handle du coup, et là ça gère la fougère
 
 -- Lorsqu'un élément est sélectionné, il faut la possibilité de pouvoir le supprimer, à voir comment
 -- faire au mieux. En tapant à côté la sélection est perdue
