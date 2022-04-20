@@ -11,6 +11,7 @@ local levelView = nil
 local max = math.max
 local min = math.min
 local scene = composer.newScene()
+local selectedElement = nil
 
 local elementDefaults = {
   ["obstacle-corner"] = {
@@ -26,8 +27,8 @@ local elementDefaults = {
   ["obstacle-horizontal-barrier"] = {
     width = 100,
     height = 30,
-    minWidth = 20,
-    minHeight = 10,
+    minWidth = 30,
+    minHeight = 30,
     maxWidth = 150,
     maxHeight = 60,
   },
@@ -35,22 +36,22 @@ local elementDefaults = {
     width = 150,
     height = 30,
     minWidth = 100,
-    minHeight = 20,
+    minHeight = 30,
     maxWidth = 300,
     maxHeight = 120,
   },
   ["obstacle-vertical-barrier"] = {
     width = 30,
     height = 100,
-    minWidth = 10,
-    minHeight = 20,
+    minWidth = 30,
+    minHeight = 30,
     maxWidth = 60,
     maxHeight = 150,
   },
   ["obstacle-vertical-barrier-large"] = {
     width = 30,
     height = 200,
-    minWidth = 20,
+    minWidth = 30,
     minHeight = 100,
     maxWidth = 150,
     maxHeight = 460,
@@ -58,26 +59,26 @@ local elementDefaults = {
   ["target-easy"] = {
     width = 40,
     height = 40,
-    minWidth = 20,
-    minHeight = 20,
-    maxWidth = 120,
-    maxHeight = 120,
+    minWidth = 30,
+    minHeight = 30,
+    maxWidth = 80,
+    maxHeight = 80,
   },
   ["target-normal"] = {
     width = 40,
     height = 40,
-    minWidth = 20,
-    minHeight = 20,
-    maxWidth = 120,
-    maxHeight = 120,
+    minWidth = 30,
+    minHeight = 30,
+    maxWidth = 80,
+    maxHeight = 80,
   },
   ["target-hard"] = {
     width = 40,
     height = 40,
-    minWidth = 20,
-    minHeight = 20,
-    maxWidth = 120,
-    maxHeight = 120,
+    minWidth = 30,
+    minHeight = 30,
+    maxWidth = 80,
+    maxHeight = 80,
   },
 }
 
@@ -91,6 +92,14 @@ local elementTypes = {
   "target-normal",
   "target-hard",
 }
+
+local function clearElementSelection()
+  if selectedElement then
+    display.remove(selectedElement.handle)
+    selectedElement.handle = nil
+    selectedElement = nil
+  end
+end
 
 local function newElement(parent, elementType)
   if elementType == "obstacle-corner" then
@@ -108,7 +117,7 @@ local function onBlur(event)
 end
 
 local function onFocus(event)
-  local element = event.target
+  local element = event.target.element
   element.xStart = element.x
   element.yStart = element.y
   element.widthStart = element.width
@@ -116,7 +125,8 @@ local function onFocus(event)
 end
 
 local function onMove(event)
-  local element = event.target
+  local element = event.target.element
+
   element.x = element.xStart + event.xDelta
   element.y = element.yStart + event.yDelta
 
@@ -134,11 +144,19 @@ local function onMove(event)
   elseif elementBounds.yMin < levelBounds.yMin then
     element.y = element.y - (elementBounds.yMin - levelBounds.yMin)
   end
+
+  element.handle.x = element.x - (element.anchorX - 0.5) * element.width
+  element.handle.y = element.y - (element.anchorY - 0.5) * element.height
+
+  element.handle.xScale = element.handle.xScale + 0.01
 end
 
 local function onPinch(event)
-  local element = event.target
+  local element = event.target.element
   local defaults = elementDefaults[element.family .. "-" .. element.type]
+  local width = element.width
+  local height = element.height
+
   local xDelta = defaults.shouldMaintainAspectRatio and event.totalDelta or event.xDelta
   local yDelta = defaults.shouldMaintainAspectRatio and event.totalDelta or event.yDelta
 
@@ -146,6 +164,11 @@ local function onPinch(event)
   element.height = max(defaults.minHeight, min(defaults.maxHeight, element.heightStart + yDelta))
   element.maskScaleX = element.maskScaleX and element.width / 394 or 0
   element.maskScaleY = element.maskScaleY and element.height / 394 or 0
+
+  element.handle.width = element.handle.width + element.width - width
+  element.handle.height = element.handle.height + element.height - height
+  element.handle.x = element.x - (element.anchorX - 0.5) * element.width
+  element.handle.y = element.y - (element.anchorY - 0.5) * element.height
 end
 
 function scene:create(event)
@@ -201,8 +224,13 @@ function scene:createElementBar()
   end)
 
   middleGround:addEventListener("touch", function(event)
-    if event.phase == "began" and elementBar.isOpened then
-      elementBar.close()
+    if event.phase == "began" then
+      if selectedElement and not utils.isEventWithinBounds(selectedElement.handle, event) then
+        clearElementSelection()
+      end
+      if elementBar.isOpened then
+        elementBar.close()
+      end
     end
     return false
   end)
@@ -325,12 +353,36 @@ function scene:createElementBar()
 end
 
 function scene:configureElement(element)
-  multitouch.addMoveAndPinchListener(element, {
-    onBlur = onBlur,
-    onFocus = onFocus,
-    onMove = onMove,
-    onPinch = (element.family == "obstacle" or element.family == "target") and onPinch or nil,
-  })
+  element:addEventListener("touch", function(event)
+    if event.phase == "began" then
+      if selectedElement == element then
+        return true
+      end
+
+      clearElementSelection()
+
+      local centerX = element.x - (element.anchorX - 0.5) * element.width
+      local centerY = element.y - (element.anchorY - 0.5) * element.height
+      local handle = display.newRect(levelView, centerX, centerY, element.width + 20, element.height + 20)
+
+      handle.stroke = { type = "gradient", color1 = { 0.5, 0.5, 0.5, 0 }, color2 = { 0.5, 0.5, 0.5, 0.5 } }
+      handle.strokeWidth = 40
+      handle.isHitTestable = true
+      handle:setFillColor(0, 0, 0, 0)
+
+      selectedElement = element
+      selectedElement.handle = handle
+      handle.element = element
+
+      multitouch.addMoveAndPinchListener(handle, {
+        onBlur = onBlur,
+        onFocus = onFocus,
+        onMove = onMove,
+        onPinch = (element.family == "obstacle" or element.family == "target") and onPinch or nil,
+      })
+    end
+    return true
+  end)
 end
 
 function scene:newLevelElement(elementType)
@@ -356,19 +408,12 @@ end
 
 -- TODO
 
--- Pour la selection, lorsque l'utilisateur clique sur un élément il est sélectionné, à ce moment
--- un marchingAnts est affiché autour de l'élément à parti d'un rounded Rect transparent
--- qui vient se calquer sur le contentBounds, légèrement plus grand
-
 -- Lorsqu'un élément est sélectionné, il faut la possibilité de pouvoir le supprimer, à voir comment
 -- faire au mieux. En tapant à côté la sélection est perdue
 -- Par exemple une petite barre s'affiche à droite de l'élément, à gauche lorsqu'il est trop à droite
 -- Cela permet de locker l'élément pour ne plus le bouger, cela permet de le supprimer, etc.
 
 -- Reste à pouvoir sauvegarder le niveau, le supprimer et configurer le nombre de coups pour les étoiles
-
--- Permettre le pinch plus large lorsqu'un item est sélectionné ?
--- Difficile sinon parfois d'aller chercher l'élément pour ensuite le manipuler lorsqu'il est petit
 
 function scene:show(event)
   if event.phase == "did" then

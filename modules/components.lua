@@ -2,14 +2,6 @@ local utils = require "modules.utils"
 
 local components = {}
 
-local function isWithinBounds(object, event)
-  local bounds = object.contentBounds
-  local x = event.x
-  local y = event.y
-	local isWithinBounds = true
-	return bounds.xMin <= x and bounds.xMax >= x and bounds.yMin <= y and bounds.yMax >= y
-end
-
 components.newBackground = function(parent)
   local screenX = display.screenOriginX
   local screenY = display.screenOriginY
@@ -81,13 +73,13 @@ components.newObjectButton = function(object, options)
         if options.scrollview and math.abs(event.y - event.yStart) > 5 then
           setDefaultState()
           options.scrollview:takeFocus(event)
-        elseif not isWithinBounds(object, event) then
+        elseif not utils.isEventWithinBounds(object, event) then
           setDefaultState()
         elseif not object.isOver then
           setOverState()
         end
       elseif event.phase == "ended" or event.phase == "cancelled" then
-        if isWithinBounds(object, event) then
+        if utils.isEventWithinBounds(object, event) then
           if options.onEvent then
             options.onEvent(event)
           elseif options.onRelease then

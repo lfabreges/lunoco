@@ -27,6 +27,13 @@ utils.isAndroid = function()
   return platform == "android"
 end
 
+utils.isEventWithinBounds = function(object, event)
+  local bounds = object.contentBounds
+  local x = event.x
+  local y = event.y
+	return bounds.xMin <= x and bounds.xMax >= x and bounds.yMin <= y and bounds.yMax >= y
+end
+
 utils.isSimulator = function()
   return environment == "simulator"
 end

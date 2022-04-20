@@ -5,6 +5,7 @@
 * Ajouter des checks dès que les données proviennent de systemDocument ?
 * Revoir les padding de scrollview en horizontal parce qu'ils ne servent à rien en l'état, uniquement en cas de scroll
 * Ajouter un tutorial avec les icones de swipe, etc. disponibles
+* Revoir les resize qui ne fonctionne pas avec le shape (le background dans element-image par exempel ?)
 
 # Modes de jeu
 * Ajouter la possibilité de speedrun un niveau

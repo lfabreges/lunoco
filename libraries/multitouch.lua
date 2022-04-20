@@ -109,6 +109,8 @@ local function createMoveAndPinchListener(object, options)
           local xDelta, yDelta = calculateDistanceDelta(firstEvent, secondEvent)
           xDelta = xDelta + cumulatedDistanceX
           yDelta = yDelta + cumulatedDistanceY
+          -- TODO N'est jamais négatif ?
+          -- Pareil pour les delta, alors qu'on veut que ce soit possible
           local totalDelta = sqrt(xDelta * xDelta + yDelta * yDelta)
           options.onPinch({ xDelta = xDelta, yDelta = yDelta, totalDelta = totalDelta, target = object })
         end
