@@ -139,40 +139,30 @@ function levelClass:createConfiguration(elements)
   local round = math.round
 
   configuration.ball = {
-    x = round(elements.ball.x - 10),
-    y = round(elements.ball.y + 5),
+    x = round(elements.ball.contentBounds.xMin + elements.ball.contentWidth * 0.5 - 10),
+    y = round(elements.ball.contentBounds.yMax - 10),
   }
 
   for index = 1, #elements.obstacles do
     local obstacle = elements.obstacles[index]
-    if obstacle.type == "corner" then
-      configuration.obstacles[index] = {
-        type = obstacle.type,
-        x = round(obstacle.x - 10 - obstacle.width / 2),
-        y = round(obstacle.y - 10 - obstacle.height / 2),
-        width = round(obstacle.width),
-        height = round(obstacle.height),
-        rotation = round(obstacle.rotation),
-      }
-    elseif obstacle.type:starts("horizontal-barrier") or obstacle.type:starts("vertical-barrier") then
-      configuration.obstacles[index] = {
-        type = obstacle.type,
-        x = round(obstacle.x - 10),
-        y = round(obstacle.y - 10),
-        width = round(obstacle.width),
-        height = round(obstacle.height),
-      }
-    end
+    configuration.obstacles[index] = {
+      type = obstacle.type,
+      x = round(obstacle.contentBounds.xMin - 10),
+      y = round(obstacle.contentBounds.yMin - 10),
+      width = round(obstacle.contentWidth),
+      height = round(obstacle.contentHeight),
+      rotation = obstacle.rotation ~= 0 and round(obstacle.rotation) or nil,
+    }
   end
 
   for index = 1, #elements.targets do
     local target = elements.targets[index]
     configuration.targets[index] = {
       type = target.type,
-      x = round(target.x - 10),
-      y = round(target.y - 10),
-      width = round(target.width),
-      height = round(target.height),
+      x = round(obstacle.contentBounds.xMin - 10),
+      y = round(obstacle.contentBounds.yMin - 10),
+      width = round(obstacle.contentWidth),
+      height = round(obstacle.contentHeight),
     }
   end
 

@@ -120,8 +120,8 @@ local function onFocus(event)
   local element = event.target.element
   element.xStart = element.x
   element.yStart = element.y
-  element.widthStart = element.width
-  element.heightStart = element.height
+  element.xScaleStart = element.xScale
+  element.yScaleStart = element.yScale
 end
 
 local function onMove(event)
@@ -138,37 +138,31 @@ local function onMove(event)
   elseif elementBounds.xMin < levelBounds.xMin then
     element.x = element.x - (elementBounds.xMin - levelBounds.xMin)
   end
-
   if elementBounds.yMax > levelBounds.yMax then
     element.y = element.y - (elementBounds.yMax - levelBounds.yMax)
   elseif elementBounds.yMin < levelBounds.yMin then
     element.y = element.y - (elementBounds.yMin - levelBounds.yMin)
   end
 
-  element.handle.x = element.x - (element.anchorX - 0.5) * element.width
-  element.handle.y = element.y - (element.anchorY - 0.5) * element.height
-
-  element.handle.xScale = element.handle.xScale + 0.01
+  element.handle.x = element.contentBounds.xMin + element.contentWidth * 0.5
+  element.handle.y = element.contentBounds.yMin + element.contentHeight * 0.5
 end
 
 local function onPinch(event)
   local element = event.target.element
   local defaults = elementDefaults[element.family .. "-" .. element.type]
-  local width = element.width
-  local height = element.height
-
+  local minXScale = defaults.minWidth / element.width
+  local minYScale = defaults.minHeight / element.height
+  local maxXScale = defaults.maxWidth / element.width
+  local maxYScale = defaults.maxHeight / element.height
   local xDelta = defaults.shouldMaintainAspectRatio and event.totalDelta or event.xDelta
   local yDelta = defaults.shouldMaintainAspectRatio and event.totalDelta or event.yDelta
-
-  element.width = max(defaults.minWidth, min(defaults.maxWidth, element.widthStart + xDelta))
-  element.height = max(defaults.minHeight, min(defaults.maxHeight, element.heightStart + yDelta))
-  element.maskScaleX = element.maskScaleX and element.width / 394 or 0
-  element.maskScaleY = element.maskScaleY and element.height / 394 or 0
-
-  element.handle.width = element.handle.width + element.width - width
-  element.handle.height = element.handle.height + element.height - height
-  element.handle.x = element.x - (element.anchorX - 0.5) * element.width
-  element.handle.y = element.y - (element.anchorY - 0.5) * element.height
+  element.xScale = min(maxXScale, max(minXScale, element.xScaleStart + xDelta / element.width))
+  element.yScale = min(maxYScale, max(minYScale, element.yScaleStart + yDelta / element.height))
+  element.handle.path.width = element.contentWidth + element.handle.strokeWidth * 0.5
+  element.handle.path.height = element.contentHeight + element.handle.strokeWidth * 0.5
+  element.handle.x = element.contentBounds.xMin + element.contentWidth * 0.5
+  element.handle.y = element.contentBounds.yMin + element.contentHeight * 0.5
 end
 
 function scene:create(event)
@@ -361,9 +355,9 @@ function scene:configureElement(element)
 
       clearElementSelection()
 
-      local centerX = element.x - (element.anchorX - 0.5) * element.width
-      local centerY = element.y - (element.anchorY - 0.5) * element.height
-      local handle = display.newRect(levelView, centerX, centerY, element.width + 20, element.height + 20)
+      local centerX = element.contentBounds.xMin + element.contentWidth * 0.5
+      local centerY = element.contentBounds.yMin + element.contentHeight * 0.5
+      local handle = display.newRoundedRect(levelView, centerX, centerY, element.width + 20, element.height + 20, 1)
 
       handle.stroke = { type = "gradient", color1 = { 0.5, 0.5, 0.5, 0 }, color2 = { 0.5, 0.5, 0.5, 0.5 } }
       handle.strokeWidth = 40

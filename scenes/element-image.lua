@@ -42,8 +42,8 @@ local function onFocus(event)
     local object = objects[index]
     object.xStart = object.x
     object.yStart = object.y
-    object.widthStart = object.width
-    object.heightStart = object.height
+    object.xScaleStart = object.xScale
+    object.yScaleStart = object.yScale
   end
 end
 
@@ -62,7 +62,6 @@ local function onMove(event)
   elseif backPhotoBounds.xMin > containerBounds.xMin then
     deltaX = containerBounds.xMin - backPhotoBounds.xMin
   end
-
   if backPhotoBounds.yMax < containerBounds.yMax then
     deltaY = containerBounds.yMax - backPhotoBounds.yMax
   elseif backPhotoBounds.yMin > containerBounds.yMin then
@@ -78,12 +77,16 @@ local function onMove(event)
 end
 
 local function onPinch(event)
-  backPhoto.width = max(frontContainer.width, backPhoto.widthStart + event.xDelta)
-  backPhoto.height = max(frontContainer.height, backPhoto.heightStart + event.yDelta)
-  backPhotoBackground.width = backPhoto.width
-  backPhotoBackground.height = backPhoto.height
-  frontPhoto.width = backPhoto.width
-  frontPhoto.height = backPhoto.height
+  local minXScale = frontContainer.width / backPhoto.width
+  local minYScale = frontContainer.height / backPhoto.height
+  local xScale = min(4, max(minXScale, backPhoto.xScaleStart + event.xDelta / backPhoto.width))
+  local yScale = min(4, max(minYScale, backPhoto.yScaleStart + event.yDelta / backPhoto.height))
+  backPhoto.xScale = xScale
+  backPhoto.yScale = yScale
+  backPhotoBackground.xScale = xScale
+  backPhotoBackground.yScale = yScale
+  frontPhoto.xScale = xScale
+  frontPhoto.yScale = yScale
 end
 
 local function saveImage()
@@ -130,21 +133,23 @@ function scene:show(event)
     local yScale = min(1, display.actualContentHeight / backPhoto.height)
     local photoScale = max(xScale, yScale)
 
-    frontContainer = display.newContainer(content, element.width, element.height)
-    frontContainer.x = centerX
-    frontContainer.y = centerY
-
-    backPhoto.width = max(frontContainer.width, backPhoto.width * photoScale)
-    backPhoto.height = max(frontContainer.height, backPhoto.height * photoScale)
+    backPhoto.xScale = photoScale
+    backPhoto.yScale = photoScale
     backPhoto.alpha = 0.25
 
     backPhotoBackground.width = backPhoto.width
     backPhotoBackground.height = backPhoto.height
+    backPhotoBackground.xScale = photoScale
+    backPhotoBackground.yScale = photoScale
     backPhotoBackground:setFillColor(0)
 
+    frontContainer = display.newContainer(content, element.width, element.height)
+    frontContainer.x = centerX
+    frontContainer.y = centerY
+
     frontPhoto = display.newImage(frontContainer, filename, system.TemporaryDirectory, 0, 0)
-    frontPhoto.width = backPhoto.width
-    frontPhoto.height = backPhoto.height
+    frontPhoto.xScale = photoScale
+    frontPhoto.yScale = photoScale
 
     if element.mask then
       local frontPhotoMask = graphics.newMask(element.mask)
