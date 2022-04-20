@@ -4,7 +4,6 @@ local multitouch = require "libraries.multitouch"
 local utils = require "modules.utils"
 local widget = require "widget"
 
-local elementBar = nil
 local elements = nil
 local level = nil
 local levelView = nil
@@ -12,6 +11,7 @@ local max = math.max
 local min = math.min
 local scene = composer.newScene()
 local selectedElement = nil
+local sideBar = nil
 
 local elementDefaults = {
   ["obstacle-corner"] = {
@@ -187,11 +187,11 @@ function scene:create(event)
     self:configureElement(element)
   end
 
-  scene:createElementBar()
+  scene:createSideBar()
 
   elements.frame:addEventListener("tap", function(event)
-    if event.numTaps == 2 and not elementBar.isOpened then
-      elementBar.open()
+    if event.numTaps == 2 and not sideBar.isOpened then
+      sideBar.open()
     end
     return true
   end)
@@ -220,7 +220,7 @@ function scene:create(event)
   end, -1)
 end
 
-function scene:createElementBar()
+function scene:createSideBar()
   local middleGround = display.newRect(self.view, 0, 0, display.actualContentWidth, display.actualContentHeight)
   middleGround.anchorX = 0
   middleGround.anchorY = 0
@@ -232,76 +232,76 @@ function scene:createElementBar()
       if selectedElement and not utils.isEventWithinBounds(selectedElement.handle, event) then
         clearElementSelection()
       end
-      if elementBar.isOpened then
-        elementBar.close()
+      if sideBar.isOpened then
+        sideBar.close()
       end
     end
     return false
   end)
 
-  elementBar = components.newGroup(self.view)
+  sideBar = components.newGroup(self.view)
 
-  local elementBarBackground = components.newBackground(elementBar)
-  elementBarBackground.width = 106
-  elementBarBackground:addEventListener("tap", function() return true end)
-  elementBarBackground:addEventListener("touch", function() return true end)
+  local sideBarBackground = components.newBackground(sideBar)
+  sideBarBackground.width = 106
+  sideBarBackground:addEventListener("tap", function() return true end)
+  sideBarBackground:addEventListener("touch", function() return true end)
 
-  local elementBarHandle = components.newGroup(elementBar)
-  elementBarHandle.x = elementBarBackground.x + 100
-  elementBarHandle.y = display.contentCenterY
+  local sideBarHandle = components.newGroup(sideBar)
+  sideBarHandle.x = sideBarBackground.x + 100
+  sideBarHandle.y = display.contentCenterY
 
-  local elementBarHandleBackground = display.newRect(elementBarHandle, 1, 0, 10, elementBarBackground.height)
-  elementBarHandleBackground.isVisible = false
-  elementBarHandleBackground.isHitTestable = true
+  local sideBarHandleBackground = display.newRect(sideBarHandle, 1, 0, 10, sideBarBackground.height)
+  sideBarHandleBackground.isVisible = false
+  sideBarHandleBackground.isHitTestable = true
 
-  local elementBarHandleOne = display.newLine(elementBarHandle, -1, -15, -1, 15)
-  local elementBarHandleTwo = display.newLine(elementBarHandle, 1, -15, 1, 15)
-  elementBarHandleOne:setStrokeColor(0.75, 0.75, 0.75, 1)
-  elementBarHandleTwo:setStrokeColor(0.75, 0.75, 0.75, 1)
+  local sideBarHandleOne = display.newLine(sideBarHandle, -1, -15, -1, 15)
+  local sideBarHandleTwo = display.newLine(sideBarHandle, 1, -15, 1, 15)
+  sideBarHandleOne:setStrokeColor(0.75, 0.75, 0.75, 1)
+  sideBarHandleTwo:setStrokeColor(0.75, 0.75, 0.75, 1)
 
-  local elementBarMinX = elementBar.x - elementBarBackground.width + elementBarHandleBackground.width
-  local elementBarMaxX = elementBar.x
+  local sideBarMinX = sideBar.x - sideBarBackground.width + sideBarHandleBackground.width
+  local sideBarMaxX = sideBar.x
 
-  elementBar.x = elementBarMinX
-  elementBar.isOpened = false
+  sideBar.x = sideBarMinX
+  sideBar.isOpened = false
 
-  elementBar.open = function()
-    transition.to(elementBar, { x = elementBarMaxX, time = 100 })
-    elementBar.isOpened = true
+  sideBar.open = function()
+    transition.to(sideBar, { x = sideBarMaxX, time = 100 })
+    sideBar.isOpened = true
   end
 
-  elementBar.close = function()
-    transition.to(elementBar, { x = elementBarMinX, time = 100 })
-    elementBar.isOpened = false
+  sideBar.close = function()
+    transition.to(sideBar, { x = sideBarMinX, time = 100 })
+    sideBar.isOpened = false
   end
 
-  elementBar.toggle = function()
-    if elementBar.isOpened then
-      elementBar.close()
+  sideBar.toggle = function()
+    if sideBar.isOpened then
+      sideBar.close()
     else
-      elementBar.open()
+      sideBar.open()
     end
   end
 
-  elementBarHandleBackground:addEventListener("touch", function(event)
+  sideBarHandleBackground:addEventListener("touch", function(event)
     if event.phase == "began" then
-      transition.cancel(elementBar)
-      display.getCurrentStage():setFocus(elementBarHandleBackground, event.id)
-      elementBarHandleBackground.isFocus = true
-      elementBar.xStart = elementBar.x
-    elseif elementBarHandleBackground.isFocus then
+      transition.cancel(sideBar)
+      display.getCurrentStage():setFocus(sideBarHandleBackground, event.id)
+      sideBarHandleBackground.isFocus = true
+      sideBar.xStart = sideBar.x
+    elseif sideBarHandleBackground.isFocus then
       if event.phase == "moved" then
-        local x = elementBar.xStart + (event.x - event.xStart)
-        elementBar.x = x < elementBarMinX and elementBarMinX or x > elementBarMaxX and elementBarMaxX or x
+        local x = sideBar.xStart + (event.x - event.xStart)
+        sideBar.x = x < sideBarMinX and sideBarMinX or x > sideBarMaxX and sideBarMaxX or x
       elseif event.phase == "ended" or event.phase == "cancelled" then
-        display.getCurrentStage():setFocus(elementBarHandleBackground, nil)
-        elementBarHandleBackground.isFocus = false
-        if math.abs(elementBar.x - elementBar.xStart) > 20 then
-          elementBar.toggle()
-        elseif elementBar.isOpened then
-          elementBar.open()
+        display.getCurrentStage():setFocus(sideBarHandleBackground, nil)
+        sideBarHandleBackground.isFocus = false
+        if math.abs(sideBar.x - sideBar.xStart) > 20 then
+          sideBar.toggle()
+        elseif sideBar.isOpened then
+          sideBar.open()
         else
-          elementBar.close()
+          sideBar.close()
         end
       end
     end
@@ -311,10 +311,10 @@ function scene:createElementBar()
   local screenHeight = display.actualContentHeight
 
   local scrollview = widget.newScrollView({
-    left = elementBarBackground.x,
-    top = elementBarBackground.y,
-    width = elementBarBackground.width - 10,
-    height = elementBarBackground.height,
+    left = sideBarBackground.x,
+    top = sideBarBackground.y,
+    width = sideBarBackground.width - 10,
+    height = sideBarBackground.height,
     hideBackground = true,
     hideScrollBar = true,
     horizontalScrollDisabled = true,
@@ -322,7 +322,7 @@ function scene:createElementBar()
     bottomPadding = 10 + (screenY + screenHeight) - (elements.background.y + elements.background.height),
   })
 
-  elementBar:insert(scrollview)
+  sideBar:insert(scrollview)
 
   local scrollviewContent = components.newGroup(scrollview)
   local y = 0
