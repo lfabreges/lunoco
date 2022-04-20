@@ -394,7 +394,7 @@ function scene:newLevelElement(elementType)
 
   element.xScale = defaults.width / element.width
   element.yScale = defaults.height / element.height
-  level:positionElement(element, 150 - element.width * 0.5, 230 - element.height * 0.5)
+  level:positionElement(element, 150 - element.contentWidth * 0.5, 230 - element.contentHeight * 0.5)
 
   if elementType:starts("target-") then
     elements.targets[#elements.targets + 1] = element

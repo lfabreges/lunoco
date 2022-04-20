@@ -172,10 +172,10 @@ end
 function levelClass:positionElement(element, x, y)
   if element.type == "ball" then
     element.x = 10 + x
-    element.y = 10 + y - element.height * 0.5
+    element.y = 10 + y - element.contentHeight * 0.5
   elseif element.type == "corner" then
-    element.x = 10 + x + element.width * 0.5
-    element.y = 10 + y + element.height * 0.5
+    element.x = 10 + x + element.contentWidth * 0.5
+    element.y = 10 + y + element.contentHeight * 0.5
   else
     element.anchorX = 0
     element.anchorY = 0
