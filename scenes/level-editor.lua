@@ -189,6 +189,13 @@ function scene:create(event)
 
   scene:createElementBar()
 
+  elements.frame:addEventListener("tap", function(event)
+    if event.numTaps == 2 and not elementBar.isOpened then
+      elementBar.open()
+    end
+    return true
+  end)
+
   -- TODO Pour du debug uniquement ? Sinon gérer le cancel dans le hide
   timer.performWithDelay(5000, function()
     local configuration = level:createConfiguration(elements)
@@ -236,6 +243,7 @@ function scene:createElementBar()
 
   local elementBarBackground = components.newBackground(elementBar)
   elementBarBackground.width = 106
+  elementBarBackground:addEventListener("tap", function() return true end)
   elementBarBackground:addEventListener("touch", function() return true end)
 
   local elementBarHandle = components.newGroup(elementBar)
@@ -379,6 +387,7 @@ function scene:configureElement(element)
       selectedElement.handle = handle
       handle.element = element
 
+      handle:addEventListener("tap", function() return true end)
       multitouch.addMoveAndPinchListener(handle, { onFocus = onFocus, onMoveAndPinch = onMoveAndPinch })
 
       event.target = handle
@@ -386,6 +395,7 @@ function scene:configureElement(element)
     end
     return true
   end)
+  element:addEventListener("tap", function() return true end)
 end
 
 function scene:newLevelElement(elementType)
