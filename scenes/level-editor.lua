@@ -119,8 +119,8 @@ local function onFocus(event)
   local element = event.target.element
   element.xStart = element.x
   element.yStart = element.y
-  element.xScaleStart = element.xScale
-  element.yScaleStart = element.yScale
+  element.contentWidthStart = element.contentWidth
+  element.contentHeightStart = element.contentHeight
 end
 
 local function onMove(event)
@@ -128,6 +128,8 @@ local function onMove(event)
 
   element.x = element.xStart + event.xDelta
   element.y = element.yStart + event.yDelta
+  element.x = element.x - element.x % 5
+  element.y = element.y - element.y % 5
 
   local elementBounds = element.contentBounds
   local levelBounds = elements.background.contentBounds
@@ -150,12 +152,12 @@ end
 local function onPinch(event)
   local element = event.target.element
   local defaults = elementDefaults[element.family .. "-" .. element.type]
-  local minXScale = defaults.minWidth / element.width
-  local minYScale = defaults.minHeight / element.height
-  local maxXScale = defaults.maxWidth / element.width
-  local maxYScale = defaults.maxHeight / element.height
-  element.xScale = min(maxXScale, max(minXScale, element.xScaleStart + event.xDelta / element.width))
-  element.yScale = min(maxYScale, max(minYScale, element.yScaleStart + event.yDelta / element.height))
+  local width = min(defaults.maxWidth, max(defaults.minWidth, element.contentWidthStart + event.xDelta))
+  local height = min(defaults.maxHeight, max(defaults.minHeight, element.contentHeightStart + event.yDelta))
+  width = width - width % 5
+  height = height - height % 5
+  element.xScale = width / element.width
+  element.yScale = height / element.height
   element.handle.path.width = element.contentWidth + element.handle.strokeWidth * 0.5
   element.handle.path.height = element.contentHeight + element.handle.strokeWidth * 0.5
   element.handle.x = element.contentBounds.xMin + element.contentWidth * 0.5
@@ -179,9 +181,11 @@ function scene:create(event)
   scene:createElementBar()
 
   -- TODO Pour du debug uniquement ? Sinon gérer le cancel dans le hide
-  --[[timer.performWithDelay(5000, function()
+  timer.performWithDelay(5000, function()
     local configuration = level:createConfiguration(elements)
-    utils.saveJson(configuration, level.world.directory .. "/" .. level.name .. ".json", system.DocumentsDirectory)
+    local json = require "json"
+    print(json.prettify(configuration))
+    --[[utils.saveJson(configuration, level.world.directory .. "/" .. level.name .. ".json", system.DocumentsDirectory)
 
     local worldConfig = utils.loadJson(level.world.directory .. ".json", system.DocumentsDirectory)
     worldConfig.levels = worldConfig.levels or {}
@@ -196,8 +200,8 @@ function scene:create(event)
     end
 
     worldConfig.levels[levelIndex or #worldConfig.levels + 1] = level.name
-    utils.saveJson(worldConfig, level.world.directory .. ".json", system.DocumentsDirectory)
-  end, -1)]]
+    utils.saveJson(worldConfig, level.world.directory .. ".json", system.DocumentsDirectory)]]
+  end, -1)
 end
 
 function scene:createElementBar()
@@ -392,6 +396,10 @@ function scene:newLevelElement(elementType)
 end
 
 -- TODO
+
+-- Ajouter peut-être un swipe à 3 doigts pour ouvrir la barre latérale ?
+-- Avec le double tap elle s'ouvrait trop souvent sans le vouloir
+-- Et avec une largeur de 10 sur un petit téléphone pas évident de la récupérer
 
 -- Lorsqu'un élément est sélectionné, il faut la possibilité de pouvoir le supprimer, à voir comment
 -- faire au mieux. En tapant à côté la sélection est perdue

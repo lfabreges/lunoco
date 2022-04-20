@@ -159,10 +159,10 @@ function levelClass:createConfiguration(elements)
     local target = elements.targets[index]
     configuration.targets[index] = {
       type = target.type,
-      x = round(obstacle.contentBounds.xMin - 10),
-      y = round(obstacle.contentBounds.yMin - 10),
-      width = round(obstacle.contentWidth),
-      height = round(obstacle.contentHeight),
+      x = round(target.contentBounds.xMin - 10),
+      y = round(target.contentBounds.yMin - 10),
+      width = round(target.contentWidth),
+      height = round(target.contentHeight),
     }
   end
 
