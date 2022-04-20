@@ -14,6 +14,8 @@ local filename = nil
 local frontContainer = nil
 local frontPhoto = nil
 local level = nil
+local max = math.max
+local min = math.min
 local scene = composer.newScene()
 
 local elements = {
@@ -34,29 +36,54 @@ local function goBack()
   navigation.gotoCustomizeLevel(level)
 end
 
-local function onMove(_, deltaX, deltaY)
-  local containerBounds = frontContainer.contentBounds
-  local photoBounds = backPhoto.contentBounds
-  deltaX = photoBounds.xMax + deltaX < containerBounds.xMax and containerBounds.xMax - photoBounds.xMax or deltaX
-  deltaX = photoBounds.xMin + deltaX > containerBounds.xMin and containerBounds.xMin - photoBounds.xMin or deltaX
-  deltaY = photoBounds.yMax + deltaY < containerBounds.yMax and containerBounds.yMax - photoBounds.yMax or deltaY
-  deltaY = photoBounds.yMin + deltaY > containerBounds.yMin and containerBounds.yMin - photoBounds.yMin or deltaY
-  backPhoto:translate(deltaX, deltaY)
-  backPhotoBackground:translate(deltaX, deltaY)
-  frontPhoto:translate(deltaX, deltaY)
+local function onFocus(event)
+  local objects = { backPhoto, backPhotoBackground, frontPhoto }
+  for index = 1, 3 do
+    local object = objects[index]
+    object.xStart = object.x
+    object.yStart = object.y
+    object.widthStart = object.width
+    object.heightStart = object.height
+  end
 end
 
-local function onPinch(_, deltaDistanceX, deltaDistanceY)
-  local minXScale = frontContainer.width / backPhoto.width
-  local minYScale = frontContainer.height / backPhoto.height
-  local xScale = math.min(4, math.max(minXScale, frontPhoto.xScale + deltaDistanceX / backPhoto.width))
-  local yScale = math.min(4, math.max(minYScale, frontPhoto.yScale + deltaDistanceY / backPhoto.height))
-  backPhoto.xScale = xScale
-  backPhoto.yScale = yScale
-  backPhotoBackground.xScale = xScale
-  backPhotoBackground.yScale = yScale
-  frontPhoto.xScale = xScale
-  frontPhoto.yScale = yScale
+local function onMove(event)
+  local containerBounds = frontContainer.contentBounds
+
+  backPhoto.x = backPhoto.xStart + event.x
+  backPhoto.y = backPhoto.yStart + event.y
+
+  local backPhotoBounds = backPhoto.contentBounds
+  local deltaX = 0
+  local deltaY = 0
+
+  if backPhotoBounds.xMax < containerBounds.xMax then
+    deltaX = containerBounds.xMax - backPhotoBounds.xMax
+  elseif backPhotoBounds.xMin > containerBounds.xMin then
+    deltaX = containerBounds.xMin - backPhotoBounds.xMin
+  end
+
+  if backPhotoBounds.yMax < containerBounds.yMax then
+    deltaY = containerBounds.yMax - backPhotoBounds.yMax
+  elseif backPhotoBounds.yMin > containerBounds.yMin then
+    deltaY = containerBounds.yMin - backPhotoBounds.yMin
+  end
+
+  backPhoto.x = backPhoto.x + deltaX
+  backPhoto.y = backPhoto.y + deltaY
+  backPhotoBackground.x = backPhotoBackground.xStart + event.x + deltaX
+  backPhotoBackground.y = backPhotoBackground.yStart + event.y + deltaY
+  frontPhoto.x = frontPhoto.xStart + event.x + deltaX
+  frontPhoto.y = frontPhoto.yStart + event.y + deltaY
+end
+
+local function onPinch(event)
+  backPhoto.width = max(frontContainer.width, backPhoto.widthStart + event.x)
+  backPhoto.height = max(frontContainer.height, backPhoto.heightStart + event.y)
+  backPhotoBackground.width = backPhoto.width
+  backPhotoBackground.height = backPhoto.height
+  frontPhoto.width = backPhoto.width
+  frontPhoto.height = backPhoto.height
 end
 
 local function saveImage()
@@ -99,27 +126,25 @@ function scene:show(event)
     backPhotoBackground = display.newRect(content, centerX, centerY, 1, 1)
     backPhoto = display.newImage(content, filename, system.TemporaryDirectory, centerX, centerY)
 
-    local xScale = math.min(1, display.actualContentWidth / backPhoto.width)
-    local yScale = math.min(1, display.actualContentHeight / backPhoto.height)
-    local photoScale = math.max(xScale, yScale)
-
-    backPhotoBackground.width = backPhoto.width
-    backPhotoBackground.height = backPhoto.height
-    backPhotoBackground.xScale = photoScale
-    backPhotoBackground.yScale = photoScale
-    backPhotoBackground:setFillColor(0)
-
-    backPhoto.xScale = photoScale
-    backPhoto.yScale = photoScale
-    backPhoto.alpha = 0.25
+    local xScale = min(1, display.actualContentWidth / backPhoto.width)
+    local yScale = min(1, display.actualContentHeight / backPhoto.height)
+    local photoScale = max(xScale, yScale)
 
     frontContainer = display.newContainer(content, element.width, element.height)
     frontContainer.x = centerX
     frontContainer.y = centerY
 
+    backPhoto.width = max(frontContainer.width, backPhoto.width * photoScale)
+    backPhoto.height = max(frontContainer.height, backPhoto.height * photoScale)
+    backPhoto.alpha = 0.25
+
+    backPhotoBackground.width = backPhoto.width
+    backPhotoBackground.height = backPhoto.height
+    backPhotoBackground:setFillColor(0)
+
     frontPhoto = display.newImage(frontContainer, filename, system.TemporaryDirectory, 0, 0)
-    frontPhoto.xScale = photoScale
-    frontPhoto.yScale = photoScale
+    frontPhoto.width = backPhoto.width
+    frontPhoto.height = backPhoto.height
 
     if element.mask then
       local frontPhotoMask = graphics.newMask(element.mask)
@@ -128,22 +153,16 @@ function scene:show(event)
       frontContainer.maskScaleY = frontContainer.height / 394
     end
 
-    onPinch(background, 0, 0)
-
   elseif event.phase == "did" then
-    if not utils.isSimulator() then
-      system.activate("multitouch")
-    end
-    multitouch.addMoveAndPinchListener(background, onMove, onPinch)
+    utils.activateMultitouch()
+    multitouch.addMoveAndPinchListener(background, { onFocus = onFocus, onMove = onMove, onPinch = onPinch })
   end
 end
 
 function scene:hide(event)
   if event.phase == "will" then
     multitouch.removeMoveAndPinchListener(background)
-    if not utils.isSimulator() then
-      system.deactivate("multitouch")
-    end
+    utils.deactivateMultitouch()
   elseif event.phase == "did" then
     transition.cancelAll()
     display.remove(backPhoto)

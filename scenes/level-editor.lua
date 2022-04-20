@@ -104,28 +104,43 @@ local function newElement(parent, elementType)
   end
 end
 
-local function onMove(element, deltaX, deltaY)
-  local elementBounds = element.contentBounds
-  local levelBounds = elements.background.contentBounds
-  deltaX = elementBounds.xMax + deltaX > levelBounds.xMax and levelBounds.xMax - elementBounds.xMax or deltaX
-  deltaX = elementBounds.xMin + deltaX < levelBounds.xMin and levelBounds.xMin - elementBounds.xMin or deltaX
-  deltaY = elementBounds.yMax + deltaY > levelBounds.yMax and levelBounds.yMax - elementBounds.yMax or deltaY
-  deltaY = elementBounds.yMin + deltaY < levelBounds.yMin and levelBounds.yMin - elementBounds.yMin or deltaY
-  element:translate(deltaX, deltaY)
+local function onFocus(event)
+  local element = event.target
+  element.xStart = element.x
+  element.yStart = element.y
+  element.widthStart = element.width
+  element.heightStart = element.height
 end
 
-local function onPinch(element, deltaDistanceX, deltaDistanceY, deltaTotalDistance)
-  local defaults = elementDefaults[element.family .. "-" .. element.type]
+local function onMove(event)
+  local element = event.target
+  element.x = element.xStart + event.x
+  element.y = element.yStart + event.y
 
-  -- TODO A tester pour le coin, peut-être nécessaire de ralentir car la valeur sera plus grande que
-  -- simplement pour un X par exemple, à voir
-  if defaults.shouldMaintainAspectRatio then
-    deltaDistanceX = deltaTotalDistance
-    deltaDistanceY = deltaTotalDistance
+  local elementBounds = element.contentBounds
+  local levelBounds = elements.background.contentBounds
+
+  if elementBounds.xMax > levelBounds.xMax then
+    element.x = element.x - (elementBounds.xMax - levelBounds.xMax)
+  elseif elementBounds.xMin < levelBounds.xMin then
+    element.x = element.x - (elementBounds.xMin - levelBounds.xMin)
   end
 
-  element.width = min(defaults.maxWidth, max(defaults.minWidth, element.width + deltaDistanceX))
-  element.height = min(defaults.maxHeight, max(defaults.minHeight, element.height + deltaDistanceY))
+  if elementBounds.yMax > levelBounds.yMax then
+    element.y = element.y - (elementBounds.yMax - levelBounds.yMax)
+  elseif elementBounds.yMin < levelBounds.yMin then
+    element.y = element.y - (elementBounds.yMin - levelBounds.yMin)
+  end
+end
+
+local function onPinch(event)
+  local element = event.target
+  local defaults = elementDefaults[element.family .. "-" .. element.type]
+  local x = defaults.shouldMaintainAspectRatio and event.total or event.x
+  local y = defaults.shouldMaintainAspectRatio and event.total or event.y
+
+  element.width = max(defaults.minWidth, min(defaults.maxWidth, element.widthStart + x))
+  element.height = max(defaults.minHeight, min(defaults.maxHeight, element.heightStart + y))
   element.maskScaleX = element.maskScaleX and element.width / 394 or 0
   element.maskScaleY = element.maskScaleY and element.height / 394 or 0
 end
@@ -308,9 +323,9 @@ end
 
 function scene:configureElement(element)
   if element.family == "obstacle" or element.family == "target" then
-    multitouch.addMoveAndPinchListener(element, onMove, onPinch)
+    multitouch.addMoveAndPinchListener(element, { onFocus = onFocus, onMove = onMove, onPinch = onPinch })
   else
-    multitouch.addMoveAndPinchListener(element, onMove)
+    multitouch.addMoveAndPinchListener(element, { onFocus = onFocus, onMove = onMove })
   end
 end
 
@@ -353,17 +368,13 @@ end
 
 function scene:show(event)
   if event.phase == "did" then
-    if not utils.isSimulator() then
-      system.activate("multitouch")
-    end
+    utils.activateMultitouch()
   end
 end
 
 function scene:hide(event)
   if event.phase == "will" then
-    if not utils.isSimulator() then
-      system.deactivate("multitouch")
-    end
+    utils.deactivateMultitouch()
   elseif event.phase == "did" then
     transition.cancelAll()
     composer.removeScene("scenes.level-editor")

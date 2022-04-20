@@ -6,6 +6,18 @@ local utils = {}
 local environment = system.getInfo("environment")
 local platform = system.getInfo("platform")
 
+utils.activateMultitouch = function()
+  if not utils.isSimulator() then
+    system.activate("multitouch")
+  end
+end
+
+utils.deactivateMultitouch = function()
+  if not utils.isSimulator() then
+    system.deactivate("multitouch")
+  end
+end
+
 utils.fileExists = function(filename, baseDirectory)
   local filepath = system.pathForFile(filename, baseDirectory)
   return os.rename(filepath, filepath) and true or false
