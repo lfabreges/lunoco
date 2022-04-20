@@ -104,6 +104,9 @@ local function newElement(parent, elementType)
   end
 end
 
+local function onBlur(event)
+end
+
 local function onFocus(event)
   local element = event.target
   element.xStart = element.x
@@ -114,8 +117,8 @@ end
 
 local function onMove(event)
   local element = event.target
-  element.x = element.xStart + event.x
-  element.y = element.yStart + event.y
+  element.x = element.xStart + event.xDelta
+  element.y = element.yStart + event.yDelta
 
   local elementBounds = element.contentBounds
   local levelBounds = elements.background.contentBounds
@@ -136,8 +139,8 @@ end
 local function onPinch(event)
   local element = event.target
   local defaults = elementDefaults[element.family .. "-" .. element.type]
-  local x = defaults.shouldMaintainAspectRatio and event.total or event.x
-  local y = defaults.shouldMaintainAspectRatio and event.total or event.y
+  local x = defaults.shouldMaintainAspectRatio and event.totalDelta or event.xDelta
+  local y = defaults.shouldMaintainAspectRatio and event.totalDelta or event.yDelta
 
   element.width = max(defaults.minWidth, min(defaults.maxWidth, element.widthStart + x))
   element.height = max(defaults.minHeight, min(defaults.maxHeight, element.heightStart + y))
@@ -322,11 +325,12 @@ function scene:createElementBar()
 end
 
 function scene:configureElement(element)
-  if element.family == "obstacle" or element.family == "target" then
-    multitouch.addMoveAndPinchListener(element, { onFocus = onFocus, onMove = onMove, onPinch = onPinch })
-  else
-    multitouch.addMoveAndPinchListener(element, { onFocus = onFocus, onMove = onMove })
-  end
+  multitouch.addMoveAndPinchListener(element, {
+    onBlur = onBlur,
+    onFocus = onFocus,
+    onMove = onMove,
+    onPinch = (element.family == "obstacle" or element.family == "target") and onPinch or nil,
+  })
 end
 
 function scene:newLevelElement(elementType)

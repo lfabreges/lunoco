@@ -50,8 +50,8 @@ end
 local function onMove(event)
   local containerBounds = frontContainer.contentBounds
 
-  backPhoto.x = backPhoto.xStart + event.x
-  backPhoto.y = backPhoto.yStart + event.y
+  backPhoto.x = backPhoto.xStart + event.xDelta
+  backPhoto.y = backPhoto.yStart + event.yDelta
 
   local backPhotoBounds = backPhoto.contentBounds
   local deltaX = 0
@@ -71,15 +71,15 @@ local function onMove(event)
 
   backPhoto.x = backPhoto.x + deltaX
   backPhoto.y = backPhoto.y + deltaY
-  backPhotoBackground.x = backPhotoBackground.xStart + event.x + deltaX
-  backPhotoBackground.y = backPhotoBackground.yStart + event.y + deltaY
-  frontPhoto.x = frontPhoto.xStart + event.x + deltaX
-  frontPhoto.y = frontPhoto.yStart + event.y + deltaY
+  backPhotoBackground.x = backPhotoBackground.xStart + event.xDelta + deltaX
+  backPhotoBackground.y = backPhotoBackground.yStart + event.yDelta + deltaY
+  frontPhoto.x = frontPhoto.xStart + event.xDelta + deltaX
+  frontPhoto.y = frontPhoto.yStart + event.yDelta + deltaY
 end
 
 local function onPinch(event)
-  backPhoto.width = max(frontContainer.width, backPhoto.widthStart + event.x)
-  backPhoto.height = max(frontContainer.height, backPhoto.heightStart + event.y)
+  backPhoto.width = max(frontContainer.width, backPhoto.widthStart + event.xDelta)
+  backPhoto.height = max(frontContainer.height, backPhoto.heightStart + event.yDelta)
   backPhotoBackground.width = backPhoto.width
   backPhotoBackground.height = backPhoto.height
   frontPhoto.width = backPhoto.width

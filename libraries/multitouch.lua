@@ -3,7 +3,7 @@ local multitouch = {}
 local abs = math.abs
 local sqrt = math.sqrt
 
-local function calculateDistance(firstEvent, secondEvent)
+local function calculateDistanceDelta(firstEvent, secondEvent)
   local startDistanceX = abs(firstEvent.xStart - secondEvent.xStart)
   local startDistanceY = abs(firstEvent.yStart - secondEvent.yStart)
   local currentDistanceX = abs(firstEvent.x - secondEvent.x)
@@ -64,10 +64,10 @@ local function createMoveAndPinchListener(object, options)
   local middleStartY
 
   local function updateCumulatedDistance(oldFirstEvent, oldSecondEvent, newFirstEvent, newSecondEvent)
-    local oldDistanceX, oldDistanceY = calculateDistance(oldFirstEvent, oldSecondEvent)
-    local newDistanceX, newDistanceY = calculateDistance(newFirstEvent, newSecondEvent)
-    cumulatedDistanceX = cumulatedDistanceX + oldDistanceX - newDistanceX
-    cumulatedDistanceY = cumulatedDistanceY + oldDistanceY - newDistanceY
+    local oldDeltaX, oldDeltaY = calculateDistanceDelta(oldFirstEvent, oldSecondEvent)
+    local newDeltaX, newDeltaY = calculateDistanceDelta(newFirstEvent, newSecondEvent)
+    cumulatedDistanceX = cumulatedDistanceX + oldDeltaX - newDeltaX
+    cumulatedDistanceY = cumulatedDistanceY + oldDeltaY - newDeltaY
   end
 
   local function updateMiddleStart(oldFirstEvent, oldSecondEvent, newFirstEvent, newSecondEvent)
@@ -106,18 +106,26 @@ local function createMoveAndPinchListener(object, options)
     elseif object.isFocus then
       if phase == "moved" then
         if options.onPinch and numberOfEvents > 1 then
-          local x, y = calculateDistance(firstEvent, secondEvent)
-          x = x + cumulatedDistanceX
-          y = y + cumulatedDistanceY
-          local total = sqrt(x * x + y * y)
-          options.onPinch({ x = x, y = y, total = total, target = object })
+          local xDelta, yDelta = calculateDistanceDelta(firstEvent, secondEvent)
+          xDelta = xDelta + cumulatedDistanceX
+          yDelta = yDelta + cumulatedDistanceY
+          local total = sqrt(xDelta * xDelta + yDelta * yDelta)
+          options.onPinch({ xDelta = xDelta, yDelta = yDelta, total = total, target = object })
         end
         if options.onMove then
           if numberOfEvents == 1 then
-            options.onMove({ x = firstEvent.x - middleStartX, y = firstEvent.y - middleStartY, target = object })
+            options.onMove({
+              xDelta = firstEvent.x - middleStartX,
+              yDelta = firstEvent.y - middleStartY,
+              target = object,
+            })
           else
             local middleX, middleY = calculateMiddle(firstEvent, secondEvent)
-            options.onMove({ x = middleX - middleStartX, y = middleY - middleStartY, target = object })
+            options.onMove({
+              xDelta = middleX - middleStartX,
+              yDelta = middleY - middleStartY,
+              target = object,
+            })
           end
         end
       elseif phase == "ended" or phase == "cancelled" then
