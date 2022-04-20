@@ -198,6 +198,7 @@ function levelClass:newBall(parent, width, height)
   local ball = display.newImageRect(parent, imageName, imageBaseDir, width, height)
   local ballMask = graphics.newMask("images/elements/ball-mask.png")
   ball:setMask(ballMask)
+  ball.isHitTestMasked = false
   ball.maskScaleX = ball.width / 394
   ball.maskScaleY = ball.height / 394
   ball.isDefault = isDefault
@@ -242,6 +243,7 @@ function levelClass:newObstacleCorner(parent, width, height)
   local corner = display.newImageRect(parent, imageName, imageBaseDir, width, height)
   local cornerMask = graphics.newMask("images/elements/corner-mask.png")
   corner:setMask(cornerMask)
+  corner.isHitTestMasked = false
   corner.maskScaleX = corner.width / 394
   corner.maskScaleY = corner.height / 394
   corner.isDefault = isDefault

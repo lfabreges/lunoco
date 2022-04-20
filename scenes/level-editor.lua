@@ -22,7 +22,6 @@ local elementDefaults = {
     maxWidth = 150,
     maxHeight = 150,
     canRotate = true,
-    shouldMaintainAspectRatio = true,
   },
   ["obstacle-horizontal-barrier"] = {
     width = 100,
@@ -155,10 +154,8 @@ local function onPinch(event)
   local minYScale = defaults.minHeight / element.height
   local maxXScale = defaults.maxWidth / element.width
   local maxYScale = defaults.maxHeight / element.height
-  local xDelta = defaults.shouldMaintainAspectRatio and event.totalDelta or event.xDelta
-  local yDelta = defaults.shouldMaintainAspectRatio and event.totalDelta or event.yDelta
-  element.xScale = min(maxXScale, max(minXScale, element.xScaleStart + xDelta / element.width))
-  element.yScale = min(maxYScale, max(minYScale, element.yScaleStart + yDelta / element.height))
+  element.xScale = min(maxXScale, max(minXScale, element.xScaleStart + event.xDelta / element.width))
+  element.yScale = min(maxYScale, max(minYScale, element.yScaleStart + event.yDelta / element.height))
   element.handle.path.width = element.contentWidth + element.handle.strokeWidth * 0.5
   element.handle.path.height = element.contentHeight + element.handle.strokeWidth * 0.5
   element.handle.x = element.contentBounds.xMin + element.contentWidth * 0.5
@@ -210,13 +207,6 @@ function scene:createElementBar()
   middleGround.isVisible = false
   middleGround.isHitTestable = true
 
-  middleGround:addEventListener("tap", function(event)
-    if event.numTaps == 2 and not elementBar.isOpened then
-      elementBar.open()
-    end
-    return true
-  end)
-
   middleGround:addEventListener("touch", function(event)
     if event.phase == "began" then
       if selectedElement and not utils.isEventWithinBounds(selectedElement.handle, event) then
@@ -233,7 +223,6 @@ function scene:createElementBar()
 
   local elementBarBackground = components.newBackground(elementBar)
   elementBarBackground.width = 106
-  elementBarBackground:addEventListener("tap", function() return true end)
   elementBarBackground:addEventListener("touch", function() return true end)
 
   local elementBarHandle = components.newGroup(elementBar)
@@ -355,9 +344,14 @@ function scene:configureElement(element)
 
       clearElementSelection()
 
-      local centerX = element.contentBounds.xMin + element.contentWidth * 0.5
-      local centerY = element.contentBounds.yMin + element.contentHeight * 0.5
-      local handle = display.newRoundedRect(levelView, centerX, centerY, element.width + 20, element.height + 20, 1)
+      local handle = display.newRoundedRect(
+        levelView,
+        element.contentBounds.xMin + element.contentWidth * 0.5,
+        element.contentBounds.yMin + element.contentHeight * 0.5,
+        element.contentWidth + 20,
+        element.contentHeight + 20,
+        1
+      )
 
       handle.stroke = { type = "gradient", color1 = { 0.5, 0.5, 0.5, 0 }, color2 = { 0.5, 0.5, 0.5, 0.5 } }
       handle.strokeWidth = 40
@@ -383,11 +377,8 @@ function scene:newLevelElement(elementType)
   local element = newElement(levelView, elementType)
   local defaults = elementDefaults[elementType]
 
-  element.width = defaults.width
-  element.height = defaults.height
-  element.maskScaleX = element.maskScaleX and element.width / 394 or 0
-  element.maskScaleY = element.maskScaleY and element.height / 394 or 0
-
+  element.xScale = defaults.width / element.width
+  element.yScale = defaults.height / element.height
   level:positionElement(element, 150 - element.width * 0.5, 230 - element.height * 0.5)
 
   if elementType:starts("target-") then
