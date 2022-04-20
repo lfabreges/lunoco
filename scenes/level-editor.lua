@@ -139,11 +139,11 @@ end
 local function onPinch(event)
   local element = event.target
   local defaults = elementDefaults[element.family .. "-" .. element.type]
-  local x = defaults.shouldMaintainAspectRatio and event.totalDelta or event.xDelta
-  local y = defaults.shouldMaintainAspectRatio and event.totalDelta or event.yDelta
+  local xDelta = defaults.shouldMaintainAspectRatio and event.totalDelta or event.xDelta
+  local yDelta = defaults.shouldMaintainAspectRatio and event.totalDelta or event.yDelta
 
-  element.width = max(defaults.minWidth, min(defaults.maxWidth, element.widthStart + x))
-  element.height = max(defaults.minHeight, min(defaults.maxHeight, element.heightStart + y))
+  element.width = max(defaults.minWidth, min(defaults.maxWidth, element.widthStart + xDelta))
+  element.height = max(defaults.minHeight, min(defaults.maxHeight, element.heightStart + yDelta))
   element.maskScaleX = element.maskScaleX and element.width / 394 or 0
   element.maskScaleY = element.maskScaleY and element.height / 394 or 0
 end

@@ -109,8 +109,8 @@ local function createMoveAndPinchListener(object, options)
           local xDelta, yDelta = calculateDistanceDelta(firstEvent, secondEvent)
           xDelta = xDelta + cumulatedDistanceX
           yDelta = yDelta + cumulatedDistanceY
-          local total = sqrt(xDelta * xDelta + yDelta * yDelta)
-          options.onPinch({ xDelta = xDelta, yDelta = yDelta, total = total, target = object })
+          local totalDelta = sqrt(xDelta * xDelta + yDelta * yDelta)
+          options.onPinch({ xDelta = xDelta, yDelta = yDelta, totalDelta = totalDelta, target = object })
         end
         if options.onMove then
           if numberOfEvents == 1 then
