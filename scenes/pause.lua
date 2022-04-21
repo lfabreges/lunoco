@@ -12,6 +12,10 @@ local function gotoCustomizeLevel()
   navigation.gotoCustomizeLevel(level)
 end
 
+local function gotoLevelEditor()
+  navigation.gotoLevelEditor(level)
+end
+
 local function gotoLevels()
   navigation.gotoLevels(level.world)
 end
@@ -26,6 +30,10 @@ local function retryLevel()
 end
 
 function scene:create(event)
+  level = event.params.level
+  shouldResumeGame = false
+
+  local isLevelBuiltIn = level.world.isBuiltIn
   local screenY = display.screenOriginY
   local screenHeight = display.actualContentHeight
 
@@ -47,25 +55,46 @@ function scene:create(event)
   resumeButton.x = display.contentCenterX
   resumeButton.y = screenY + resumeBackground.height * 0.5
 
-  local retryButton = components.newTextButton(self.view, i18n.t("retry"), 160, 40, { onRelease = retryLevel })
+  local retryButton = components.newTextButton(
+    self.view,
+    i18n.t("retry"),
+    160,
+    40,
+    { onRelease = retryLevel }
+  )
   retryButton.x = display.contentCenterX
-  retryButton.y = remainingBackground.y + remainingBackground.height * 0.5 - 60
+  retryButton.y = remainingBackground.y + remainingBackground.height * 0.5 - (isLevelBuiltIn and 60 or 90)
 
-  local levelsButton = components.newTextButton(self.view, i18n.t("levels"), 160, 40, { onRelease = gotoLevels })
+  local levelsButton = components.newTextButton(
+    self.view,
+    i18n.t("levels"),
+    160,
+    40,
+    { onRelease = gotoLevels }
+  )
   levelsButton.x = display.contentCenterX
   levelsButton.y = retryButton.y + 60
 
-  local customizeButton = components.newTextButton(self.view, i18n.t("customize"), 160, 40, {
-    onRelease = gotoCustomizeLevel,
-  })
+  local customizeButton = components.newTextButton(
+    self.view,
+    i18n.t("customize"),
+    160,
+    40,
+    { onRelease = gotoCustomizeLevel }
+  )
   customizeButton.x = display.contentCenterX
   customizeButton.y = levelsButton.y + 60
-end
 
-function scene:show(event)
-  if event.phase == "will" then
-    level = event.params.level
-    shouldResumeGame = false
+  if not isLevelBuiltIn then
+    local editButton = components.newTextButton(
+      self.view,
+      i18n.t("edit"),
+      160,
+      40,
+      { onRelease = gotoLevelEditor }
+    )
+    editButton.x = display.contentCenterX
+    editButton.y = customizeButton.y + 60
   end
 end
 
@@ -76,11 +105,11 @@ function scene:hide(event)
     end
   elseif event.phase == "did" then
     transition.cancelAll()
+    composer.removeScene("scenes.pause")
   end
 end
 
 scene:addEventListener("create", scene)
-scene:addEventListener("show", scene)
 scene:addEventListener("hide", scene)
 
 return scene
