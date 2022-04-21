@@ -1,6 +1,16 @@
 local multitouch = {}
 
 local abs = math.abs
+local atan2 = math.atan2
+local deg = math.deg
+
+local function calculateAngleDelta(firstEvent, secondEvent)
+  local xDistanceStart = firstEvent.xStart - secondEvent.xStart
+  local yDistanceStart = firstEvent.yStart - secondEvent.yStart
+  local xDistance = firstEvent.x - secondEvent.x
+  local yDistance = firstEvent.y - secondEvent.y
+  return deg(atan2(yDistance, xDistance)) - deg(atan2(yDistanceStart, xDistanceStart))
+end
 
 local function calculateDistanceDelta(firstEvent, secondEvent)
   local xDistanceStart = abs(firstEvent.xStart - secondEvent.xStart)
@@ -56,24 +66,27 @@ local function createEventListener(listener)
   return onTouch
 end
 
-local function createMoveAndPinchListener(object, options)
-  local xDistanceCumulated
-  local yDistanceCumulated
+local function createMovePinchRotateListener(object, options)
+  local angleCumulative
+  local xDistanceCumulative
+  local yDistanceCumulative
   local xMoveStart
   local yMoveStart
 
-  local function updateDistanceCumulated(oldFirstEvent, oldSecondEvent, newFirstEvent, newSecondEvent)
-    local xOldDistanceDelta, yOldDistanceDelta = calculateDistanceDelta(oldFirstEvent, oldSecondEvent)
-    local xNewDistanceDelta, yNewDistanceDelta = calculateDistanceDelta(newFirstEvent, newSecondEvent)
-    xDistanceCumulated = xDistanceCumulated + xOldDistanceDelta - xNewDistanceDelta
-    yDistanceCumulated = yDistanceCumulated + yOldDistanceDelta - yNewDistanceDelta
-  end
-
-  local function updateMoveStart(oldFirstEvent, oldSecondEvent, newFirstEvent, newSecondEvent)
+  local function updateMoveStartAndCumulativeData(oldFirstEvent, oldSecondEvent, newFirstEvent, newSecondEvent)
     local xOldMiddle, yOldMiddle = calculateMiddle(oldFirstEvent, oldSecondEvent)
     local xNewMiddle, yNewMiddle = calculateMiddle(newFirstEvent, newSecondEvent)
     xMoveStart = xMoveStart + xNewMiddle - xOldMiddle
     yMoveStart = yMoveStart + yNewMiddle - yOldMiddle
+
+    local xOldDistanceDelta, yOldDistanceDelta = calculateDistanceDelta(oldFirstEvent, oldSecondEvent)
+    local xNewDistanceDelta, yNewDistanceDelta = calculateDistanceDelta(newFirstEvent, newSecondEvent)
+    xDistanceCumulative = xDistanceCumulative + xOldDistanceDelta - xNewDistanceDelta
+    yDistanceCumulative = yDistanceCumulative + yOldDistanceDelta - yNewDistanceDelta
+
+    local oldAngleDelta = calculateAngleDelta(oldFirstEvent, oldSecondEvent)
+    local newAngleDelta = calculateAngleDelta(newFirstEvent, newSecondEvent)
+    angleCumulative = angleCumulative + oldAngleDelta - newAngleDelta
   end
 
   local function onMultitouch(event)
@@ -91,22 +104,22 @@ local function createMoveAndPinchListener(object, options)
       if index == 1 then
         display.getCurrentStage():setFocus(object)
         object.isFocus = true
-        xDistanceCumulated = 0
-        yDistanceCumulated = 0
+        angleCumulative = 0
+        xDistanceCumulative = 0
+        yDistanceCumulative = 0
         xMoveStart = firstEvent.x
         yMoveStart = firstEvent.y
         if options.onFocus then
           options.onFocus({ target = object })
         end
       elseif index == 2 then
-        updateMoveStart(firstEvent, firstEvent, firstEvent, secondEvent)
-        updateDistanceCumulated(firstEvent, firstEvent, firstEvent, secondEvent)
+        updateMoveStartAndCumulativeData(firstEvent, firstEvent, firstEvent, secondEvent)
       end
     elseif object.isFocus then
       if phase == "moved" then
-        if options.onMoveAndPinch then
+        if options.onMovePinchRotate then
           if numberOfEvents == 1 then
-            options.onMoveAndPinch({
+            options.onMovePinchRotate({
               xDelta = firstEvent.x - xMoveStart,
               yDelta = firstEvent.y - yMoveStart,
               target = object,
@@ -114,11 +127,13 @@ local function createMoveAndPinchListener(object, options)
           else
             local xMiddle, yMiddle = calculateMiddle(firstEvent, secondEvent)
             local xDistanceDelta, yDistanceDelta = calculateDistanceDelta(firstEvent, secondEvent)
-            options.onMoveAndPinch({
+            local angleDelta = calculateAngleDelta(firstEvent, secondEvent)
+            options.onMovePinchRotate({
+              angleDelta = angleDelta + angleCumulative,
               xDelta = xMiddle - xMoveStart,
               yDelta = yMiddle - yMoveStart,
-              xDistanceDelta = xDistanceDelta + xDistanceCumulated,
-              yDistanceDelta = yDistanceDelta + yDistanceCumulated,
+              xDistanceDelta = xDistanceDelta + xDistanceCumulative,
+              yDistanceDelta = yDistanceDelta + yDistanceCumulative,
               target = object,
             })
           end
@@ -133,8 +148,7 @@ local function createMoveAndPinchListener(object, options)
         else
           local remainingEvent = index == 1 and secondEvent or firstEvent
           local otherEvent = numberOfEvents == 2 and remainingEvent or event.events[3]
-          updateMoveStart(firstEvent, secondEvent, remainingEvent, otherEvent)
-          updateDistanceCumulated(firstEvent, secondEvent, remainingEvent, otherEvent)
+          updateMoveStartAndCumulativeData(firstEvent, secondEvent, remainingEvent, otherEvent)
         end
       end
     end
@@ -159,17 +173,17 @@ multitouch.removeEventListener = function(object, listener)
   end
 end
 
-multitouch.addMoveAndPinchListener = function(object, options)
-  local listener = createMoveAndPinchListener(object, options)
-  multitouch.removeMoveAndPinchListener(object)
+multitouch.addMovePinchRotateListener = function(object, options)
+  local listener = createMovePinchRotateListener(object, options)
+  multitouch.removeMovePinchRotateListener(object)
   multitouch.addEventListener(object, listener)
-  object.multitouchMoveAndPinchListener = listener
+  object.multitouchMovePinchRotateListener = listener
 end
 
-multitouch.removeMoveAndPinchListener = function(object)
-  if object.multitouchMoveAndPinchListener then
-    multitouch.removeEventListener(object, object.multitouchMoveAndPinchListener)
-    object.multitouchMoveAndPinchListener = nil
+multitouch.removeMovePinchRotateListener = function(object)
+  if object.multitouchMovePinchRotateListener then
+    multitouch.removeEventListener(object, object.multitouchMovePinchRotateListener)
+    object.multitouchMovePinchRotateListener = nil
   end
 end
 

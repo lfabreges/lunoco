@@ -112,20 +112,18 @@ local function newElement(parent, elementType)
   end
 end
 
-local function onBlur(event)
-end
-
 local function onFocus(event)
   local element = event.target.element
+  element.contentWidthStart = element.contentWidth
+  element.contentHeightStart = element.contentHeight
+  element.rotationStart = element.rotation
   element.xStart = element.x
   element.yStart = element.y
   element.xDeltaCorrection = 0
   element.yDeltaCorrection = 0
-  element.contentWidthStart = element.contentWidth
-  element.contentHeightStart = element.contentHeight
 end
 
-local function onMoveAndPinch(event)
+local function onMovePinchRotate(event)
   local element = event.target.element
   local defaults = elementDefaults[element.family .. "-" .. element.type]
   local xDeltaCorrection = 0
@@ -148,6 +146,10 @@ local function onMoveAndPinch(event)
 
     element.handle.path.width = element.contentWidth + 40
     element.handle.path.height = element.contentHeight + 40
+  end
+
+  if event.angleDelta and (element.family == "obstacle" or element.family == "target") then
+    element.rotation = element.rotationStart + event.angleDelta
   end
 
   element.x = element.xStart + event.xDelta + element.xDeltaCorrection
@@ -407,7 +409,7 @@ function scene:configureElement(element)
       handle.element = element
 
       handle:addEventListener("tap", function() return true end)
-      multitouch.addMoveAndPinchListener(handle, { onFocus = onFocus, onMoveAndPinch = onMoveAndPinch })
+      multitouch.addMovePinchRotateListener(handle, { onFocus = onFocus, onMovePinchRotate = onMovePinchRotate })
 
       event.target = handle
       handle:dispatchEvent(event)

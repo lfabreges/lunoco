@@ -47,7 +47,7 @@ local function onFocus(event)
   end
 end
 
-local function onMoveAndPinch(event)
+local function onMovePinchRotate(event)
   if event.xDistanceDelta then
     local minXScale = frontContainer.width / backPhoto.width
     local minYScale = frontContainer.height / backPhoto.height
@@ -159,13 +159,13 @@ function scene:show(event)
 
   elseif event.phase == "did" then
     utils.activateMultitouch()
-    multitouch.addMoveAndPinchListener(background, { onFocus = onFocus, onMoveAndPinch = onMoveAndPinch })
+    multitouch.addMovePinchRotateListener(background, { onFocus = onFocus, onMovePinchRotate = onMovePinchRotate })
   end
 end
 
 function scene:hide(event)
   if event.phase == "will" then
-    multitouch.removeMoveAndPinchListener(background)
+    multitouch.removeMovePinchRotateListener(background)
     utils.deactivateMultitouch()
   elseif event.phase == "did" then
     transition.cancelAll()
