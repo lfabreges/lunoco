@@ -126,9 +126,9 @@ end
 
 local function onMovePinchRotate(event)
   local element = event.target.element
-  local defaults = elementDefaults[element.family .. "-" .. element.type]
+  local defaults = elementDefaults[element.family .. "-" .. element.type] or {}
 
-  if element.family == "obstacle" or element.family == "target" then
+  if element.family ~= "root" then
     if event.xDistanceDelta then
       local minWidth = defaults.minWidth
       local maxWidth = defaults.maxWidth
