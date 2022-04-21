@@ -103,6 +103,35 @@ local function clearElementSelection()
   end
 end
 
+local function newButton(parent, x, y, content, options)
+  local group = components.newGroup(parent)
+  group.x = x
+  group.y = y
+
+  local frame = display.newRoundedRect(group, 0, 0, 78, 78, 5)
+  frame.anchorX = 0
+  frame.anchorY = 0
+  frame:setFillColor(0.5, 0.5, 0.5, 0.25)
+  frame:setStrokeColor(0.5, 0.5, 0.5, 0.75)
+  frame.strokeWidth = 1
+
+  local contentGroup = components.newGroup(group)
+
+  local background = display.newRect(contentGroup, frame.x, frame.y, frame.width, frame.height)
+  background.anchorX = frame.anchorX
+  background.anchorY = frame.anchorY
+  background.isVisible = false
+  background.isHitTestable = true
+
+  contentGroup:insert(content)
+  content.x = frame.x + frame.contentWidth * 0.5
+  content.y = frame.y + frame.contentWidth * 0.5
+
+  components.newObjectButton(contentGroup, options)
+
+  return group
+end
+
 local function newElement(parent, elementType)
   if elementType == "obstacle-corner" then
     return level:newObstacleCorner(parent, 50, 50)
@@ -304,46 +333,15 @@ function scene:createSideBar()
 
   local topInset, _, bottomInset = display.getSafeAreaInsets()
 
-  local playButtonFrame = display.newRoundedRect(sideBar, 10, topInset + 10, 168, 58, 5)
-  playButtonFrame.anchorX = 0
-  playButtonFrame.anchorY = 0
-  playButtonFrame:setFillColor(0.5, 0.5, 0.5, 0.25)
-  playButtonFrame:setStrokeColor(0.5, 0.5, 0.5, 0.75)
-  playButtonFrame.strokeWidth = 1
-
-  local playButtonGroup = components.newGroup(sideBar)
-
-  local playButtonBackground = display.newRect(
-    playButtonGroup,
-    playButtonFrame.x,
-    playButtonFrame.y,
-    playButtonFrame.width,
-    playButtonFrame.height
-  )
-  playButtonBackground.anchorX = playButtonFrame.anchorX
-  playButtonBackground.anchorY = playButtonFrame.anchorY
-  playButtonBackground.isVisible = false
-  playButtonBackground.isHitTestable = true
-
-  local playButtonIcon = display.newImageRect(playButtonGroup, "images/icons/resume.png", 30, 30)
-  playButtonIcon.x = playButtonFrame.x + playButtonFrame.width * 0.5
-  playButtonIcon.y = playButtonFrame.y + playButtonFrame.height * 0.5
-
-  components.newObjectButton(playButtonGroup, { onRelease = saveAndPlay })
-
-  local sideBarSeparatorTopY = playButtonFrame.contentBounds.yMax + 10
-  local sideBarSeparatorTop = display.newLine(sideBar, 20, sideBarSeparatorTopY, 170, sideBarSeparatorTopY)
-  sideBarSeparatorTop:setStrokeColor(0.5, 0.5, 0.5, 0.75)
-
   local scrollview = widget.newScrollView({
     left = 0,
-    top = sideBarSeparatorTopY,
+    top = 0,
     width = sideBarWidth - 10,
-    height = sideBarBackground.height - (sideBarSeparatorTopY - screenY),
+    height = sideBarBackground.height,
     hideBackground = true,
     hideScrollBar = true,
     horizontalScrollDisabled = true,
-    topPadding = 10,
+    topPadding = topInset + 10,
     bottomPadding = bottomInset + 10,
   })
 
@@ -352,24 +350,17 @@ function scene:createSideBar()
   local scrollviewContent = components.newGroup(scrollview)
   local y = 0
 
+  local playButtonIcon = display.newImageRect("images/icons/resume.png", 30, 30)
+  local playButton = newButton(scrollviewContent, 10, y, playButtonIcon, { onRelease = saveAndPlay })
+
+  y = playButton.y + playButton.contentHeight + 20
+  local sideBarSeparatorTop = display.newLine(scrollviewContent, 20, y, 170, y)
+  sideBarSeparatorTop:setStrokeColor(0.5, 0.5, 0.5, 0.75)
+
+  y = y + 21
+
   for index, elementType in ipairs(elementTypes) do
     local isEven = index % 2 == 0
-
-    local frame = display.newRoundedRect(scrollviewContent, isEven and 100 or 10, y, 78, 78, 5)
-    frame.anchorX = 0
-    frame.anchorY = 0
-    frame:setFillColor(0.5, 0.5, 0.5, 0.25)
-    frame:setStrokeColor(0.5, 0.5, 0.5, 0.75)
-    frame.strokeWidth = 1
-
-    local elementGroup = components.newGroup(scrollviewContent)
-
-    local elementBackground = display.newRect(elementGroup, frame.x, frame.y, frame.width, frame.height)
-    elementBackground.anchorX = frame.anchorX
-    elementBackground.anchorY = frame.anchorY
-    elementBackground.isVisible = false
-    elementBackground.isHitTestable = true
-
     local elementTypeWithRotation, rotation = elementType:match("^(.+)-(%d+)$")
 
     if elementTypeWithRotation then
@@ -378,26 +369,30 @@ function scene:createSideBar()
       rotation = 0
     end
 
-    local element = newElement(elementGroup, elementType)
-    element.x = frame.x + frame.width * 0.5
-    element.y = frame.y + frame.height * 0.5
+    local element = newElement(self.view, elementType)
     element.rotation = rotation
 
-    local elementButton = components.newObjectButton(elementGroup, {
+    local elementButton = newButton(scrollviewContent, isEven and 100 or 10, y, element, {
       onRelease = function()
         local newElement = scene:newLevelElement(elementType)
         newElement.rotation = rotation
-        local fromXScale = element.width / newElement.width
-        local fromYScale = element.height / newElement.height
+
         local fromX = (newElement.anchorX - element.anchorX) * element.contentWidth
         local fromY = (newElement.anchorY - element.anchorX) * element.contentHeight
         fromX, fromY = element:localToContent(fromX, fromY)
-        transition.from(newElement, { xScale = fromXScale, yScale = fromYScale, x = fromX, y = fromY, time = 100 })
+
+        transition.from(newElement, {
+          xScale = element.width / newElement.width,
+          yScale = element.height / newElement.height,
+          x = fromX,
+          y = fromY,
+          time = 100,
+        })
       end,
       scrollview = scrollview,
     })
 
-    y = isEven and y + frame.height + 10 or y
+    y = isEven and y + elementButton.contentHeight + 10 or y
   end
 end
 

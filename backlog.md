@@ -6,7 +6,7 @@
 * Revoir les padding de scrollview en horizontal parce qu'ils ne servent à rien en l'état, uniquement en cas de scroll
 * Ajouter un tutorial avec les icones de swipe, etc. disponibles
 * Ajouter des icones avec les boutons ?
-* Supprimer les scores après édition
+* Supprimer les scores après édition (en vérifiant qu'il y a eu modificaiton eu niveau des éléments (new ou move, etc. en comparant les valeurs au niveau du onBlur !))
 
 # Modes de jeu
 * Ajouter la possibilité de speedrun un niveau
