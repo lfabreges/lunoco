@@ -220,7 +220,12 @@ function scene:create(event)
 end
 
 function scene:createSideBar()
-  local middleGround = display.newRect(self.view, 0, 0, display.actualContentWidth, display.actualContentHeight)
+  local screenX = display.screenOriginX
+  local screenY = display.screenOriginY
+  local screenWidth = display.actualContentWidth
+  local screenHeight = display.actualContentHeight
+
+  local middleGround = display.newRect(self.view, screenX, screenY, screenWidth, screenHeight)
   middleGround.anchorX = 0
   middleGround.anchorY = 0
   middleGround.isVisible = false
@@ -238,30 +243,13 @@ function scene:createSideBar()
     return false
   end)
 
+  local sideBarWidth = 106
+  local sideBarMinX = max(screenX + 10, 0) - sideBarWidth
+  local sideBarMaxX = screenX
+
   sideBar = components.newGroup(self.view)
-
-  local sideBarBackground = components.newBackground(sideBar)
-  sideBarBackground.width = 106
-  sideBarBackground:addEventListener("tap", function() return true end)
-  sideBarBackground:addEventListener("touch", function() return true end)
-
-  local sideBarHandle = components.newGroup(sideBar)
-  sideBarHandle.x = sideBarBackground.x + 100
-  sideBarHandle.y = display.contentCenterY
-
-  local sideBarHandleBackground = display.newRect(sideBarHandle, 1, 0, 10, sideBarBackground.height)
-  sideBarHandleBackground.isVisible = false
-  sideBarHandleBackground.isHitTestable = true
-
-  local sideBarHandleOne = display.newLine(sideBarHandle, -1, -15, -1, 15)
-  local sideBarHandleTwo = display.newLine(sideBarHandle, 1, -15, 1, 15)
-  sideBarHandleOne:setStrokeColor(0.75, 0.75, 0.75, 1)
-  sideBarHandleTwo:setStrokeColor(0.75, 0.75, 0.75, 1)
-
-  local sideBarMinX = sideBar.x - sideBarBackground.width + sideBarHandleBackground.width
-  local sideBarMaxX = sideBar.x
-
   sideBar.x = sideBarMinX
+  sideBar.y = screenY
   sideBar.isOpened = false
 
   sideBar.open = function()
@@ -281,6 +269,31 @@ function scene:createSideBar()
       sideBar.open()
     end
   end
+
+  local sideBarBackground = display.newRoundedRect(sideBar, -10, 0, sideBarWidth + 10, screenHeight, 10)
+  sideBarBackground.anchorX = 0
+  sideBarBackground.anchorY = 0
+  sideBarBackground:addEventListener("tap", function() return true end)
+  sideBarBackground:addEventListener("touch", function() return true end)
+
+  display.setDefault("textureWrapX", "repeat")
+  display.setDefault("textureWrapY", "repeat")
+  sideBarBackground.fill = { type = "image", filename = "images/background.png" }
+  display.setDefault("textureWrapX", "clampToEdge")
+  display.setDefault("textureWrapY", "clampToEdge")
+
+  local sideBarHandle = components.newGroup(sideBar)
+  sideBarHandle.x = 100
+  sideBarHandle.y = sideBarBackground.height * 0.5
+
+  local sideBarHandleBackground = display.newRect(sideBarHandle, 1, 0, 10, sideBarBackground.height)
+  sideBarHandleBackground.isVisible = false
+  sideBarHandleBackground.isHitTestable = true
+
+  local sideBarHandleOne = display.newLine(sideBarHandle, -1, -15, -1, 15)
+  local sideBarHandleTwo = display.newLine(sideBarHandle, 1, -15, 1, 15)
+  sideBarHandleOne:setStrokeColor(0.75, 0.75, 0.75, 1)
+  sideBarHandleTwo:setStrokeColor(0.75, 0.75, 0.75, 1)
 
   sideBarHandleBackground:addEventListener("touch", function(event)
     if event.phase == "began" then
@@ -306,19 +319,18 @@ function scene:createSideBar()
     end
   end)
 
-  local screenY = display.screenOriginY
-  local screenHeight = display.actualContentHeight
+  local topInset, _, bottomInset = display.getSafeAreaInsets()
 
   local scrollview = widget.newScrollView({
-    left = sideBarBackground.x,
-    top = sideBarBackground.y,
-    width = sideBarBackground.width - 10,
+    left = 0,
+    top = 0,
+    width = sideBarWidth - 10,
     height = sideBarBackground.height,
     hideBackground = true,
     hideScrollBar = true,
     horizontalScrollDisabled = true,
-    topPadding = 10 + (elements.background.y - screenY),
-    bottomPadding = 10 + (screenY + screenHeight) - (elements.background.y + elements.background.height),
+    topPadding = topInset + 10,
+    bottomPadding = bottomInset + 10,
   })
 
   sideBar:insert(scrollview)
