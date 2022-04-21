@@ -21,7 +21,6 @@ local elementDefaults = {
     minHeight = 40,
     maxWidth = 150,
     maxHeight = 150,
-    canRotate = true,
   },
   ["obstacle-horizontal-barrier"] = {
     width = 100,
@@ -82,7 +81,10 @@ local elementDefaults = {
 }
 
 local elementTypes = {
-  "obstacle-corner",
+  "obstacle-corner-0",
+  "obstacle-corner-270",
+  "obstacle-corner-90",
+  "obstacle-corner-180",
   "obstacle-horizontal-barrier",
   "obstacle-horizontal-barrier-large",
   "obstacle-vertical-barrier",
@@ -116,7 +118,6 @@ local function onFocus(event)
   local element = event.target.element
   element.contentWidthStart = element.contentWidth
   element.contentHeightStart = element.contentHeight
-  element.rotationStart = element.rotation
   element.xStart = element.x
   element.yStart = element.y
   element.xDeltaCorrection = 0
@@ -126,30 +127,26 @@ end
 local function onMovePinchRotate(event)
   local element = event.target.element
   local defaults = elementDefaults[element.family .. "-" .. element.type]
-  local xDeltaCorrection = 0
-  local yDeltaCorrection = 0
 
-  if event.xDistanceDelta and (element.family == "obstacle" or element.family == "target") then
-    local minWidth = defaults.minWidth
-    local maxWidth = defaults.maxWidth
-    local minHeight = defaults.minHeight
-    local maxHeight = defaults.maxHeight
-    local newWidth = min(maxWidth, max(minWidth, element.contentWidthStart + event.xDistanceDelta))
-    local newHeight = min(maxHeight, max(minHeight, element.contentHeightStart + event.yDistanceDelta))
-    newWidth = newWidth - newWidth % 5
-    newHeight = newHeight - newHeight % 5
+  if element.family == "obstacle" or element.family == "target" then
+    if event.xDistanceDelta then
+      local minWidth = defaults.minWidth
+      local maxWidth = defaults.maxWidth
+      local minHeight = defaults.minHeight
+      local maxHeight = defaults.maxHeight
+      local newWidth = min(maxWidth, max(minWidth, element.contentWidthStart + event.xDistanceDelta))
+      local newHeight = min(maxHeight, max(minHeight, element.contentHeightStart + event.yDistanceDelta))
+      newWidth = newWidth - newWidth % 5
+      newHeight = newHeight - newHeight % 5
 
-    element.xScale = newWidth / element.width
-    element.yScale = newHeight / element.height
-    element.xDeltaCorrection = (element.anchorX - 0.5) * (newWidth - element.contentWidthStart)
-    element.yDeltaCorrection = (element.anchorY - 0.5) * (newHeight - element.contentHeightStart)
+      element.xScale = newWidth / element.width
+      element.yScale = newHeight / element.height
+      element.xDeltaCorrection = (element.anchorX - 0.5) * (element.contentWidth - element.contentWidthStart)
+      element.yDeltaCorrection = (element.anchorY - 0.5) * (element.contentHeight - element.contentHeightStart)
 
-    element.handle.path.width = element.contentWidth + 40
-    element.handle.path.height = element.contentHeight + 40
-  end
-
-  if event.angleDelta and (element.family == "obstacle" or element.family == "target") then
-    element.rotation = element.rotationStart + event.angleDelta
+      element.handle.path.width = element.contentWidth + 40
+      element.handle.path.height = element.contentHeight + 40
+    end
   end
 
   element.x = element.xStart + event.xDelta + element.xDeltaCorrection
@@ -356,13 +353,23 @@ function scene:createSideBar()
     elementBackground.isVisible = false
     elementBackground.isHitTestable = true
 
+    local elementTypeWithRotation, rotation = elementType:match("^(.+)-(%d+)$")
+
+    if elementTypeWithRotation then
+      elementType = elementTypeWithRotation
+    else
+      rotation = 0
+    end
+
     local element = newElement(elementGroup, elementType)
     element.x = frame.x + frame.width * 0.5
     element.y = frame.y + frame.height * 0.5
+    element.rotation = rotation
 
     local elementButton = components.newObjectButton(elementGroup, {
       onRelease = function()
         local newElement = scene:newLevelElement(elementType)
+        newElement.rotation = rotation
         local fromXScale = element.width / newElement.width
         local fromYScale = element.height / newElement.height
         local fromX = (newElement.anchorX - element.anchorX) * element.contentWidth
