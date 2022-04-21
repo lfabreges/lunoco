@@ -2,13 +2,14 @@ local components = require "modules.components"
 local composer = require "composer"
 local i18n = require "modules.i18n"
 local navigation = require "modules.navigation"
-local universe = require "universe"
+local universeClass = require "classes.universe"
 local utils = require "modules.utils"
 local widget = require "widget"
 
 local content = nil
 local scene = composer.newScene()
 local scrollview = nil
+local universe = universeClass:new(1)
 
 function scene:create(event)
   local topInset, leftInset, bottomInset, rightInset = display.getSafeAreaInsets()
@@ -53,7 +54,7 @@ end
 function scene:show(event)
   if event.phase == "will" then
     local y = 110
-    local worlds = universe.worlds()
+    local worlds = universe:worlds()
 
     content = components.newGroup(scrollview)
 
@@ -141,7 +142,7 @@ function scene:show(event)
 
     components.newObjectButton(newWorldContainer, {
       onRelease = function()
-        local world = universe.newWorld()
+        local world = universe:newWorld()
         local level = world:newLevel()
         navigation.gotoLevelEditor(level)
       end,

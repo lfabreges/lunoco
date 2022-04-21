@@ -3,8 +3,8 @@ local utils = require "modules.utils"
 
 local worldClass = {}
 
-function worldClass:new(name, isBuiltIn)
-  local object = { isBuiltIn = isBuiltIn, name = name }
+function worldClass:new(universe, name, isBuiltIn)
+  local object = { isBuiltIn = isBuiltIn, name = name, universe = universe }
   local category = isBuiltIn and "builtIn" or "user"
   object.directory = "worlds/" .. category .. "/" .. name
   utils.mkdir(system.DocumentsDirectory, object.directory)
@@ -70,6 +70,9 @@ function worldClass:saveLevel(level)
       utils.saveJson(configuration, self.directory .. ".json", system.DocumentsDirectory)
       if self._levels then
         self._levels[levelIndex] = level
+      end
+      if levelIndex == 1 then
+        self.universe:saveWorld(self)
       end
     end
   end

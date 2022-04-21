@@ -2,7 +2,6 @@ local components = require "modules.components"
 local composer = require "composer"
 local i18n = require "modules.i18n"
 local navigation = require "modules.navigation"
-local universe = require "universe"
 local widget = require "widget"
 
 local content = nil
