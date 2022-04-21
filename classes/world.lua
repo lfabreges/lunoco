@@ -13,19 +13,26 @@ function worldClass:new(name, isBuiltIn)
   return object
 end
 
+function worldClass:configuration()
+  if self._configuration == nil then
+    if self.isBuiltIn then
+      self._configuration = utils.loadJson("worlds/" .. self.name .. ".json")
+    else
+      self._configuration = utils.loadJson(self.directory .. ".json", system.DocumentsDirectory)
+    end
+    if not self._configuration.levels then
+      self._configuration.levels = {}
+    end
+  end
+  return self._configuration
+end
+
 function worldClass:levels()
   if self._levels == nil then
     self._levels = {}
-    local configuration
-    if self.isBuiltIn then
-      configuration = utils.loadJson("worlds/" .. self.name .. ".json", system.ResourceDirectory)
-    else
-      configuration = utils.loadJson("worlds/user/" .. self.name .. ".json", system.DocumentsDirectory)
-    end
-    if configuration.levels then
-      for index = 1, #configuration.levels do
-        self._levels[index] = levelClass:new(self, configuration.levels[index])
-      end
+    local configuration = self:configuration()
+    for index = 1, #configuration.levels do
+      self._levels[index] = levelClass:new(self, configuration.levels[index])
     end
   end
   return self._levels
@@ -34,15 +41,38 @@ end
 function worldClass:newLevel()
   local levels = self:levels()
   local newLevelNumber = 1
+
   for _, level in pairs(levels) do
     local levelNumber = tonumber(level.name)
     if levelNumber >= newLevelNumber then
       newLevelNumber = levelNumber + 1
     end
   end
+
   local newLevel = levelClass:new(self, tostring(newLevelNumber))
-  self._levels[#self._levels + 1] = newLevel
+
+  local newLevelConfiguration = newLevel:configuration()
+  newLevelConfiguration.ball = { x = 150, y = 460 }
+  newLevelConfiguration.stars = { one = 6, two = 4, three = 2 }
+  newLevelConfiguration.obstacles = {}
+  newLevelConfiguration.targets = {}
+
   return newLevel
+end
+
+function worldClass:saveLevel(level)
+  if not self.isBuiltIn then
+    local configuration = self:configuration()
+    local levelIndex = table.indexOf(configuration.levels, level.name)
+    if not levelIndex then
+      levelIndex = #configuration.levels + 1
+      configuration.levels[levelIndex] = level.name
+      utils.saveJson(configuration, self.directory .. ".json", system.DocumentsDirectory)
+      if self._levels then
+        self._levels[levelIndex] = level
+      end
+    end
+  end
 end
 
 function worldClass:progress()

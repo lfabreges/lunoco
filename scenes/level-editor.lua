@@ -1,6 +1,7 @@
 local components = require "modules.components"
 local composer = require "composer"
 local multitouch = require "libraries.multitouch"
+local navigation = require "modules.navigation"
 local utils = require "modules.utils"
 local widget = require "widget"
 
@@ -171,6 +172,11 @@ local function onMovePinchRotate(event)
   element.handle.x, element.handle.y = element:localToContent(0, 0)
 end
 
+local function saveAndPlay()
+  level:save(elements, level:configuration().stars)
+  navigation.gotoGame(level)
+end
+
 function scene:create(event)
   level = event.params.level
 
@@ -193,29 +199,6 @@ function scene:create(event)
     end
     return true
   end)
-
-  -- TODO Pour du debug uniquement ? Sinon gérer le cancel dans le hide
-  timer.performWithDelay(5000, function()
-    local configuration = level:createConfiguration(elements)
-    local json = require "json"
-    print(json.prettify(configuration))
-    --[[utils.saveJson(configuration, level.world.directory .. "/" .. level.name .. ".json", system.DocumentsDirectory)
-
-    local worldConfig = utils.loadJson(level.world.directory .. ".json", system.DocumentsDirectory)
-    worldConfig.levels = worldConfig.levels or {}
-
-    local levelIndex = nil
-
-    for index, levelName in ipairs(worldConfig.levels) do
-      if levelName == level.name then
-        levelIndex = index
-        break
-      end
-    end
-
-    worldConfig.levels[levelIndex or #worldConfig.levels + 1] = level.name
-    utils.saveJson(worldConfig, level.world.directory .. ".json", system.DocumentsDirectory)]]
-  end, -1)
 end
 
 function scene:createSideBar()
@@ -242,7 +225,7 @@ function scene:createSideBar()
     return false
   end)
 
-  local sideBarWidth = 106
+  local sideBarWidth = 196
   local sideBarMinX = max(screenX + 10, 0) - sideBarWidth
   local sideBarMaxX = screenX
 
@@ -272,6 +255,7 @@ function scene:createSideBar()
   local sideBarBackground = display.newRoundedRect(sideBar, -10, 0, sideBarWidth + 10, screenHeight, 10)
   sideBarBackground.anchorX = 0
   sideBarBackground.anchorY = 0
+  sideBarBackground.alpha = 0.9
   sideBarBackground:addEventListener("tap", function() return true end)
   sideBarBackground:addEventListener("touch", function() return true end)
 
@@ -282,7 +266,7 @@ function scene:createSideBar()
   display.setDefault("textureWrapY", "clampToEdge")
 
   local sideBarHandle = components.newGroup(sideBar)
-  sideBarHandle.x = 100
+  sideBarHandle.x = sideBarWidth - 6
   sideBarHandle.y = sideBarBackground.height * 0.5
 
   local sideBarHandleBackground = display.newRect(sideBarHandle, 1, 0, 10, sideBarBackground.height)
@@ -320,15 +304,46 @@ function scene:createSideBar()
 
   local topInset, _, bottomInset = display.getSafeAreaInsets()
 
+  local playButtonFrame = display.newRoundedRect(sideBar, 10, topInset + 10, 168, 58, 5)
+  playButtonFrame.anchorX = 0
+  playButtonFrame.anchorY = 0
+  playButtonFrame:setFillColor(0.5, 0.5, 0.5, 0.25)
+  playButtonFrame:setStrokeColor(0.5, 0.5, 0.5, 0.75)
+  playButtonFrame.strokeWidth = 1
+
+  local playButtonGroup = components.newGroup(sideBar)
+
+  local playButtonBackground = display.newRect(
+    playButtonGroup,
+    playButtonFrame.x,
+    playButtonFrame.y,
+    playButtonFrame.width,
+    playButtonFrame.height
+  )
+  playButtonBackground.anchorX = playButtonFrame.anchorX
+  playButtonBackground.anchorY = playButtonFrame.anchorY
+  playButtonBackground.isVisible = false
+  playButtonBackground.isHitTestable = true
+
+  local playButtonIcon = display.newImageRect(playButtonGroup, "images/icons/resume.png", 30, 30)
+  playButtonIcon.x = playButtonFrame.x + playButtonFrame.width * 0.5
+  playButtonIcon.y = playButtonFrame.y + playButtonFrame.height * 0.5
+
+  components.newObjectButton(playButtonGroup, { onRelease = saveAndPlay })
+
+  local sideBarSeparatorTopY = playButtonFrame.contentBounds.yMax + 10
+  local sideBarSeparatorTop = display.newLine(sideBar, 20, sideBarSeparatorTopY, 170, sideBarSeparatorTopY)
+  sideBarSeparatorTop:setStrokeColor(0.5, 0.5, 0.5, 0.75)
+
   local scrollview = widget.newScrollView({
     left = 0,
-    top = 0,
+    top = sideBarSeparatorTopY,
     width = sideBarWidth - 10,
-    height = sideBarBackground.height,
+    height = sideBarBackground.height - (sideBarSeparatorTopY - screenY),
     hideBackground = true,
     hideScrollBar = true,
     horizontalScrollDisabled = true,
-    topPadding = topInset + 10,
+    topPadding = 10,
     bottomPadding = bottomInset + 10,
   })
 
@@ -337,8 +352,10 @@ function scene:createSideBar()
   local scrollviewContent = components.newGroup(scrollview)
   local y = 0
 
-  for _, elementType in ipairs(elementTypes) do
-    local frame = display.newRoundedRect(scrollviewContent, 10, y, 78, 78, 5)
+  for index, elementType in ipairs(elementTypes) do
+    local isEven = index % 2 == 0
+
+    local frame = display.newRoundedRect(scrollviewContent, isEven and 100 or 10, y, 78, 78, 5)
     frame.anchorX = 0
     frame.anchorY = 0
     frame:setFillColor(0.5, 0.5, 0.5, 0.25)
@@ -380,7 +397,7 @@ function scene:createSideBar()
       scrollview = scrollview,
     })
 
-    y = y + frame.height + 10
+    y = isEven and y + frame.height + 10 or y
   end
 end
 

@@ -15,29 +15,9 @@ end
 function levelClass:configuration()
   if self._configuration == nil then
     if self.world.isBuiltIn then
-      self._configuration = utils.loadJson(
-        "worlds/" .. self.world.name .. "/" .. self.name .. ".json",
-        system.ResourceDirectory
-      )
+      self._configuration = utils.loadJson("worlds/" .. self.world.name .. "/" .. self.name .. ".json")
     else
-      self._configuration = utils.loadJson(
-        "worlds/user/" .. self.world.name .. "/" .. self.name .. ".json",
-        system.DocumentsDirectory
-      )
-    end
-    -- TODO A voir si à positionner ailleurs ?
-    -- Poser une fonction de validation ?
-    if not self._configuration.ball then
-      self._configuration.ball = { x = 150, y = 460 }
-    end
-    if not self._configuration.stars then
-      self._configuration.stars = { one = 6, two = 4, three = 2 }
-    end
-    if not self._configuration.obstacles then
-      self._configuration.obstacles = {}
-    end
-    if not self._configuration.targets then
-      self._configuration.targets = {}
+      self._configuration = utils.loadJson(self.directory .. ".json", system.DocumentsDirectory)
     end
   end
   return self._configuration
@@ -134,8 +114,23 @@ function levelClass:createElements(parent)
   return elements
 end
 
-function levelClass:createConfiguration(elements)
-  local configuration = { obstacles = {}, targets = {} }
+function levelClass:positionElement(element, x, y)
+  if element.type == "ball" then
+    element.x = 10 + x
+    element.y = 10 + y - element.contentHeight * 0.5
+  elseif element.type == "corner" then
+    element.x = 10 + x + element.contentWidth * 0.5
+    element.y = 10 + y + element.contentHeight * 0.5
+  else
+    element.anchorX = 0
+    element.anchorY = 0
+    element.x = 10 + x
+    element.y = 10 + y
+  end
+end
+
+function levelClass:save(elements, stars)
+  local configuration = { obstacles = {}, stars = stars, targets = {} }
   local round = math.round
 
   configuration.ball = {
@@ -166,22 +161,9 @@ function levelClass:createConfiguration(elements)
     }
   end
 
-  return configuration
-end
-
-function levelClass:positionElement(element, x, y)
-  if element.type == "ball" then
-    element.x = 10 + x
-    element.y = 10 + y - element.contentHeight * 0.5
-  elseif element.type == "corner" then
-    element.x = 10 + x + element.contentWidth * 0.5
-    element.y = 10 + y + element.contentHeight * 0.5
-  else
-    element.anchorX = 0
-    element.anchorY = 0
-    element.x = 10 + x
-    element.y = 10 + y
-  end
+  utils.saveJson(configuration, self.directory .. ".json", system.DocumentsDirectory)
+  self._configuration = configuration
+  self.world:saveLevel(self)
 end
 
 function levelClass:newBackground(parent, width, height)
