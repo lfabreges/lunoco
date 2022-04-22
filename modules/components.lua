@@ -108,12 +108,7 @@ components.newGroup = function(parent)
 end
 
 components.newStar = function(parent, width, height)
-  local star = display.newImageRect(parent, "images/star.png", width, height)
-  local starMask = graphics.newMask("images/star-mask.png")
-  star:setMask(starMask)
-  star.maskScaleX = star.width / 394
-  star.maskScaleY = star.height / 394
-  return star
+  return display.newImageRect(parent, "images/star.png", width, height)
 end
 
 components.newTopBar = function(parent)

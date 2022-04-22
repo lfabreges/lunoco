@@ -11,6 +11,10 @@ local levelView = nil
 local max = math.max
 local min = math.min
 local scene = composer.newScene()
+local screenX = display.screenOriginX
+local screenY = display.screenOriginY
+local screenWidth = display.actualContentWidth
+local screenHeight = display.actualContentHeight
 local selectedElement = nil
 local sideBar = nil
 
@@ -212,7 +216,6 @@ function scene:create(event)
   levelView = components.newGroup(self.view)
   elements = level:createElements(levelView)
   scene:configureElement(elements.ball)
-
   for _, element in pairs(elements.obstacles) do
     scene:configureElement(element)
   end
@@ -220,27 +223,13 @@ function scene:create(event)
     scene:configureElement(element)
   end
 
-  scene:createSideBar()
-
-  elements.frame:addEventListener("tap", function(event)
-    if event.numTaps == 2 and not sideBar.isOpened then
-      sideBar.open()
-    end
-    return true
-  end)
-end
-
-function scene:createSideBar()
-  local screenX = display.screenOriginX
-  local screenY = display.screenOriginY
-  local screenWidth = display.actualContentWidth
-  local screenHeight = display.actualContentHeight
-
   local middleGround = display.newRect(self.view, screenX, screenY, screenWidth, screenHeight)
   middleGround.anchorX = 0
   middleGround.anchorY = 0
   middleGround.isVisible = false
   middleGround.isHitTestable = true
+
+  scene:createSideBar()
 
   middleGround:addEventListener("touch", function(event)
     if event.phase == "began" then
@@ -253,7 +242,15 @@ function scene:createSideBar()
     end
     return false
   end)
+  elements.frame:addEventListener("tap", function(event)
+    if event.numTaps == 2 and not sideBar.isOpened then
+      sideBar.open()
+    end
+    return true
+  end)
+end
 
+function scene:createSideBar()
   local sideBarWidth = 196
   local sideBarMinX = max(screenX + 10, 0) - sideBarWidth
   local sideBarMaxX = screenX
@@ -348,16 +345,119 @@ function scene:createSideBar()
   sideBar:insert(scrollview)
 
   local scrollviewContent = components.newGroup(scrollview)
-  local y = 0
+  local elementGroup = components.newGroup(scrollviewContent)
+
+  local pickerWheelGroup = components.newGroup(scrollviewContent)
+  pickerWheelGroup.alpha = 0
 
   local playButtonIcon = display.newImageRect("images/icons/resume.png", 30, 30)
   local playButton = newButton(scrollviewContent, 10, y, playButtonIcon, { onRelease = saveAndPlay })
 
-  y = playButton.y + playButton.contentHeight + 20
-  local sideBarSeparatorTop = display.newLine(scrollviewContent, 20, y, 170, y)
+  local starImage = components.newStar(self.view, 35, 35)
+
+  local starButton = newButton(scrollviewContent, 100, y, starImage, { onRelease = function(event)
+    local self = event.target
+    self.isPressed = not self.isPressed and true or false
+    if self.isPressed then
+      starImage.fill.effect = "filter.grayscale"
+      transition.to(elementGroup, { y = 220, time = 100 })
+      transition.to(pickerWheelGroup, {
+        alpha = 1,
+        delay = 100,
+        time = 100,
+        onComplete = function()
+          scrollview:setScrollHeight(scrollviewContent.contentHeight)
+        end
+      })
+    else
+      starImage.fill.effect = nil
+      transition.to(pickerWheelGroup, { alpha = 0, time = 100 })
+      transition.to(elementGroup, {
+        y = 0,
+        delay = 100,
+        time = 100,
+        onComplete = function()
+          scrollview:setScrollHeight(scrollviewContent.contentHeight)
+        end
+      })
+    end
+  end })
+
+  local pickerWheelFrame = display.newRoundedRect(
+    pickerWheelGroup,
+    10,
+    playButton.y + playButton.contentHeight + 10,
+    168,
+    210,
+    5
+  )
+  pickerWheelFrame.anchorX = 0
+  pickerWheelFrame.anchorY = 0
+  pickerWheelFrame:setFillColor(0.5, 0.5, 0.5, 0.25)
+  pickerWheelFrame:setStrokeColor(0.5, 0.5, 0.5, 0.75)
+  pickerWheelFrame.strokeWidth = 1
+
+  local configuration = level:configuration()
+  local pickerWheel
+
+  local pickerWheelColumns = {
+    { startIndex = configuration.stars.one, labels = { 1, 2, 3, 4, 5, 6, 7, 8, 9 } },
+    { startIndex = configuration.stars.two, labels = { 1, 2, 3, 4, 5, 6, 7, 8, 9 } },
+    { startIndex = configuration.stars.three, labels = { 1, 2, 3, 4, 5, 6, 7, 8, 9 } },
+  }
+
+  pickerWheel = widget.newPickerWheel({
+    left = 20,
+    top = pickerWheelFrame.y + 40,
+    columns = pickerWheelColumns,
+    style = "resizable",
+    width = 150,
+    rowHeight = 32,
+    columnColor = { 0, 0, 0, 0 },
+    fontColor = { 1, 1, 1, 0.5 },
+    fontColorSelected = { 1, 1, 1 },
+    fontSize = 14,
+    sheet = graphics.newImageSheet("images/pickerwheel.png", { width = 1, height = 1, numFrames = 1 }),
+		middleSpanTopFrame = 1,
+		middleSpanBottomFrame = 1,
+		middleSpanOffset = 0,
+    onValueSelected = function(event)
+      local values = pickerWheel:getValues()
+      local newValue = tonumber(pickerWheelColumns[event.column].labels[event.row])
+
+      if event.column == 1 then
+        configuration.stars.one = newValue
+      elseif event.column == 2 then
+        configuration.stars.two = newValue
+      else
+        configuration.stars.three = newValue
+      end
+
+      for column = 1, 3 do
+        local value = tonumber(values[column].value)
+        if (column < event.column and value < newValue) or (column > event.column and value > newValue) then
+          pickerWheel:selectValue(column, newValue)
+        end
+      end
+    end,
+  })
+  pickerWheelGroup:insert(pickerWheel)
+
+  for index = 1, 3 do
+    local columnWidth = pickerWheel.contentWidth / 3
+    local columnStarImage = components.newStar(pickerWheelGroup, 20, 20)
+    columnStarImage.anchorY = 0
+    columnStarImage.x = pickerWheelFrame.x + 10 + (index - 1) * columnWidth + columnWidth * 0.5
+    columnStarImage.y = pickerWheelFrame.y + 10
+  end
+
+  --starImage.fill.effect = "filter.grayscale"
+
+  local y = playButton.y + playButton.contentHeight + 20
+  local sideBarSeparatorTop = display.newLine(elementGroup, 20, y, 170, y)
   sideBarSeparatorTop:setStrokeColor(0.5, 0.5, 0.5, 0.75)
 
-  y = y + 21
+  y = y + 20
 
   for index, elementType in ipairs(elementTypes) do
     local isEven = index % 2 == 0
@@ -372,7 +472,7 @@ function scene:createSideBar()
     local element = newElement(self.view, elementType)
     element.rotation = rotation
 
-    local elementButton = newButton(scrollviewContent, isEven and 100 or 10, y, element, {
+    local elementButton = newButton(elementGroup, isEven and 100 or 10, y, element, {
       onRelease = function()
         local newElement = scene:newLevelElement(elementType)
         newElement.rotation = rotation
@@ -465,7 +565,7 @@ end
 -- Par exemple une petite barre s'affiche à droite de l'élément, à gauche lorsqu'il est trop à droite
 -- Cela permet de locker l'élément pour ne plus le bouger, cela permet de le supprimer, etc.
 
--- Reste à pouvoir sauvegarder le niveau, le supprimer et configurer le nombre de coups pour les étoiles
+-- Reste à pouvoir supprimer le niveau
 
 function scene:show(event)
   if event.phase == "did" then
