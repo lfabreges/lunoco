@@ -66,6 +66,7 @@ function scene:show(event)
     world = event.params.world
 
     local centerX = scrollview.width * 0.5
+    local isEven = false
     local spaceWidth = (display.actualContentWidth - 240) / 3
     local y = 0
     local worldLevels = world:levels()
@@ -76,7 +77,8 @@ function scene:show(event)
     worldProgressText.text = i18n.t("progress", worldProgress)
 
     for levelNumber, level in ipairs(worldLevels) do
-      local isEven = levelNumber % 2 == 0
+      isEven = levelNumber % 2 == 0
+
       local levelImageName, levelImageBaseDir = level:image("screenshot", "images/level-unknown.png")
 
       local levelButton = components.newImageButton(
@@ -108,6 +110,33 @@ function scene:show(event)
       if isEven then
         y = y + 240
       end
+    end
+
+    if not world.isBuiltIn then
+      isEven = not isEven
+
+      local newLevelGroup = components.newGroup(content)
+      newLevelGroup.x = isEven and centerX + 60 + spaceWidth / 2 or centerX - 60 - spaceWidth / 2
+      newLevelGroup.y = y + 90
+
+      local newLevelBackground = display.newRoundedRect(newLevelGroup, 0, 0, 120, 180, 15)
+      newLevelBackground.fill.effect = "generator.linearGradient"
+      newLevelBackground.fill.effect.color1 = { 0.25, 0.25, 0.25, 0.75 }
+      newLevelBackground.fill.effect.position1  = { 0, 0 }
+      newLevelBackground.fill.effect.color2 = { 0.5, 0.5, 0.5, 0.25 }
+      newLevelBackground.fill.effect.position2  = { 1, 1 }
+      newLevelBackground.strokeWidth = 1
+      newLevelBackground:setStrokeColor(0.5, 0.5, 0.5, 0.75)
+
+      display.newImageRect(newLevelGroup, "images/icons/plus.png", 50, 50)
+
+      components.newObjectButton(newLevelGroup, {
+        onRelease = function()
+          local level = world:newLevel()
+          navigation.gotoLevelEditor(level)
+        end,
+        scrollview = scrollview,
+      })
     end
 
     if isNewWorld then

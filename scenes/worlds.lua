@@ -124,12 +124,11 @@ function scene:show(event)
       y = worldProgressText.y + worldProgressText.contentHeight + 30
     end
 
-    local newWorldContainer = display.newContainer(content ,280, 105)
-    newWorldContainer.anchorY = 0
-    newWorldContainer.x = scrollview.width * 0.5
-    newWorldContainer.y = y
+    local newWorldGroup = components.newGroup(content)
+    newWorldGroup.x = scrollview.width * 0.5
+    newWorldGroup.y = y + 52.5
 
-    local newWorldBackground = display.newRoundedRect(newWorldContainer, 0, 0, 278, 103, 15)
+    local newWorldBackground = display.newRoundedRect(newWorldGroup, 0, 0, 278, 103, 15)
     newWorldBackground.fill.effect = "generator.linearGradient"
     newWorldBackground.fill.effect.color1 = { 0.25, 0.25, 0.25, 0.75 }
     newWorldBackground.fill.effect.position1  = { 0, 0 }
@@ -138,9 +137,9 @@ function scene:show(event)
     newWorldBackground.strokeWidth = 1
     newWorldBackground:setStrokeColor(0.5, 0.5, 0.5, 0.75)
 
-    display.newImageRect(newWorldContainer, "images/icons/plus.png", 50, 50)
+    display.newImageRect(newWorldGroup, "images/icons/plus.png", 50, 50)
 
-    components.newObjectButton(newWorldContainer, {
+    components.newObjectButton(newWorldGroup, {
       onRelease = function()
         local world = universe:newWorld()
         local level = world:newLevel()
