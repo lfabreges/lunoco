@@ -1,12 +1,13 @@
 # Next
-* Ajouter un éditeur de niveau en réutilisant la logique du jeu, dans une scène à part ?
-* Permettre à l'utilisateur de créer un nouveau niveau dans son propre monde
 * Simplifier une partie du code si pertinent avec un removeScene dans le hide
 * Ajouter des checks dès que les données proviennent de systemDocument ?
 * Revoir les padding de scrollview en horizontal parce qu'ils ne servent à rien en l'état, uniquement en cas de scroll
 * Ajouter un tutorial avec les icones de swipe, etc. disponibles
 * Ajouter des icones avec les boutons ?
 * Supprimer les scores après édition (en vérifiant qu'il y a eu modificaiton eu niveau des éléments (new ou move, etc. en comparant les valeurs au niveau du onBlur !))
+* Rendre plus sure la suppression d'un élément de niveau
+* Ajouter une aide au lancement pour indiquer le double tap afin d'ouvrir la sideBar
+* Reste à pouvoir supprimer le niveau
 
 # Modes de jeu
 * Ajouter la possibilité de speedrun un niveau

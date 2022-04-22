@@ -451,8 +451,6 @@ function scene:createSideBar()
     columnStarImage.y = pickerWheelFrame.y + 10
   end
 
-  --starImage.fill.effect = "filter.grayscale"
-
   local y = playButton.y + playButton.contentHeight + 20
   local sideBarSeparatorTop = display.newLine(elementGroup, 20, y, 170, y)
   sideBarSeparatorTop:setStrokeColor(0.5, 0.5, 0.5, 0.75)
@@ -527,15 +525,32 @@ function scene:configureElement(element)
       selectedElement.handle = handle
       handle.element = element
 
-      handle:addEventListener("tap", function() return true end)
       multitouch.addMovePinchRotateListener(handle, { onFocus = onFocus, onMovePinchRotate = onMovePinchRotate })
+
+      handle:addEventListener("tap", function(event)
+        if event.numTaps == 2 then
+          clearElementSelection()
+          display.remove(element)
+          for _, objects in pairs({ elements.obstacles, elements.targets }) do
+            local index = table.indexOf(objects, element)
+            if index then
+              table.remove(objects, index)
+              break
+            end
+          end
+        end
+        return true
+      end)
 
       event.target = handle
       handle:dispatchEvent(event)
     end
     return true
   end)
-  element:addEventListener("tap", function() return true end)
+
+  element:addEventListener("tap", function()
+    return not (selectedElement and selectedElement == element)
+  end)
 end
 
 function scene:newLevelElement(elementType)
@@ -555,17 +570,6 @@ function scene:newLevelElement(elementType)
 
   return element
 end
-
--- TODO
-
--- Ajouter une aide au lancement pour indiquer le double tap afin d'ouvrir la sideBar
-
--- Lorsqu'un élément est sélectionné, il faut la possibilité de pouvoir le supprimer, à voir comment
--- faire au mieux. En tapant à côté la sélection est perdue
--- Par exemple une petite barre s'affiche à droite de l'élément, à gauche lorsqu'il est trop à droite
--- Cela permet de locker l'élément pour ne plus le bouger, cela permet de le supprimer, etc.
-
--- Reste à pouvoir supprimer le niveau
 
 function scene:show(event)
   if event.phase == "did" then
