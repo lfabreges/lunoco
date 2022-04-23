@@ -277,6 +277,7 @@ function levelClass:save(elements, stars)
     utils.saveJson(newConfiguration, self.directory .. ".json", system.DocumentsDirectory)
     self._configuration = newConfiguration
     self:deleteScores()
+    self:removeImage("screenshot")
     self.world:saveLevel(self)
   end
 end

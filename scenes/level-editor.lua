@@ -582,7 +582,7 @@ function scene:createSideBar()
 
   newButton(bottomGroup, 10, y, deleteButtonIcon, { onRelease = function()
     confirmDeleteButton.showConfirm = not confirmDeleteButton.showConfirm
-    transition.to(confirmDeleteButton, { alpha = confirmDeleteButton.showConfirm and 100 or 0, time = 100 })
+    transition.to(confirmDeleteButton, { alpha = confirmDeleteButton.showConfirm and 1 or 0, time = 100 })
   end })
 
   local confirmDeleteButtonGroup = display.newGroup()
