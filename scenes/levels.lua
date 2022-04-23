@@ -6,6 +6,10 @@ local widget = require "widget"
 
 local content = nil
 local scene = composer.newScene()
+local screenX = display.screenOriginX
+local screenY = display.screenOriginY
+local screenWidth = display.actualContentWidth
+local screenHeight = display.actualContentHeight
 local scrollview = nil
 local world = nil
 local worldProgressText = nil
@@ -19,10 +23,6 @@ local function startLevel(level)
 end
 
 function scene:create(event)
-  local screenX = display.screenOriginX
-  local screenY = display.screenOriginY
-  local screenWidth = display.actualContentWidth
-  local screenHeight = display.actualContentHeight
   local topInset, leftInset, bottomInset, rightInset = display.getSafeAreaInsets()
 
   components.newBackground(self.view)
@@ -67,7 +67,7 @@ function scene:show(event)
 
     local centerX = scrollview.width * 0.5
     local isEven = false
-    local spaceWidth = (display.actualContentWidth - 240) / 3
+    local spaceWidth = (screenWidth - 240) / 3
     local y = 0
     local worldLevels = world:levels()
     local worldProgress = world:progress()

@@ -8,6 +8,10 @@ local widget = require "widget"
 
 local content = nil
 local scene = composer.newScene()
+local screenX = display.screenOriginX
+local screenY = display.screenOriginY
+local screenWidth = display.actualContentWidth
+local screenHeight = display.actualContentHeight
 local scrollview = nil
 local universe = universeClass:new(1)
 
@@ -17,10 +21,10 @@ function scene:create(event)
   components.newBackground(self.view)
 
   scrollview = widget.newScrollView({
-    left = display.screenOriginX,
-    top = display.screenOriginY,
-    width = display.actualContentWidth,
-    height = display.actualContentHeight,
+    left = screenX,
+    top = screenY,
+    width = screenWidth,
+    height = screenHeight,
     hideBackground = true,
     hideScrollBar = true,
     horizontalScrollDisabled = true,
@@ -48,7 +52,7 @@ function scene:create(event)
   })
 
   gameTitle.anchorX = 0
-  titleGroup.x = display.actualContentWidth / 2 - titleGroup.contentWidth / 2
+  titleGroup.x = screenWidth / 2 - titleGroup.contentWidth / 2
 end
 
 function scene:show(event)

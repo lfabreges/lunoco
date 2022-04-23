@@ -17,6 +17,10 @@ local level = nil
 local max = math.max
 local min = math.min
 local scene = composer.newScene()
+local screenX = display.screenOriginX
+local screenY = display.screenOriginY
+local screenWidth = display.actualContentWidth
+local screenHeight = display.actualContentHeight
 
 local elements = {
   ["background"] = { width = 200, height = 306 },
@@ -128,8 +132,8 @@ function scene:show(event)
     backPhotoBackground = display.newRect(content, centerX, centerY, 1, 1)
     backPhoto = display.newImage(content, filename, system.TemporaryDirectory, centerX, centerY)
 
-    local xScale = min(1, display.actualContentWidth / backPhoto.width)
-    local yScale = min(1, display.actualContentHeight / backPhoto.height)
+    local xScale = min(1, screenWidth / backPhoto.width)
+    local yScale = min(1, screenHeight / backPhoto.height)
     local photoScale = max(xScale, yScale)
 
     backPhoto.xScale = photoScale

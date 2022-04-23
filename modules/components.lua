@@ -2,11 +2,12 @@ local utils = require "modules.utils"
 
 local components = {}
 
+local screenX = display.screenOriginX
+local screenY = display.screenOriginY
+local screenWidth = display.actualContentWidth
+local screenHeight = display.actualContentHeight
+
 components.newBackground = function(parent)
-  local screenX = display.screenOriginX
-  local screenY = display.screenOriginY
-  local screenWidth = display.actualContentWidth
-  local screenHeight = display.actualContentHeight
   local background = display.newRect(parent, screenX, screenY, screenWidth, screenHeight)
   background.anchorX = 0
   background.anchorY = 0
@@ -112,9 +113,6 @@ components.newTextButton = function(parent, text, width, height, options)
 end
 
 components.newTopBar = function(parent)
-  local screenX = display.screenOriginX
-  local screenY = display.screenOriginY
-  local screenWidth = display.actualContentWidth
   local topInset, leftInset, bottomInset, rightInset = display.getSafeAreaInsets()
   local topBar = display.newRect(parent, screenX, screenY, screenWidth, topInset + 60)
   topBar.anchorX = 0

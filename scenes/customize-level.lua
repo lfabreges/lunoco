@@ -8,6 +8,10 @@ local widget = require "widget"
 local elementView = nil
 local level = nil
 local scene = composer.newScene()
+local screenX = display.screenOriginX
+local screenY = display.screenOriginY
+local screenWidth = display.actualContentWidth
+local screenHeight = display.actualContentHeight
 local scrollview = nil
 
 local customizableElementTypes = {
@@ -143,10 +147,6 @@ local function selectPhoto(onComplete)
 end
 
 function scene:create(event)
-  local screenX = display.screenOriginX
-  local screenY = display.screenOriginY
-  local screenWidth = display.actualContentWidth
-  local screenHeight = display.actualContentHeight
   local topInset, leftInset, bottomInset, rightInset = display.getSafeAreaInsets()
 
   components.newBackground(self.view)

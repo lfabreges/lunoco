@@ -3,9 +3,12 @@ local composer = require "composer"
 local i18n = require "modules.i18n"
 local navigation = require "modules.navigation"
 
-local scene = composer.newScene()
-
 local level = nil
+local scene = composer.newScene()
+local screenX = display.screenOriginX
+local screenY = display.screenOriginY
+local screenWidth = display.actualContentWidth
+local screenHeight = display.actualContentHeight
 local shouldResumeGame = false
 
 local function gotoCustomizeLevel()
@@ -34,8 +37,6 @@ function scene:create(event)
   shouldResumeGame = false
 
   local isLevelBuiltIn = level.world.isBuiltIn
-  local screenY = display.screenOriginY
-  local screenHeight = display.actualContentHeight
 
   local resumeBackground = components.newBackground(self.view)
   resumeBackground.height = screenHeight * 0.33
