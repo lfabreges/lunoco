@@ -3,6 +3,32 @@ local utils = require "modules.utils"
 
 local levelClass = {}
 
+local function isObjectEqual(firstObject, secondObject)
+  for key, value in pairs(firstObject) do
+    if secondObject[key] == nil or secondObject[key] ~= value then
+      return false
+    end
+  end
+  for key, value in pairs(secondObject) do
+    if firstObject[key] == nil or firstObject[key] ~= value then
+      return false
+    end
+  end
+  return true
+end
+
+local function isArrayEqual(firstArray, secondArray)
+  if #firstArray ~= #secondArray then
+    return false
+  end
+  for index, value in ipairs(firstArray) do
+    if not isObjectEqual(value, secondArray[index]) then
+      return false
+    end
+  end
+  return true
+end
+
 function levelClass:new(world, name)
   local object = { name = name, world = world }
   object.directory = world.directory .. "/" .. name
@@ -67,7 +93,16 @@ end
 function levelClass:delete()
   utils.removeFile(self.directory .. ".json", system.DocumentsDirectory)
   utils.removeFile(self.directory, system.DocumentsDirectory)
+  self:deleteScores()
   self.world:deleteLevel(self)
+end
+
+function levelClass:deleteScores()
+  local worldScores = self.world:scores()
+  if worldScores[self.name] then
+    worldScores[self.name] = nil
+    self.world:saveScores(worldScores)
+  end
 end
 
 function levelClass:image(imageName, defaultImageName)
@@ -199,17 +234,17 @@ function levelClass:removeImage(imageName)
 end
 
 function levelClass:save(elements, stars)
-  local configuration = { obstacles = {}, stars = stars, targets = {} }
+  local newConfiguration = { obstacles = {}, stars = stars, targets = {} }
   local round = math.round
 
-  configuration.ball = {
+  newConfiguration.ball = {
     x = round(elements.ball.contentBounds.xMin + elements.ball.contentWidth * 0.5 - 10),
     y = round(elements.ball.contentBounds.yMax - 10),
   }
 
   for index = 1, #elements.obstacles do
     local obstacle = elements.obstacles[index]
-    configuration.obstacles[index] = {
+    newConfiguration.obstacles[index] = {
       type = obstacle.type,
       x = round(obstacle.contentBounds.xMin - 10),
       y = round(obstacle.contentBounds.yMin - 10),
@@ -221,7 +256,7 @@ function levelClass:save(elements, stars)
 
   for index = 1, #elements.targets do
     local target = elements.targets[index]
-    configuration.targets[index] = {
+    newConfiguration.targets[index] = {
       type = target.type,
       x = round(target.contentBounds.xMin - 10),
       y = round(target.contentBounds.yMin - 10),
@@ -230,9 +265,20 @@ function levelClass:save(elements, stars)
     }
   end
 
-  utils.saveJson(configuration, self.directory .. ".json", system.DocumentsDirectory)
-  self._configuration = configuration
-  self.world:saveLevel(self)
+  local oldConfiguration = self:configuration()
+  local hasChanges = false
+
+  hasChanges = hasChanges or not isObjectEqual(oldConfiguration.ball, newConfiguration.ball)
+  hasChanges = hasChanges or not isObjectEqual(oldConfiguration.stars, newConfiguration.stars)
+  hasChanges = hasChanges or not isArrayEqual(oldConfiguration.obstacles, newConfiguration.obstacles)
+  hasChanges = hasChanges or not isArrayEqual(oldConfiguration.targets, newConfiguration.targets)
+
+  if hasChanges then
+    utils.saveJson(newConfiguration, self.directory .. ".json", system.DocumentsDirectory)
+    self._configuration = newConfiguration
+    self:deleteScores()
+    self.world:saveLevel(self)
+  end
 end
 
 function levelClass:saveScore(numberOfShots, numberOfStars)

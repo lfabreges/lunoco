@@ -18,6 +18,7 @@ local screenWidth = display.actualContentWidth
 local screenHeight = display.actualContentHeight
 local selectedElement = nil
 local sideBar = nil
+local stars = {}
 
 local elementDefaults = {
   ["obstacle-corner"] = {
@@ -229,12 +230,21 @@ local function removeHelp()
 end
 
 local function save()
-  level:save(elements, level:configuration().stars)
+  local configuration = level:configuration()
+  level:save(elements, {
+    one = stars[1] or configuration.stars.one,
+    two = stars[2] or configuration.stars.two,
+    three = stars[3] or configuration.stars.three,
+  })
+end
+
+local function saveAndGoBack()
+  save()
   goBack()
 end
 
 local function saveAndPlay()
-  level:save(elements, level:configuration().stars)
+  save()
   navigation.gotoGame(level)
 end
 
@@ -416,7 +426,7 @@ function scene:createSideBar()
   local cancelButton = newButton(scrollViewContent, 10, 0, cancelButtonIcon, { onRelease = goBack })
 
   local acceptButtonIcon = display.newImageRect("images/icons/accept.png", 35, 35)
-  local acceptButton = newButton(scrollViewContent, 100, 0, acceptButtonIcon, { onRelease = save })
+  local acceptButton = newButton(scrollViewContent, 100, 0, acceptButtonIcon, { onRelease = saveAndGoBack })
 
   local playButtonIcon = display.newImageRect("images/icons/resume.png", 30, 30)
   local playButton = newButton(
@@ -498,15 +508,7 @@ function scene:createSideBar()
     onValueSelected = function(event)
       local values = pickerWheel:getValues()
       local newValue = tonumber(pickerWheelColumns[event.column].labels[event.row])
-
-      if event.column == 1 then
-        configuration.stars.one = newValue
-      elseif event.column == 2 then
-        configuration.stars.two = newValue
-      else
-        configuration.stars.three = newValue
-      end
-
+      stars[event.column] = newValue
       for column = 1, 3 do
         local value = tonumber(values[column].value)
         if (column < event.column and value < newValue) or (column > event.column and value > newValue) then
@@ -630,7 +632,10 @@ function scene:configureElement(element)
       selectedElement.handle = handle
       handle.element = element
 
-      multitouch.addMovePinchRotateListener(handle, { onFocus = onFocus, onMovePinchRotate = onMovePinchRotate })
+      multitouch.addMovePinchRotateListener(handle, {
+        onFocus = onFocus,
+        onMovePinchRotate = onMovePinchRotate,
+      })
 
       handle:addEventListener("tap", function(event)
         if event.numTaps == 2 then
