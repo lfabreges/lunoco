@@ -3,7 +3,6 @@ local composer = require "composer"
 local i18n = require "modules.i18n"
 local navigation = require "modules.navigation"
 local utils = require "modules.utils"
-local widget = require "widget"
 
 local elementView = nil
 local level = nil
@@ -12,7 +11,8 @@ local screenX = display.screenOriginX
 local screenY = display.screenOriginY
 local screenWidth = display.actualContentWidth
 local screenHeight = display.actualContentHeight
-local scrollview = nil
+local scrollView = nil
+local topInset, leftInset, bottomInset, rightInset = display.getSafeAreaInsets()
 
 local customizableElementTypes = {
   "background",
@@ -147,40 +147,32 @@ local function selectPhoto(onComplete)
 end
 
 function scene:create(event)
-  local topInset, leftInset, bottomInset, rightInset = display.getSafeAreaInsets()
-
   components.newBackground(self.view)
 
   local topBar = components.newTopBar(self.view)
 
+  -- TODO Configurable au niveau de la topbar pour éviter la redite
   local goBackButton = components.newImageButton(self.view, "images/icons/back.png", 40, 40, { onRelease = goBack })
   goBackButton.anchorX = 0
   goBackButton.anchorY = 0
   goBackButton.x = screenX + leftInset + 20
   goBackButton.y = screenY + topInset + 10
 
-  scrollview = widget.newScrollView({
-    left = screenX,
-    top = topBar.y + topBar.height,
-    width = screenWidth,
-    height = screenHeight - topBar.height,
-    hideBackground = true,
-    hideScrollBar = true,
-    horizontalScrollDisabled = true,
+  scrollView = components.newScrollView(self.view, {
+    top = topBar.contentBounds.yMax,
+    height = screenHeight - topBar.contentHeight,
     topPadding = 20,
     bottomPadding = 20,
-    leftPadding = leftInset,
-    rightPadding = rightInset,
   })
 
-  self.view:insert(scrollview)
+  self.view:insert(scrollView)
 end
 
 function scene:createElementView()
   local elementTypes = elementTypesFromLevelConfig()
   local y = 0
 
-  elementView = components.newGroup(scrollview)
+  elementView = components.newGroup(scrollView)
 
   for _, elementType in ipairs(elementTypes) do
     if table.indexOf(customizableElementTypes, elementType) ~= nil then
@@ -223,7 +215,7 @@ function scene:createElementView()
         40,
         {
           onRelease = function() selectPhoto(onCapturePhotoOrSelectPhotoComplete) end,
-          scrollview = scrollview
+          scrollView = scrollView
         }
       )
       selectPhotoButton.anchorX = 0
@@ -237,7 +229,7 @@ function scene:createElementView()
         40,
         {
           onRelease = function() capturePhoto(onCapturePhotoOrSelectPhotoComplete) end,
-          scrollview = scrollview
+          scrollView = scrollView
         }
       )
       takePhotoButton.anchorX = 0
@@ -272,7 +264,7 @@ function scene:createElementView()
               display.remove(removeCustomizationButtonFrame)
               display.remove(removeCustomizationButton)
             end,
-            scrollview = scrollview
+            scrollView = scrollView
           }
         )
         removeCustomizationButton.x = removeCustomizationButtonFrame.x + removeCustomizationButtonFrame.width / 2
@@ -290,7 +282,7 @@ function scene:show(event)
     level = event.params.level
     self:createElementView()
     if isNewLevel then
-      scrollview:scrollTo("top", { time = 0 })
+      scrollView:scrollTo("top", { time = 0 })
     end
   end
 end

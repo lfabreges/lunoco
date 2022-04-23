@@ -2,7 +2,6 @@ local components = require "modules.components"
 local composer = require "composer"
 local i18n = require "modules.i18n"
 local navigation = require "modules.navigation"
-local widget = require "widget"
 
 local content = nil
 local scene = composer.newScene()
@@ -10,7 +9,8 @@ local screenX = display.screenOriginX
 local screenY = display.screenOriginY
 local screenWidth = display.actualContentWidth
 local screenHeight = display.actualContentHeight
-local scrollview = nil
+local scrollView = nil
+local topInset, leftInset, bottomInset, rightInset = display.getSafeAreaInsets()
 local world = nil
 local worldProgressText = nil
 
@@ -23,8 +23,6 @@ local function startLevel(level)
 end
 
 function scene:create(event)
-  local topInset, leftInset, bottomInset, rightInset = display.getSafeAreaInsets()
-
   components.newBackground(self.view)
 
   local topBar = components.newTopBar(self.view)
@@ -43,21 +41,12 @@ function scene:create(event)
   })
   worldProgressText.anchorX = 1
 
-  scrollview = widget.newScrollView({
-    left = screenX,
-    top = topBar.y + topBar.height,
-    width = screenWidth,
-    height = screenHeight - topBar.height,
-    hideBackground = true,
-    hideScrollBar = true,
-    horizontalScrollDisabled = true,
-    topPadding = topInset + 40,
-    bottomPadding = bottomInset + 40,
-    leftPadding = leftInset,
-    rightPadding = rightInset,
+  scrollView = components.newScrollView(self.view, {
+    top = topBar.contentBounds.yMax,
+    height = screenHeight - topBar.contentHeight,
+    topPadding = 40,
+    bottomPadding = 40,
   })
-
-  self.view:insert(scrollview)
 end
 
 function scene:show(event)
@@ -65,7 +54,7 @@ function scene:show(event)
     local isNewWorld = world and world ~= event.params.world
     world = event.params.world
 
-    local centerX = scrollview.width * 0.5
+    local centerX = scrollView.width * 0.5
     local isEven = false
     local spaceWidth = (screenWidth - 240) / 3
     local y = 0
@@ -73,7 +62,7 @@ function scene:show(event)
     local worldProgress = world:progress()
     local worldScores = world:scores()
 
-    content = components.newGroup(scrollview)
+    content = components.newGroup(scrollView)
     worldProgressText.text = i18n.t("progress", worldProgress)
 
     for levelNumber, level in ipairs(worldLevels) do
@@ -87,7 +76,7 @@ function scene:show(event)
         levelImageBaseDir,
         120,
         180,
-        { onRelease = function() startLevel(level) end, scrollview = scrollview }
+        { onRelease = function() startLevel(level) end, scrollView = scrollView }
       )
 
       levelButton.anchorY = 0
@@ -135,12 +124,12 @@ function scene:show(event)
           local level = world:newLevel()
           navigation.gotoLevelEditor(level)
         end,
-        scrollview = scrollview,
+        scrollView = scrollView,
       })
     end
 
     if isNewWorld then
-      scrollview:scrollTo("top", { time = 0 })
+      scrollView:scrollTo("top", { time = 0 })
     end
   end
 end

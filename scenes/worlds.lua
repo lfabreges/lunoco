@@ -4,7 +4,6 @@ local i18n = require "modules.i18n"
 local navigation = require "modules.navigation"
 local universeClass = require "classes.universe"
 local utils = require "modules.utils"
-local widget = require "widget"
 
 local content = nil
 local scene = composer.newScene()
@@ -12,31 +11,14 @@ local screenX = display.screenOriginX
 local screenY = display.screenOriginY
 local screenWidth = display.actualContentWidth
 local screenHeight = display.actualContentHeight
-local scrollview = nil
+local scrollView = nil
 local universe = universeClass:new(1)
 
 function scene:create(event)
-  local topInset, leftInset, bottomInset, rightInset = display.getSafeAreaInsets()
-
   components.newBackground(self.view)
+  scrollView = components.newScrollView(self.view, { topPadding = 50, bottomPadding = 40 })
 
-  scrollview = widget.newScrollView({
-    left = screenX,
-    top = screenY,
-    width = screenWidth,
-    height = screenHeight,
-    hideBackground = true,
-    hideScrollBar = true,
-    horizontalScrollDisabled = true,
-    topPadding = topInset + 50,
-    bottomPadding = bottomInset + 40,
-    leftPadding = leftInset,
-    rightPadding = rightInset,
-  })
-
-  self.view:insert(scrollview)
-
-  local titleGroup = components.newGroup(scrollview)
+  local titleGroup = components.newGroup(scrollView)
 
   local gameIcon = display.newImageRect(titleGroup, "images/icon.png", 60, 60)
   gameIcon.anchorX = 0
@@ -60,7 +42,7 @@ function scene:show(event)
     local y = 110
     local worlds = universe:worlds()
 
-    content = components.newGroup(scrollview)
+    content = components.newGroup(scrollView)
 
     for _, world in ipairs(worlds) do
       local worldLevels = world:levels()
@@ -95,19 +77,19 @@ function scene:show(event)
 
       local worldButton = components.newObjectButton(worldButtonContainer, {
         onRelease = function() navigation.gotoLevels(world) end,
-        scrollview = scrollview,
+        scrollView = scrollView,
       })
       worldButton.anchorChildren = false
       worldButton.anchorX = 0
       worldButton.anchorY = 0
-      worldButton.x = scrollview.width * 0.5 - 140
+      worldButton.x = scrollView.width * 0.5 - 140
       worldButton.y = y
 
       local worldProgressText = display.newText({
         text = i18n.t("progress", worldProgress),
         fontSize = 20,
         parent = content,
-        x = scrollview.width * 0.5 - worldButton.contentWidth / 2,
+        x = scrollView.width * 0.5 - worldButton.contentWidth / 2,
         y = y + worldButton.height + 10,
       })
       worldProgressText.anchorX = 0
@@ -119,7 +101,7 @@ function scene:show(event)
           local star = components.newStar(content, 20, 20)
           star.anchorX = 1
           star.anchorY = 0
-          star.x = scrollview.width * 0.5 + worldButton.contentWidth / 2 + (starCount - 3) * 25
+          star.x = scrollView.width * 0.5 + worldButton.contentWidth / 2 + (starCount - 3) * 25
           star.y = worldProgressText.y
           star.fill.effect = not isFullStar and "filter.grayscale" or nil
         end
@@ -129,7 +111,7 @@ function scene:show(event)
     end
 
     local newWorldGroup = components.newGroup(content)
-    newWorldGroup.x = scrollview.width * 0.5
+    newWorldGroup.x = scrollView.width * 0.5
     newWorldGroup.y = y + 52.5
 
     local newWorldBackground = display.newRoundedRect(newWorldGroup, 0, 0, 278, 103, 15)
@@ -149,7 +131,7 @@ function scene:show(event)
         local level = world:newLevel()
         navigation.gotoLevelEditor(level)
       end,
-      scrollview = scrollview,
+      scrollView = scrollView,
     })
   end
 end

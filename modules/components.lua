@@ -1,4 +1,5 @@
 local utils = require "modules.utils"
+local widget = require "widget"
 
 local components = {}
 
@@ -6,6 +7,7 @@ local screenX = display.screenOriginX
 local screenY = display.screenOriginY
 local screenWidth = display.actualContentWidth
 local screenHeight = display.actualContentHeight
+local topInset, leftInset, bottomInset, rightInset = display.getSafeAreaInsets()
 
 components.newBackground = function(parent)
   local background = display.newRect(parent, screenX, screenY, screenWidth, screenHeight)
@@ -63,9 +65,9 @@ components.newObjectButton = function(object, options)
       end
     elseif object.isFocus then
       if event.phase == "moved" then
-        if options.scrollview and math.abs(event.y - event.yStart) > 5 then
+        if options.scrollView and math.abs(event.y - event.yStart) > 5 then
           setDefaultState()
-          options.scrollview:takeFocus(event)
+          options.scrollView:takeFocus(event)
         elseif not utils.isEventWithinBounds(object, event) then
           setDefaultState()
         elseif not object.isOver then
@@ -98,6 +100,22 @@ components.newStar = function(parent, width, height)
   return display.newImageRect(parent, "images/star.png", width, height)
 end
 
+components.newScrollView = function(parent, options)
+  local scrollView = widget.newScrollView({
+    left = options.left or screenX,
+    top = options.top or screenY,
+    width = options.width or screenWidth,
+    height = options.height or screenHeight,
+    hideBackground = true,
+    hideScrollBar = true,
+    horizontalScrollDisabled = true,
+    topPadding = topInset + (options.topPadding or 0),
+    bottomPadding = bottomInset + (options.bottomPadding or 0),
+  })
+  parent:insert(scrollView)
+  return scrollView
+end
+
 components.newTextButton = function(parent, text, width, height, options)
   local container = display.newContainer(parent, width, height)
   local rectangle = display.newRoundedRect(container, 0, 0, width - 2, height - 2, 5)
@@ -113,7 +131,6 @@ components.newTextButton = function(parent, text, width, height, options)
 end
 
 components.newTopBar = function(parent)
-  local topInset, leftInset, bottomInset, rightInset = display.getSafeAreaInsets()
   local topBar = display.newRect(parent, screenX, screenY, screenWidth, topInset + 60)
   topBar.anchorX = 0
   topBar.anchorY = 0

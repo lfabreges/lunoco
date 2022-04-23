@@ -21,6 +21,7 @@ local screenX = display.screenOriginX
 local screenY = display.screenOriginY
 local screenWidth = display.actualContentWidth
 local screenHeight = display.actualContentHeight
+local topInset, leftInset, bottomInset, rightInset = display.getSafeAreaInsets()
 
 local elements = {
   ["background"] = { width = 200, height = 306 },
@@ -103,8 +104,6 @@ end
 function scene:create(event)
   background = components.newBackground(self.view)
   content = components.newGroup(self.view)
-
-  local topInset, leftInset, bottomInset, rightInset = display.getSafeAreaInsets()
 
   local cancelButton = components.newImageButton(self.view, "images/icons/cancel.png", 40, 40, { onRelease = goBack })
   cancelButton.anchorX = 0

@@ -328,34 +328,27 @@ function scene:createSideBar()
     end
   end)
 
-  local topInset, _, bottomInset = display.getSafeAreaInsets()
-
-  local scrollview = widget.newScrollView({
+  local scrollView = components.newScrollView(sideBar, {
     left = 0,
     top = 0,
     width = sideBarWidth - 10,
-    height = sideBarBackground.height,
-    hideBackground = true,
-    hideScrollBar = true,
-    horizontalScrollDisabled = true,
-    topPadding = topInset + 10,
-    bottomPadding = bottomInset + 10,
+    height = sideBarBackground.contentHeight,
+    topPadding = 10,
+    bottomPadding = 10,
   })
 
-  sideBar:insert(scrollview)
+  local scrollViewContent = components.newGroup(scrollView)
+  local elementGroup = components.newGroup(scrollViewContent)
 
-  local scrollviewContent = components.newGroup(scrollview)
-  local elementGroup = components.newGroup(scrollviewContent)
-
-  local pickerWheelGroup = components.newGroup(scrollviewContent)
+  local pickerWheelGroup = components.newGroup(scrollViewContent)
   pickerWheelGroup.alpha = 0
 
   local playButtonIcon = display.newImageRect("images/icons/resume.png", 30, 30)
-  local playButton = newButton(scrollviewContent, 10, y, playButtonIcon, { onRelease = saveAndPlay })
+  local playButton = newButton(scrollViewContent, 10, y, playButtonIcon, { onRelease = saveAndPlay })
 
   local starImage = components.newStar(self.view, 35, 35)
 
-  local starButton = newButton(scrollviewContent, 100, y, starImage, { onRelease = function(event)
+  local starButton = newButton(scrollViewContent, 100, y, starImage, { onRelease = function(event)
     local self = event.target
     self.isPressed = not self.isPressed and true or false
     if self.isPressed then
@@ -366,7 +359,7 @@ function scene:createSideBar()
         delay = 100,
         time = 100,
         onComplete = function()
-          scrollview:setScrollHeight(scrollviewContent.contentHeight)
+          scrollView:setScrollHeight(scrollViewContent.contentHeight)
         end
       })
     else
@@ -377,7 +370,7 @@ function scene:createSideBar()
         delay = 100,
         time = 100,
         onComplete = function()
-          scrollview:setScrollHeight(scrollviewContent.contentHeight)
+          scrollView:setScrollHeight(scrollViewContent.contentHeight)
         end
       })
     end
@@ -487,7 +480,7 @@ function scene:createSideBar()
           time = 100,
         })
       end,
-      scrollview = scrollview,
+      scrollView = scrollView,
     })
 
     y = isEven and y + elementButton.contentHeight + 10 or y
