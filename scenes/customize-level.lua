@@ -147,14 +147,14 @@ function scene:create(event)
   })
 end
 
-function scene:createElementView()
+function scene:createContentView()
   local elementTypes = elementTypesFromLevelConfiguration()
   local y = 0
 
-  self.elementView = components.newGroup(self.scrollView)
+  self.contentView = components.newGroup(self.scrollView)
 
   for _, elementType in ipairs(elementTypes) do
-    local elementGroup = components.newGroup(self.elementView)
+    local elementGroup = components.newGroup(self.contentView)
     elementGroup.y = y
 
     local elementText = display.newText({
@@ -258,9 +258,9 @@ function scene:show(event)
     local isNewLevel = level and level ~= event.params.level
     level = event.params.level
 
-    if not self.elementView or isNewLevel then
-      display.remove(self.elementView)
-      self:createElementView()
+    if not self.contentView or isNewLevel then
+      display.remove(self.contentView)
+      self:createContentView()
       self.scrollView:scrollTo("top", { time = 0 })
     end
   end

@@ -4,7 +4,6 @@ local i18n = require "modules.i18n"
 local navigation = require "modules.navigation"
 local utils = require "modules.utils"
 
-local finishedInText = nil
 local level = nil
 local numberOfShots = nil
 local numberOfStars = nil
@@ -34,12 +33,16 @@ local function retryLevel()
 end
 
 function scene:create(event)
+  level = event.params.level
+  numberOfShots = event.params.numberOfShots
+  numberOfStars = event.params.numberOfStars
+
   local background = components.newBackground(self.view)
   background:setFillColor(0, 0, 0, 0.9)
 
-  finishedInText = display.newText({
+  display.newText({
     align = "center",
-    text = "",
+    text = i18n.p("finished_in", numberOfShots),
     fontSize = 25,
     parent = self.view,
     x = display.contentCenterX,
@@ -53,16 +56,12 @@ function scene:create(event)
   local levelsButton = components.newTextButton(self.view, i18n.t("levels"), 120, 40, { onRelease = gotoLevels })
   levelsButton.x = display.contentCenterX + 70
   levelsButton.y = display.contentCenterY + display.contentCenterY / 2
+
+  stars = components.newGroup(self.view)
 end
 
 function scene:show(event)
-  if event.phase == "will" then
-    level = event.params.level
-    numberOfShots = event.params.numberOfShots
-    numberOfStars = event.params.numberOfStars
-    finishedInText.text = i18n.p("finished_in", numberOfShots)
-    stars = components.newGroup(self.view)
-  elseif event.phase == "did" then
+  if event.phase == "did" then
     timer.performWithDelay(500, displayStars, 3, "displayStars")
   end
 end
@@ -73,8 +72,7 @@ function scene:hide(event)
     audio.stop()
   elseif event.phase == "did" then
     transition.cancelAll()
-    display.remove(stars)
-    stars = nil
+    composer.removeScene("scenes.game-over")
   end
 end
 
