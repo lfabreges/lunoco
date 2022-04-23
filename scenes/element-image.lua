@@ -179,7 +179,7 @@ function scene:hide(event)
     backPhotoBackground = nil
     frontContainer = nil
     frontPhoto = nil
-    os.remove(system.pathForFile(filename, system.TemporaryDirectory))
+    utils.removeFile(filename, system.TemporaryDirectory)
   end
 end
 

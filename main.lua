@@ -12,7 +12,7 @@ local version = utils.loadJson("version.json", system.DocumentsDirectory)
 
 if version.number == nil then
   local directory = "worlds/builtIn/01"
-  utils.mkdir(system.DocumentsDirectory, directory)
+  utils.makeDirectory(directory, system.DocumentsDirectory)
 
   local oldScores = utils.loadJson("scores.json", system.DocumentsDirectory)
   local newScores = {}

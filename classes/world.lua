@@ -7,7 +7,7 @@ function worldClass:new(universe, name, isBuiltIn)
   local object = { isBuiltIn = isBuiltIn, name = name, universe = universe }
   local category = isBuiltIn and "builtIn" or "user"
   object.directory = "worlds/" .. category .. "/" .. name
-  utils.mkdir(system.DocumentsDirectory, object.directory)
+  utils.makeDirectory(object.directory, system.DocumentsDirectory)
   setmetatable(object, self)
   self.__index = self
   return object
@@ -25,6 +25,26 @@ function worldClass:configuration()
     end
   end
   return self._configuration
+end
+
+function worldClass:deleteLevel(level)
+  if not self.isBuiltIn then
+    local configuration = self:configuration()
+    local levelIndex = table.indexOf(configuration.levels, level.name)
+    if levelIndex then
+      table.remove(configuration.levels, levelIndex)
+      if self._levels then
+        table.remove(self._levels, levelIndex)
+      end
+    end
+    if #configuration.levels > 0 then
+      utils.saveJson(configuration, self.directory .. ".json", system.DocumentsDirectory)
+    else
+      utils.removeFile(self.directory .. ".json", system.DocumentsDirectory)
+      utils.removeFile(self.directory, system.DocumentsDirectory)
+      self.universe:deleteWorld(self)
+    end
+  end
 end
 
 function worldClass:levels()

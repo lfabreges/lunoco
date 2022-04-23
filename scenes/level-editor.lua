@@ -108,6 +108,15 @@ local function clearElementSelection()
   end
 end
 
+local function deleteLevel()
+  level:delete()
+  if #level.world:levels() == 0 then
+    navigation.gotoWorlds()
+  else
+    navigation.gotoLevels(level.world)
+  end
+end
+
 local function newButton(parent, x, y, content, options)
   local group = components.newGroup(parent)
   group.x = x
@@ -389,7 +398,7 @@ function scene:createSideBar()
   })
 
   local scrollViewContent = components.newGroup(scrollView)
-  local elementGroup = components.newGroup(scrollViewContent)
+  local bottomGroup = components.newGroup(scrollViewContent)
 
   local pickerWheelGroup = components.newGroup(scrollViewContent)
   pickerWheelGroup.alpha = 0
@@ -405,7 +414,7 @@ function scene:createSideBar()
     self.isPressed = not self.isPressed and true or false
     if self.isPressed then
       starImage.fill.effect = "filter.grayscale"
-      transition.to(elementGroup, { y = 220, time = 100 })
+      transition.to(bottomGroup, { y = 220, time = 100 })
       transition.to(pickerWheelGroup, {
         alpha = 1,
         delay = 100,
@@ -417,7 +426,7 @@ function scene:createSideBar()
     else
       starImage.fill.effect = nil
       transition.to(pickerWheelGroup, { alpha = 0, time = 100 })
-      transition.to(elementGroup, {
+      transition.to(bottomGroup, {
         y = 0,
         delay = 100,
         time = 100,
@@ -497,10 +506,12 @@ function scene:createSideBar()
   end
 
   local y = playButton.y + playButton.contentHeight + 20
-  local sideBarSeparatorTop = display.newLine(elementGroup, 20, y, 170, y)
+  local sideBarSeparatorTop = display.newLine(bottomGroup, 20, y, 170, y)
   sideBarSeparatorTop:setStrokeColor(0.5, 0.5, 0.5, 0.75)
 
-  y = y + 20
+  local elementY = 0
+  local elementGroup = components.newGroup(bottomGroup)
+  elementGroup.y = y + 20
 
   for index, elementType in ipairs(elementTypes) do
     local isEven = index % 2 == 0
@@ -515,7 +526,7 @@ function scene:createSideBar()
     local element = newElement(self.view, elementType)
     element.rotation = rotation
 
-    local elementButton = newButton(elementGroup, isEven and 100 or 10, y, element, {
+    local elementButton = newButton(elementGroup, isEven and 100 or 10, elementY, element, {
       onRelease = function()
         local newElement = scene:newLevelElement(elementType)
         newElement.rotation = rotation
@@ -535,8 +546,17 @@ function scene:createSideBar()
       scrollView = scrollView,
     })
 
-    y = isEven and y + elementButton.contentHeight + 10 or y
+    elementY = isEven and elementY + elementButton.contentHeight + 10 or elementY
   end
+
+  y = elementGroup.y + elementGroup.contentHeight + 20
+  local sideBarSeparatorBottom = display.newLine(bottomGroup, 20, y, 170, y)
+  sideBarSeparatorBottom:setStrokeColor(0.5, 0.5, 0.5, 0.75)
+
+  y = y + 20
+
+  local deleteButtonIcon = display.newImageRect("images/icons/trash.png", 30, 30)
+  newButton(bottomGroup, 10, y, deleteButtonIcon, { onRelease = deleteLevel })
 end
 
 function scene:configureElement(element)

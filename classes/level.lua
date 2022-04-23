@@ -6,7 +6,7 @@ local levelClass = {}
 function levelClass:new(world, name)
   local object = { name = name, world = world }
   object.directory = world.directory .. "/" .. name
-  utils.mkdir(system.DocumentsDirectory, object.directory)
+  utils.makeDirectory(object.directory, system.DocumentsDirectory)
   setmetatable(object, self)
   self.__index = self
   return object
@@ -62,6 +62,12 @@ function levelClass:createElements(parent)
   elements.ball = ball
 
   return elements
+end
+
+function levelClass:delete()
+  utils.removeFile(self.directory .. ".json", system.DocumentsDirectory)
+  utils.removeFile(self.directory, system.DocumentsDirectory)
+  self.world:deleteLevel(self)
 end
 
 function levelClass:image(imageName, defaultImageName)
@@ -187,8 +193,7 @@ end
 function levelClass:removeImage(imageName)
   local imageNames = self:imageNames()
   if imageNames[imageName] then
-    local filepath = system.pathForFile(imageNames[imageName], system.DocumentsDirectory)
-    os.remove(filepath)
+    utils.removeFile(imageNames[imageName], system.DocumentsDirectory)
     imageNames[imageName] = nil
   end
 end

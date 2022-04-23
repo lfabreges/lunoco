@@ -49,16 +49,12 @@ utils.loadJson = function(filename, baseDirectory)
   return {}
 end
 
-utils.mkdir = function(baseDirectory, ...)
+utils.makeDirectory = function(directoryName, baseDirectory)
   local baseDirectoryPath = system.pathForFile(nil, baseDirectory)
-  local numberOfArguments = select("#", ...)
   lfs.chdir(baseDirectoryPath)
-  for index = 1, numberOfArguments do
-    local argument = select(index, ...)
-    for directoryName in string.gmatch(argument, "([^/]+)") do
-      lfs.mkdir(directoryName)
-      lfs.chdir(directoryName)
-    end
+  for entryname in string.gmatch(directoryName, "([^/]+)") do
+    lfs.mkdir(entryname)
+    lfs.chdir(entryname)
   end
 end
 
@@ -114,6 +110,21 @@ utils.printMemoryUsage = function()
   local textureMemoryUsed = system.getInfo("textureMemoryUsed") / 1000000
   print("System", "Memory Used:", string.format("%.03f", systemMemoryUsed), "Mb")
   print("Texture", "Memory Used:", string.format("%.03f", textureMemoryUsed), "Mb")
+end
+
+utils.removeFile = function(filename, baseDirectory)
+  local filepath = system.pathForFile(filename, baseDirectory)
+  local filemode = lfs.attributes(filepath, "mode")
+  if filemode == "file" then
+    os.remove(filepath)
+  elseif filemode == "directory" then
+    for entryname in lfs.dir(filepath) do
+      if entryname ~= "." and entryname ~= ".." then
+        utils.removeFile(filename .. "/" .. entryname, baseDirectory)
+      end
+    end
+    os.remove(filepath)
+  end
 end
 
 utils.saveJson = function(content, filename, baseDirectory)

@@ -11,6 +11,15 @@ function universeClass:new(numberOfBuiltInWorlds)
   return object
 end
 
+function universeClass:deleteWorld(world)
+  if self._worlds then
+    local worldIndex = table.indexOf(self._worlds, world)
+    if worldIndex then
+      table.remove(self._worlds, worldIndex)
+    end
+  end
+end
+
 function universeClass:newWorld()
   local worlds = self:worlds()
   local newWorldNumber = 1
