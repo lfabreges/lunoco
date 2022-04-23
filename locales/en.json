@@ -2,7 +2,7 @@
   "background": "Background",
   "ball": "Ball",
   "customize": "Customize",
-  "edit": "Edit",
+  "edit-level": "Edit level",
   "finished_in": {
     "one": "Finished in 1 shot !",
     "other": "Finished in {count} shots !"

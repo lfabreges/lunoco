@@ -345,6 +345,7 @@ function scene:createSideBar()
 
   local playButtonIcon = display.newImageRect("images/icons/resume.png", 30, 30)
   local playButton = newButton(scrollViewContent, 10, y, playButtonIcon, { onRelease = saveAndPlay })
+  playButtonIcon:setFillColor(0.21, 0.70, 0.20)
 
   local starImage = components.newStar(self.view, 35, 35)
 

@@ -89,7 +89,7 @@ function scene:create(event)
   if not isLevelBuiltIn then
     local editButton = components.newTextButton(
       self.view,
-      i18n.t("edit"),
+      i18n.t("edit-level"),
       160,
       40,
       { onRelease = gotoLevelEditor }

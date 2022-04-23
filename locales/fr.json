@@ -2,7 +2,7 @@
   "background": "Arrière-plan",
   "ball": "Balle",
   "customize": "Personnaliser",
-  "edit": "Editer",
+  "edit-level": "Editer le niveau",
   "finished_in": {
     "one": "Terminé en 1 tir !",
     "other": "Terminé en {count} tirs !"
