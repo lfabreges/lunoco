@@ -100,6 +100,14 @@ local elementTypes = {
   "target-hard",
 }
 
+local function goBack()
+  if #level.world:levels() == 0 then
+    navigation.gotoWorlds()
+  else
+    navigation.gotoLevels(level.world)
+  end
+end
+
 local function clearElementSelection()
   if selectedElement then
     display.remove(selectedElement.handle)
@@ -110,11 +118,7 @@ end
 
 local function deleteLevel()
   level:delete()
-  if #level.world:levels() == 0 then
-    navigation.gotoWorlds()
-  else
-    navigation.gotoLevels(level.world)
-  end
+  goBack()
 end
 
 local function newButton(parent, x, y, content, options)
@@ -215,13 +219,18 @@ local function onMovePinchRotate(event)
   element.handle.x, element.handle.y = element:localToContent(0, 0)
 end
 
-local removeHelp = function()
+local function removeHelp()
   if scene.help then
     transition.fadeOut(scene.help, { onComplete = function()
       display.remove(scene.help)
       scene.help = nil
     end})
   end
+end
+
+local function save()
+  level:save(elements, level:configuration().stars)
+  goBack()
 end
 
 local function saveAndPlay()
@@ -403,13 +412,24 @@ function scene:createSideBar()
   local pickerWheelGroup = components.newGroup(scrollViewContent)
   pickerWheelGroup.alpha = 0
 
+  local cancelButtonIcon = display.newImageRect("images/icons/cancel.png", 35, 35)
+  local cancelButton = newButton(scrollViewContent, 10, 0, cancelButtonIcon, { onRelease = goBack })
+
+  local acceptButtonIcon = display.newImageRect("images/icons/accept.png", 35, 35)
+  local acceptButton = newButton(scrollViewContent, 100, 0, acceptButtonIcon, { onRelease = save })
+
   local playButtonIcon = display.newImageRect("images/icons/resume.png", 30, 30)
-  local playButton = newButton(scrollViewContent, 10, y, playButtonIcon, { onRelease = saveAndPlay })
-  playButtonIcon:setFillColor(0.21, 0.70, 0.20)
+  local playButton = newButton(
+    scrollViewContent,
+    100,
+    cancelButton.y + cancelButton.contentHeight + 10,
+    playButtonIcon,
+    { onRelease = saveAndPlay }
+  )
 
   local starImage = components.newStar(self.view, 35, 35)
 
-  local starButton = newButton(scrollViewContent, 100, y, starImage, { onRelease = function(event)
+  local starButton = newButton(scrollViewContent, 10, playButton.y, starImage, { onRelease = function(event)
     local self = event.target
     self.isPressed = not self.isPressed and true or false
     if self.isPressed then
@@ -555,8 +575,28 @@ function scene:createSideBar()
 
   y = y + 20
 
+  local confirmDeleteButton
   local deleteButtonIcon = display.newImageRect("images/icons/trash.png", 30, 30)
-  newButton(bottomGroup, 10, y, deleteButtonIcon, { onRelease = deleteLevel })
+
+  newButton(bottomGroup, 10, y, deleteButtonIcon, { onRelease = function()
+    confirmDeleteButton.showConfirm = not confirmDeleteButton.showConfirm
+    transition.to(confirmDeleteButton, { alpha = confirmDeleteButton.showConfirm and 100 or 0, time = 100 })
+  end })
+
+  local confirmDeleteButtonGroup = display.newGroup()
+
+  local confirmDeleteButtonBackground = display.newRoundedRect(confirmDeleteButtonGroup, 0, 0, 78, 78, 5)
+  confirmDeleteButtonBackground:setFillColor(0.67, 0.2, 0.2, 0.75)
+
+  local confirmDeleteButtonText = display.newText({
+    align = "center",
+    text = i18n.t("click-here-to-confirm"),
+    fontSize = 14,
+    parent = confirmDeleteButtonGroup,
+    width = 70,
+  })
+  confirmDeleteButton = newButton(bottomGroup, 100, y, confirmDeleteButtonGroup, { onRelease = deleteLevel })
+  confirmDeleteButton.alpha = 0
 end
 
 function scene:configureElement(element)
