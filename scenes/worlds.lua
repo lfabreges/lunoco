@@ -135,15 +135,15 @@ end
 
 function scene:show(event)
   if event.phase == "will" then
-    if not self.contentView then
-      self:createContentView()
-    end
+    self:createContentView()
   end
 end
 
 function scene:hide(event)
   if event.phase == "did" then
     transition.cancelAll()
+    display.remove(self.contentView)
+    self.contentView = nil
   end
 end
 

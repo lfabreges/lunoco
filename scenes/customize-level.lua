@@ -257,10 +257,8 @@ function scene:show(event)
   if event.phase == "will" then
     local isNewLevel = level and level ~= event.params.level
     level = event.params.level
-
-    if not self.contentView or isNewLevel then
-      display.remove(self.contentView)
-      self:createContentView()
+    self:createContentView()
+    if isNewLevel then
       self.scrollView:scrollTo("top", { time = 0 })
     end
   end
@@ -269,6 +267,8 @@ end
 function scene:hide(event)
   if event.phase == "did" then
     transition.cancelAll()
+    display.remove(self.contentView)
+    self.contentView = nil
   end
 end
 

@@ -120,10 +120,8 @@ function scene:show(event)
   if event.phase == "will" then
     local isNewWorld = world and world ~= event.params.world
     world = event.params.world
-
-    if not self.contentView or isNewWorld then
-      display.remove(self.contentView)
-      self:createContentView()
+    self:createContentView()
+    if isNewWorld then
       self.scrollView:scrollTo("top", { time = 0 })
     end
   end
@@ -132,6 +130,8 @@ end
 function scene:hide(event)
   if event.phase == "did" then
     transition.cancelAll()
+    display.remove(self.contentView)
+    self.contentView = nil
   end
 end
 
