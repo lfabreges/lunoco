@@ -8,6 +8,7 @@
     "other": "Terminé en {count} tirs !"
   },
   "frame": "Cadre",
+  "level-editor-help": "Tapez deux fois pour ouvrir la barre latérale",
   "levels": "Niveaux",
   "obstacle-corner": "Coin",
   "obstacle-horizontal-barrier": "Barrière horizontale",

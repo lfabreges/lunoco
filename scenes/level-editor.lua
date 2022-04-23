@@ -1,5 +1,6 @@
 local components = require "modules.components"
 local composer = require "composer"
+local i18n = require "modules.i18n"
 local multitouch = require "libraries.multitouch"
 local navigation = require "modules.navigation"
 local utils = require "modules.utils"
@@ -205,6 +206,15 @@ local function onMovePinchRotate(event)
   element.handle.x, element.handle.y = element:localToContent(0, 0)
 end
 
+local removeHelp = function()
+  if scene.help then
+    transition.fadeOut(scene.help, { onComplete = function()
+      display.remove(scene.help)
+      scene.help = nil
+    end})
+  end
+end
+
 local function saveAndPlay()
   level:save(elements, level:configuration().stars)
   navigation.gotoGame(level)
@@ -229,10 +239,12 @@ function scene:create(event)
   middleGround.isVisible = false
   middleGround.isHitTestable = true
 
+  scene:createHelp()
   scene:createSideBar()
 
   middleGround:addEventListener("touch", function(event)
     if event.phase == "began" then
+      removeHelp()
       if selectedElement and not utils.isEventWithinBounds(selectedElement.handle, event) then
         clearElementSelection()
       end
@@ -248,6 +260,44 @@ function scene:create(event)
     end
     return true
   end)
+end
+
+function scene:createHelp()
+  self.help = components.newGroup(self.view)
+
+  local helpFrame = display.newRoundedRect(
+    self.help,
+    elements.background.contentBounds.xMin + elements.background.contentWidth * 0.5,
+    elements.background.contentBounds.yMin + 20,
+    elements.background.contentWidth - 40,
+    160,
+    10
+  )
+  helpFrame.anchorY = 0
+  helpFrame:setFillColor(0, 0, 0, 0.75)
+  helpFrame.strokeWidth = 1
+
+  local helpContentGroup = components.newGroup(self.help)
+
+  local helpIcon = display.newImageRect(helpContentGroup, "images/icons/tap.png", 40, 40)
+  helpIcon.anchorY = 0
+  helpIcon.x = 0
+  helpIcon.y = 0
+
+  local helpText = display.newText({
+    align = "center",
+    text = i18n.t("level-editor-help"),
+    fontSize = 14,
+    parent = helpContentGroup,
+    x = 0,
+    y = helpIcon.contentHeight + 10,
+    width = helpFrame.contentWidth - 20,
+  })
+  helpText.anchorY = 0
+
+  helpFrame.path.height = helpContentGroup.contentHeight + 40
+  helpContentGroup.x = helpFrame.x
+  helpContentGroup.y = helpFrame.contentBounds.yMin + 20
 end
 
 function scene:createSideBar()
@@ -306,6 +356,7 @@ function scene:createSideBar()
 
   sideBarHandleBackground:addEventListener("touch", function(event)
     if event.phase == "began" then
+      removeHelp()
       transition.cancel(sideBar)
       display.getCurrentStage():setFocus(sideBarHandleBackground, event.id)
       sideBarHandleBackground.isFocus = true
@@ -568,6 +619,7 @@ end
 function scene:show(event)
   if event.phase == "did" then
     utils.activateMultitouch()
+    timer.performWithDelay(3000, removeHelp, "removeHelp")
   end
 end
 
@@ -575,6 +627,7 @@ function scene:hide(event)
   if event.phase == "will" then
     utils.deactivateMultitouch()
   elseif event.phase == "did" then
+    timer.cancel("removeHelp")
     transition.cancelAll()
     composer.removeScene("scenes.level-editor")
   end

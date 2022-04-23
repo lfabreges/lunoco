@@ -43,7 +43,7 @@ function scene:create(event)
   display.newText({
     align = "center",
     text = i18n.p("finished_in", numberOfShots),
-    fontSize = 25,
+    fontSize = 20,
     parent = self.view,
     x = display.contentCenterX,
     y = display.contentCenterY / 2,

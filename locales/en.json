@@ -8,6 +8,7 @@
     "other": "Finished in {count} shots !"
   },
   "frame": "Frame",
+  "level-editor-help": "Double tap to open the sidebar",
   "levels": "Levels",
   "obstacle-corner": "Corner",
   "obstacle-horizontal-barrier": "Horizontal barrier",
