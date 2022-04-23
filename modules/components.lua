@@ -130,13 +130,32 @@ components.newTextButton = function(parent, text, width, height, options)
   return components.newObjectButton(container, options)
 end
 
-components.newTopBar = function(parent)
-  local topBar = display.newRect(parent, screenX, screenY, screenWidth, topInset + 60)
-  topBar.anchorX = 0
-  topBar.anchorY = 0
-  topBar.strokeWidth = 1
-  topBar:setFillColor(0, 0, 0, 0.33)
-  topBar:setStrokeColor(0.5, 0.5, 0.5, 0.75)
+components.newTopBar = function(parent, options)
+  options = options or {}
+
+  local topBar = components.newGroup(parent)
+
+  local background = display.newRect(topBar, screenX, screenY, screenWidth, topInset + 60)
+  background.anchorX = 0
+  background.anchorY = 0
+  background.strokeWidth = 1
+  background:setFillColor(0, 0, 0, 0.33)
+  background:setStrokeColor(0.5, 0.5, 0.5, 0.75)
+
+  if options.goBack then
+    local goBackButton = components.newImageButton(
+      topBar,
+      "images/icons/back.png",
+      40,
+      40,
+      { onRelease = options.goBack }
+    )
+    goBackButton.anchorX = 0
+    goBackButton.anchorY = 0
+    goBackButton.x = screenX + leftInset + 20
+    goBackButton.y = screenY + topInset + 10
+  end
+
   return topBar
 end
 

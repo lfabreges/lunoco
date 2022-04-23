@@ -25,12 +25,7 @@ end
 function scene:create(event)
   components.newBackground(self.view)
 
-  local topBar = components.newTopBar(self.view)
-
-  local goBackButton = components.newImageButton(self.view, "images/icons/back.png", 40, 40, { onRelease = goBack })
-  goBackButton.anchorX = 0
-  goBackButton.x = screenX + leftInset + 20
-  goBackButton.y = screenY + topInset + 30
+  local topBar = components.newTopBar(self.view, { goBack = goBack })
 
   worldProgressText = display.newText({
     text = "",

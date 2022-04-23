@@ -12,7 +12,6 @@ local screenY = display.screenOriginY
 local screenWidth = display.actualContentWidth
 local screenHeight = display.actualContentHeight
 local scrollView = nil
-local topInset, leftInset, bottomInset, rightInset = display.getSafeAreaInsets()
 
 local customizableElementTypes = {
   "background",
@@ -149,14 +148,7 @@ end
 function scene:create(event)
   components.newBackground(self.view)
 
-  local topBar = components.newTopBar(self.view)
-
-  -- TODO Configurable au niveau de la topbar pour éviter la redite
-  local goBackButton = components.newImageButton(self.view, "images/icons/back.png", 40, 40, { onRelease = goBack })
-  goBackButton.anchorX = 0
-  goBackButton.anchorY = 0
-  goBackButton.x = screenX + leftInset + 20
-  goBackButton.y = screenY + topInset + 10
+  local topBar = components.newTopBar(self.view, { goBack = goBack })
 
   scrollView = components.newScrollView(self.view, {
     top = topBar.contentBounds.yMax,
@@ -164,8 +156,6 @@ function scene:create(event)
     topPadding = 20,
     bottomPadding = 20,
   })
-
-  self.view:insert(scrollView)
 end
 
 function scene:createElementView()
