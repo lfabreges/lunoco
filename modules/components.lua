@@ -18,18 +18,10 @@ components.newBackground = function(parent)
   return background
 end
 
-components.newTextButton = function(parent, text, width, height, options)
-  local container = display.newContainer(parent, width, height)
-  local rectangle = display.newRoundedRect(container, 0, 0, width - 2, height - 2, 5)
-  rectangle.fill.effect = "generator.linearGradient"
-  rectangle.fill.effect.color1 = { 0.24, 0.60, 0.79, 1 }
-  rectangle.fill.effect.position1  = { 0, 0 }
-  rectangle.fill.effect.color2 = { 0.15, 0.39, 0.52, 1 }
-  rectangle.fill.effect.position2  = { 1, 1 }
-  rectangle.strokeWidth = 1
-  rectangle:setStrokeColor(1, 1, 1, 0.75)
-  label = display.newText({ text = text, fontSize = height * 0.4, parent = container })
-  return components.newObjectButton(container, options)
+components.newGroup = function(parent)
+  local group = display.newGroup()
+  parent:insert(group)
+  return group
 end
 
 components.newImageButton = function(parent, imageName, imageBaseDir, width, height, options)
@@ -101,14 +93,22 @@ components.newObjectButton = function(object, options)
   return object
 end
 
-components.newGroup = function(parent)
-  local group = display.newGroup()
-  parent:insert(group)
-  return group
-end
-
 components.newStar = function(parent, width, height)
   return display.newImageRect(parent, "images/star.png", width, height)
+end
+
+components.newTextButton = function(parent, text, width, height, options)
+  local container = display.newContainer(parent, width, height)
+  local rectangle = display.newRoundedRect(container, 0, 0, width - 2, height - 2, 5)
+  rectangle.fill.effect = "generator.linearGradient"
+  rectangle.fill.effect.color1 = { 0.24, 0.60, 0.79, 1 }
+  rectangle.fill.effect.position1  = { 0, 0 }
+  rectangle.fill.effect.color2 = { 0.15, 0.39, 0.52, 1 }
+  rectangle.fill.effect.position2  = { 1, 1 }
+  rectangle.strokeWidth = 1
+  rectangle:setStrokeColor(1, 1, 1, 0.75)
+  label = display.newText({ text = text, fontSize = height * 0.4, parent = container })
+  return components.newObjectButton(container, options)
 end
 
 components.newTopBar = function(parent)

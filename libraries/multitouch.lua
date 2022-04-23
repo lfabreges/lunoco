@@ -166,18 +166,18 @@ multitouch.addEventListener = function(object, listener)
   object.multitouchEventListeners[listener] = eventListener
 end
 
-multitouch.removeEventListener = function(object, listener)
-  if (object.multitouchEventListeners and object.multitouchEventListeners[listener]) then
-    object:removeEventListener("touch", object.multitouchEventListeners[listener])
-    object.multitouchEventListeners[listener] = nil
-  end
-end
-
 multitouch.addMovePinchRotateListener = function(object, options)
   local listener = createMovePinchRotateListener(object, options)
   multitouch.removeMovePinchRotateListener(object)
   multitouch.addEventListener(object, listener)
   object.multitouchMovePinchRotateListener = listener
+end
+
+multitouch.removeEventListener = function(object, listener)
+  if (object.multitouchEventListeners and object.multitouchEventListeners[listener]) then
+    object:removeEventListener("touch", object.multitouchEventListeners[listener])
+    object.multitouchEventListeners[listener] = nil
+  end
 end
 
 multitouch.removeMovePinchRotateListener = function(object)

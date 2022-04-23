@@ -60,24 +60,6 @@ function worldClass:newLevel()
   return newLevel
 end
 
-function worldClass:saveLevel(level)
-  if not self.isBuiltIn then
-    local configuration = self:configuration()
-    local levelIndex = table.indexOf(configuration.levels, level.name)
-    if not levelIndex then
-      levelIndex = #configuration.levels + 1
-      configuration.levels[levelIndex] = level.name
-      utils.saveJson(configuration, self.directory .. ".json", system.DocumentsDirectory)
-      if self._levels then
-        self._levels[levelIndex] = level
-      end
-      if levelIndex == 1 then
-        self.universe:saveWorld(self)
-      end
-    end
-  end
-end
-
 function worldClass:progress()
   local scores = self:scores()
   local levels = self:levels()
@@ -101,16 +83,34 @@ function worldClass:progress()
   return progress, worldNumberOfStars
 end
 
+function worldClass:saveScores(scores)
+  utils.saveJson(scores, self.directory .. "/scores.json", system.DocumentsDirectory)
+  self._scores = scores
+end
+
+function worldClass:saveLevel(level)
+  if not self.isBuiltIn then
+    local configuration = self:configuration()
+    local levelIndex = table.indexOf(configuration.levels, level.name)
+    if not levelIndex then
+      levelIndex = #configuration.levels + 1
+      configuration.levels[levelIndex] = level.name
+      utils.saveJson(configuration, self.directory .. ".json", system.DocumentsDirectory)
+      if self._levels then
+        self._levels[levelIndex] = level
+      end
+      if levelIndex == 1 then
+        self.universe:saveWorld(self)
+      end
+    end
+  end
+end
+
 function worldClass:scores()
   if self._scores == nil then
     self._scores = utils.loadJson(self.directory .. "/scores.json", system.DocumentsDirectory)
   end
   return self._scores
-end
-
-function worldClass:saveScores(scores)
-  utils.saveJson(scores, self.directory .. "/scores.json", system.DocumentsDirectory)
-  self._scores = scores
 end
 
 return worldClass

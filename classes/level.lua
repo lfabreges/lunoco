@@ -23,56 +23,6 @@ function levelClass:configuration()
   return self._configuration
 end
 
-function levelClass:image(imageName, defaultImageName)
-  local imageNames = self:imageNames()
-  if imageNames[imageName] then
-    return imageNames[imageName], system.DocumentsDirectory, false
-  else
-    return defaultImageName, system.ResourceDirectory, true
-  end
-end
-
-function levelClass:imageNames()
-  if self._imageNames == nil then
-    self._imageNames = {}
-    if utils.fileExists(self.directory, system.DocumentsDirectory) then
-      local path = system.pathForFile(self.directory, system.DocumentsDirectory)
-      for filename in lfs.dir(path) do
-        local nocacheImageName, imageName = filename:match("^((.+)%.nocache%..+%.png)$")
-        if nocacheImageName then
-          self._imageNames[imageName] = self.directory .. "/" .. nocacheImageName
-        end
-      end
-    end
-  end
-  return self._imageNames
-end
-
-function levelClass:removeImage(imageName)
-  local imageNames = self:imageNames()
-  if imageNames[imageName] then
-    local filepath = system.pathForFile(imageNames[imageName], system.DocumentsDirectory)
-    os.remove(filepath)
-    imageNames[imageName] = nil
-  end
-end
-
-function levelClass:saveImage(object, imageName)
-  local filename = self.directory .. "/" .. imageName .. ".nocache." .. math.random() .. ".png"
-  display.save(object, { filename = filename, captureOffscreenArea = true })
-  self:removeImage(imageName)
-  local imageNames = self:imageNames()
-  imageNames[imageName] = filename
-end
-
-function levelClass:saveScore(numberOfShots, numberOfStars)
-  local worldScores = self.world:scores()
-  if worldScores[self.name] == nil or worldScores[self.name].numberOfShots > numberOfShots then
-    worldScores[self.name] = { numberOfShots = numberOfShots, numberOfStars = numberOfStars }
-    self.world:saveScores(worldScores)
-  end
-end
-
 function levelClass:createElements(parent)
   local configuration = self:configuration()
   local elements = { obstacles = {}, targets = {} }
@@ -114,56 +64,29 @@ function levelClass:createElements(parent)
   return elements
 end
 
-function levelClass:positionElement(element, x, y)
-  if element.type == "ball" then
-    element.x = 10 + x
-    element.y = 10 + y - element.contentHeight * 0.5
-  elseif element.type == "corner" then
-    element.x = 10 + x + element.contentWidth * 0.5
-    element.y = 10 + y + element.contentHeight * 0.5
+function levelClass:image(imageName, defaultImageName)
+  local imageNames = self:imageNames()
+  if imageNames[imageName] then
+    return imageNames[imageName], system.DocumentsDirectory, false
   else
-    element.anchorX = 0
-    element.anchorY = 0
-    element.x = 10 + x
-    element.y = 10 + y
+    return defaultImageName, system.ResourceDirectory, true
   end
 end
 
-function levelClass:save(elements, stars)
-  local configuration = { obstacles = {}, stars = stars, targets = {} }
-  local round = math.round
-
-  configuration.ball = {
-    x = round(elements.ball.contentBounds.xMin + elements.ball.contentWidth * 0.5 - 10),
-    y = round(elements.ball.contentBounds.yMax - 10),
-  }
-
-  for index = 1, #elements.obstacles do
-    local obstacle = elements.obstacles[index]
-    configuration.obstacles[index] = {
-      type = obstacle.type,
-      x = round(obstacle.contentBounds.xMin - 10),
-      y = round(obstacle.contentBounds.yMin - 10),
-      width = round(obstacle.contentWidth),
-      height = round(obstacle.contentHeight),
-      rotation = obstacle.rotation ~= 0 and round(obstacle.rotation) or nil,
-    }
+function levelClass:imageNames()
+  if self._imageNames == nil then
+    self._imageNames = {}
+    if utils.fileExists(self.directory, system.DocumentsDirectory) then
+      local path = system.pathForFile(self.directory, system.DocumentsDirectory)
+      for filename in lfs.dir(path) do
+        local nocacheImageName, imageName = filename:match("^((.+)%.nocache%..+%.png)$")
+        if nocacheImageName then
+          self._imageNames[imageName] = self.directory .. "/" .. nocacheImageName
+        end
+      end
+    end
   end
-
-  for index = 1, #elements.targets do
-    local target = elements.targets[index]
-    configuration.targets[index] = {
-      type = target.type,
-      x = round(target.contentBounds.xMin - 10),
-      y = round(target.contentBounds.yMin - 10),
-      width = round(target.contentWidth),
-      height = round(target.contentHeight),
-    }
-  end
-
-  utils.saveJson(configuration, self.directory .. ".json", system.DocumentsDirectory)
-  self._configuration = configuration
-  self.world:saveLevel(self)
+  return self._imageNames
 end
 
 function levelClass:newBackground(parent, width, height)
@@ -244,6 +167,83 @@ function levelClass:newTarget(parent, targetType, width, height)
   target.family = "target"
   target.type = targetType
   return target
+end
+
+function levelClass:positionElement(element, x, y)
+  if element.type == "ball" then
+    element.x = 10 + x
+    element.y = 10 + y - element.contentHeight * 0.5
+  elseif element.type == "corner" then
+    element.x = 10 + x + element.contentWidth * 0.5
+    element.y = 10 + y + element.contentHeight * 0.5
+  else
+    element.anchorX = 0
+    element.anchorY = 0
+    element.x = 10 + x
+    element.y = 10 + y
+  end
+end
+
+function levelClass:removeImage(imageName)
+  local imageNames = self:imageNames()
+  if imageNames[imageName] then
+    local filepath = system.pathForFile(imageNames[imageName], system.DocumentsDirectory)
+    os.remove(filepath)
+    imageNames[imageName] = nil
+  end
+end
+
+function levelClass:save(elements, stars)
+  local configuration = { obstacles = {}, stars = stars, targets = {} }
+  local round = math.round
+
+  configuration.ball = {
+    x = round(elements.ball.contentBounds.xMin + elements.ball.contentWidth * 0.5 - 10),
+    y = round(elements.ball.contentBounds.yMax - 10),
+  }
+
+  for index = 1, #elements.obstacles do
+    local obstacle = elements.obstacles[index]
+    configuration.obstacles[index] = {
+      type = obstacle.type,
+      x = round(obstacle.contentBounds.xMin - 10),
+      y = round(obstacle.contentBounds.yMin - 10),
+      width = round(obstacle.contentWidth),
+      height = round(obstacle.contentHeight),
+      rotation = obstacle.rotation ~= 0 and round(obstacle.rotation) or nil,
+    }
+  end
+
+  for index = 1, #elements.targets do
+    local target = elements.targets[index]
+    configuration.targets[index] = {
+      type = target.type,
+      x = round(target.contentBounds.xMin - 10),
+      y = round(target.contentBounds.yMin - 10),
+      width = round(target.contentWidth),
+      height = round(target.contentHeight),
+    }
+  end
+
+  utils.saveJson(configuration, self.directory .. ".json", system.DocumentsDirectory)
+  self._configuration = configuration
+  self.world:saveLevel(self)
+end
+
+function levelClass:saveScore(numberOfShots, numberOfStars)
+  local worldScores = self.world:scores()
+  if worldScores[self.name] == nil or worldScores[self.name].numberOfShots > numberOfShots then
+    worldScores[self.name] = { numberOfShots = numberOfShots, numberOfStars = numberOfStars }
+    self.world:saveScores(worldScores)
+  end
+end
+
+function levelClass:saveImage(object, imageName)
+  local filename = self.directory .. "/" .. imageName .. ".nocache." .. math.random() .. ".png"
+  display.save(object, { filename = filename, captureOffscreenArea = true })
+  self:removeImage(imageName)
+  local imageNames = self:imageNames()
+  imageNames[imageName] = filename
 end
 
 return levelClass

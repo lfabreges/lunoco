@@ -21,6 +21,14 @@ navigation.gotoElementImage = function(level, elementType, filename)
   })
 end
 
+navigation.gotoGame = function(level)
+  composer.gotoScene("scenes.game", {
+    effect = defaultEffect,
+    time = defaultTime,
+    params = { level = level },
+  })
+end
+
 navigation.gotoLevelEditor = function(level)
   composer.gotoScene("scenes.level-editor", {
     effect = defaultEffect,
@@ -34,14 +42,6 @@ navigation.gotoLevels = function(world)
     effect = defaultEffect,
     time = defaultTime,
     params = { world = world },
-  })
-end
-
-navigation.gotoGame = function(level)
-  composer.gotoScene("scenes.game", {
-    effect = defaultEffect,
-    time = defaultTime,
-    params = { level = level },
   })
 end
 
