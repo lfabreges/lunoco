@@ -4,14 +4,12 @@ local i18n = require "modules.i18n"
 local navigation = require "modules.navigation"
 local utils = require "modules.utils"
 
-local elementView = nil
 local level = nil
 local scene = composer.newScene()
 local screenX = display.screenOriginX
 local screenY = display.screenOriginY
 local screenWidth = display.actualContentWidth
 local screenHeight = display.actualContentHeight
-local scrollView = nil
 
 local customizableElementTypes = {
   "background",
@@ -71,28 +69,19 @@ local function capturePhoto(onComplete, shouldRequestAppPermission)
   end
 end
 
-local function elementTypesFromLevelConfig()
-  local config = level:configuration()
-  local hashSet = { ["background"] = true, ["frame"] = true, ["ball"] = true }
+local function elementTypesFromLevelConfiguration()
+  local configuration = level:configuration()
+  local levelElementTypeSet = { ["background"] = true, ["frame"] = true, ["ball"] = true }
   local elementTypes = {}
 
-  if config.obstacles then
-    for index = 1, #config.obstacles do
-      local obstacle = config.obstacles[index]
-      hashSet["obstacle-" .. obstacle.type] = true
-    end
+  for _, elementConfiguration in pairs(configuration.obstacles) do
+    levelElementTypeSet["obstacle-" .. elementConfiguration.type] = true
   end
-
-  if config.targets then
-    for index = 1, #config.targets do
-      local target = config.targets[index]
-      hashSet["target-" .. target.type] = true
-    end
+  for _, elementConfiguration in pairs(configuration.targets) do
+    levelElementTypeSet["target-" .. elementConfiguration.type] = true
   end
-
-  for index = 1, #customizableElementTypes do
-    local elementType = customizableElementTypes[index]
-    if hashSet[elementType] then
+  for _, elementType in ipairs(customizableElementTypes) do
+    if levelElementTypeSet[elementType] then
       elementTypes[#elementTypes + 1] = elementType
     end
   end
@@ -150,7 +139,7 @@ function scene:create(event)
 
   local topBar = components.newTopBar(self.view, { goBack = goBack })
 
-  scrollView = components.newScrollView(self.view, {
+  self.scrollView = components.newScrollView(self.view, {
     top = topBar.contentBounds.yMax,
     height = screenHeight - topBar.contentHeight,
     topPadding = 20,
@@ -159,110 +148,108 @@ function scene:create(event)
 end
 
 function scene:createElementView()
-  local elementTypes = elementTypesFromLevelConfig()
+  local elementTypes = elementTypesFromLevelConfiguration()
   local y = 0
 
-  elementView = components.newGroup(scrollView)
+  self.elementView = components.newGroup(self.scrollView)
 
   for _, elementType in ipairs(elementTypes) do
-    if table.indexOf(customizableElementTypes, elementType) ~= nil then
-      local elementGroup = components.newGroup(elementView)
-      elementGroup.y = y
+    local elementGroup = components.newGroup(self.elementView)
+    elementGroup.y = y
 
-      local elementText = display.newText({
-        text = i18n.t(elementType),
-        font = native.systemFont,
-        fontSize = 20,
-        parent = elementGroup,
-        x = 20,
-        y = 0,
-      })
-      elementText.anchorX = 0
-      elementText.anchorY = 0
+    local elementText = display.newText({
+      text = i18n.t(elementType),
+      font = native.systemFont,
+      fontSize = 20,
+      parent = elementGroup,
+      x = 20,
+      y = 0,
+    })
+    elementText.anchorX = 0
+    elementText.anchorY = 0
 
-      local elementFrame = newFrame(elementGroup, 20, elementText.height + 50, 78, 78)
+    local elementFrame = newFrame(elementGroup, 20, elementText.height + 50, 78, 78)
 
-      local element = newElement(elementGroup, elementType)
-      element.x = elementFrame.x + elementFrame.width / 2
-      element.y = elementFrame.y
+    local element = newElement(elementGroup, elementType)
+    element.x = elementFrame.x + elementFrame.width / 2
+    element.y = elementFrame.y
 
-      local customizeButtonsFrame = newFrame(
+    local customizeButtonsFrame = newFrame(
+      elementGroup,
+      elementFrame.x + elementFrame.width + 5,
+      element.y,
+      122,
+      78
+    )
+
+    local onCapturePhotoOrSelectPhotoComplete = function(filename)
+      navigation.gotoElementImage(level, elementType, filename)
+    end
+
+    local selectPhotoButton = components.newImageButton(
+      elementGroup,
+      "images/icons/photo.png",
+      40,
+      40,
+      {
+        onRelease = function() selectPhoto(onCapturePhotoOrSelectPhotoComplete) end,
+        scrollView = self.scrollView
+      }
+    )
+    selectPhotoButton.anchorX = 0
+    selectPhotoButton.x = customizeButtonsFrame.x + 14
+    selectPhotoButton.y = element.y
+
+    local takePhotoButton = components.newImageButton(
+      elementGroup,
+      "images/icons/take-photo.png",
+      40,
+      40,
+      {
+        onRelease = function() capturePhoto(onCapturePhotoOrSelectPhotoComplete) end,
+        scrollView = self.scrollView
+      }
+    )
+    takePhotoButton.anchorX = 0
+    takePhotoButton.x = selectPhotoButton.x + selectPhotoButton.width + 14
+    takePhotoButton.y = element.y
+
+    if not element.isDefault then
+      local removeCustomizationButtonFrame = newFrame(
         elementGroup,
-        elementFrame.x + elementFrame.width + 5,
+        customizeButtonsFrame.x + customizeButtonsFrame.width + 5,
         element.y,
-        122,
+        64,
         78
       )
 
-      local onCapturePhotoOrSelectPhotoComplete = function(filename)
-        navigation.gotoElementImage(level, elementType, filename)
-      end
+      local removeCustomizationButton
 
-      local selectPhotoButton = components.newImageButton(
+      removeCustomizationButton = components.newImageButton(
         elementGroup,
-        "images/icons/photo.png",
+        "images/icons/trash.png",
         40,
         40,
         {
-          onRelease = function() selectPhoto(onCapturePhotoOrSelectPhotoComplete) end,
-          scrollView = scrollView
+          onRelease = function()
+            level:removeImage(elementType)
+            local defaultElement = newElement(elementGroup, elementType)
+            defaultElement.x = element.x
+            defaultElement.y = element.y
+            defaultElement.alpha = 0
+            transition.to(defaultElement, { time = 500, alpha = 1 } )
+            transition.to(element, { time = 500, alpha = 0, onComplete = function() display.remove(element) end } )
+            display.remove(removeCustomizationButtonFrame)
+            display.remove(removeCustomizationButton)
+          end,
+          scrollView = self.scrollView
         }
       )
-      selectPhotoButton.anchorX = 0
-      selectPhotoButton.x = customizeButtonsFrame.x + 14
-      selectPhotoButton.y = element.y
-
-      local takePhotoButton = components.newImageButton(
-        elementGroup,
-        "images/icons/take-photo.png",
-        40,
-        40,
-        {
-          onRelease = function() capturePhoto(onCapturePhotoOrSelectPhotoComplete) end,
-          scrollView = scrollView
-        }
-      )
-      takePhotoButton.anchorX = 0
-      takePhotoButton.x = selectPhotoButton.x + selectPhotoButton.width + 14
-      takePhotoButton.y = element.y
-
-      if not element.isDefault then
-        local removeCustomizationButtonFrame = newFrame(
-          elementGroup,
-          customizeButtonsFrame.x + customizeButtonsFrame.width + 5,
-          element.y,
-          64,
-          78
-        )
-
-        local removeCustomizationButton
-
-        removeCustomizationButton = components.newImageButton(
-          elementGroup,
-          "images/icons/trash.png",
-          40,
-          40,
-          {
-            onRelease = function()
-              level:removeImage(elementType)
-              local defaultElement = newElement(elementGroup, elementType)
-              defaultElement.x = element.x
-              defaultElement.y = element.y
-              defaultElement.alpha = 0
-              transition.to(defaultElement, { time = 500, alpha = 1 } )
-              transition.to(element, { time = 500, alpha = 0, onComplete = function() display.remove(element) end } )
-              display.remove(removeCustomizationButtonFrame)
-              display.remove(removeCustomizationButton)
-            end,
-            scrollView = scrollView
-          }
-        )
-        removeCustomizationButton.x = removeCustomizationButtonFrame.x + removeCustomizationButtonFrame.width / 2
-        removeCustomizationButton.y = element.y
-      end
-
-      y = y + elementGroup.height + 20
+      removeCustomizationButton.x = removeCustomizationButtonFrame.x + removeCustomizationButtonFrame.width / 2
+      removeCustomizationButton.y = element.y
     end
+
+    y = y + elementGroup.height + 20
   end
 end
 
@@ -270,9 +257,11 @@ function scene:show(event)
   if event.phase == "will" then
     local isNewLevel = level and level ~= event.params.level
     level = event.params.level
-    self:createElementView()
-    if isNewLevel then
-      scrollView:scrollTo("top", { time = 0 })
+
+    if not self.elementView or isNewLevel then
+      display.remove(self.elementView)
+      self:createElementView()
+      self.scrollView:scrollTo("top", { time = 0 })
     end
   end
 end
@@ -280,8 +269,6 @@ end
 function scene:hide(event)
   if event.phase == "did" then
     transition.cancelAll()
-    display.remove(elementView)
-    elementView = nil
   end
 end
 
