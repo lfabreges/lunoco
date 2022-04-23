@@ -10,7 +10,8 @@ local screenHeight = display.actualContentHeight
 local topInset, leftInset, bottomInset, rightInset = display.getSafeAreaInsets()
 
 components.newBackground = function(parent)
-  local background = display.newRect(parent, screenX, screenY, screenWidth, screenHeight)
+  local background = display.newRect(screenX, screenY, screenWidth, screenHeight)
+  parent:insert(background)
   background.anchorX = 0
   background.anchorY = 0
   display.setDefault("textureWrapX", "repeat")
@@ -34,7 +35,8 @@ components.newImageButton = function(parent, imageName, imageBaseDir, width, hei
     width = imageBaseDir
     imageBaseDir = system.ResourceDirectory
   end
-  local imageButton = display.newImageRect(parent, imageName, imageBaseDir, width, height)
+  local imageButton = display.newImageRect(imageName, imageBaseDir, width, height)
+  parent:insert(imageButton)
   return components.newObjectButton(imageButton, options)
 end
 
@@ -97,7 +99,9 @@ components.newObjectButton = function(object, options)
 end
 
 components.newStar = function(parent, width, height)
-  return display.newImageRect(parent, "images/star.png", width, height)
+  local star = display.newImageRect("images/star.png", width, height)
+  parent:insert(star)
+  return star
 end
 
 components.newScrollView = function(parent, options)
@@ -117,7 +121,8 @@ components.newScrollView = function(parent, options)
 end
 
 components.newTextButton = function(parent, text, width, height, options)
-  local container = display.newContainer(parent, width, height)
+  local container = display.newContainer(width, height)
+  parent:insert(container)
   local rectangle = display.newRoundedRect(container, 0, 0, width - 2, height - 2, 5)
   rectangle.fill.effect = "generator.linearGradient"
   rectangle.fill.effect.color1 = { 0.24, 0.60, 0.79, 1 }

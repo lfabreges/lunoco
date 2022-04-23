@@ -132,7 +132,8 @@ end
 
 function levelClass:newBackground(parent, width, height)
   local imageName, imageBaseDir, isDefault = self:image("background", "images/elements/background.png")
-  local background = display.newImageRect(parent, imageName, imageBaseDir, width, height)
+  local background = display.newImageRect(imageName, imageBaseDir, width, height)
+  parent:insert(background)
   background.isDefault = isDefault
   background.family = "root"
   background.type = "background"
@@ -141,7 +142,8 @@ end
 
 function levelClass:newBall(parent, width, height)
   local imageName, imageBaseDir, isDefault = self:image("ball", "images/elements/ball.png")
-  local ball = display.newImageRect(parent, imageName, imageBaseDir, width, height)
+  local ball = display.newImageRect(imageName, imageBaseDir, width, height)
+  parent:insert(ball)
   local ballMask = graphics.newMask("images/elements/ball-mask.png")
   ball:setMask(ballMask)
   ball.isHitTestMasked = false
@@ -155,7 +157,8 @@ end
 
 function levelClass:newFrame(parent, width, height)
   local imageName, imageBaseDir, isDefault = self:image("frame", "images/elements/frame.png")
-  local frame = display.newContainer(parent, width, height)
+  local frame = display.newContainer(width, height)
+  parent:insert(frame)
   local imageWidth = math.min(128, width)
   local imageHeight = math.min(128, height)
   for x = 0, width, 128 do
@@ -177,7 +180,8 @@ function levelClass:newObstacleBarrier(parent, barrierType, width, height)
     "obstacle-" .. barrierType,
     "images/elements/" .. barrierType .. ".png"
   )
-  local barrier = display.newImageRect(parent, imageName, imageBaseDir, width, height)
+  local barrier = display.newImageRect(imageName, imageBaseDir, width, height)
+  parent:insert(barrier)
   barrier.isDefault = isDefault
   barrier.family = "obstacle"
   barrier.type = barrierType
@@ -186,7 +190,8 @@ end
 
 function levelClass:newObstacleCorner(parent, width, height)
   local imageName, imageBaseDir, isDefault = self:image("obstacle-corner", "images/elements/corner.png")
-  local corner = display.newImageRect(parent, imageName, imageBaseDir, width, height)
+  local corner = display.newImageRect(imageName, imageBaseDir, width, height)
+  parent:insert(corner)
   local cornerMask = graphics.newMask("images/elements/corner-mask.png")
   corner:setMask(cornerMask)
   corner.isHitTestMasked = false
@@ -203,7 +208,8 @@ function levelClass:newTarget(parent, targetType, width, height)
     "target-" .. targetType,
     "images/elements/target-" .. targetType .. ".png"
   )
-  local target = display.newImageRect(parent, imageName, imageBaseDir, width, height)
+  local target = display.newImageRect(imageName, imageBaseDir, width, height)
+  parent:insert(target)
   target.isDefault = isDefault
   target.family = "target"
   target.type = targetType
