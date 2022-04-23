@@ -1,6 +1,7 @@
 local components = require "modules.components"
 local composer = require "composer"
 local i18n = require "modules.i18n"
+local layouts = require "modules.layouts"
 local navigation = require "modules.navigation"
 
 local scene = composer.newScene()
@@ -42,58 +43,39 @@ function scene:create(event)
 end
 
 function scene:createContentView()
-  local centerX = self.scrollView.width * 0.5
-  local isEven = false
-  local spaceWidth = (screenWidth - 240) / 3
-  local y = 0
   local worldLevels = world:levels()
   local worldProgress = world:progress()
   local worldScores = world:scores()
 
-  self.contentView = components.newGroup(self.scrollView)
+  self.contentView = layouts.newGrid({ parent = self.scrollView, separator = (screenWidth - 240) / 3 })
   self.worldProgressText.text = i18n.t("progress", worldProgress)
 
-  for levelNumber, level in ipairs(worldLevels) do
-    isEven = levelNumber % 2 == 0
-
+  for _, level in ipairs(worldLevels) do
+    local levelStack = layouts.newStack({ align = "center", parent = self.contentView, separator = 10 })
     local levelImageName, levelImageBaseDir = level:image("screenshot", "images/level-unknown.png")
 
     local levelButton = components.newImageButton(
-      self.contentView,
+      levelStack,
       levelImageName,
       levelImageBaseDir,
       120,
       180,
       { onRelease = function() startLevel(level) end, scrollView = self.scrollView }
     )
-    levelButton.anchorY = 0
-    levelButton.y = y
-    levelButton.x = isEven and centerX + 60 + spaceWidth / 2 or centerX - 60 - spaceWidth / 2
 
     if worldScores[level.name] then
       local numberOfStars = worldScores[level.name].numberOfStars
-
+      local startStack = layouts.newStack({ mode = "horizontal", parent = levelStack, separator = 5 })
       for starCount = 1, 3 do
         local isFullStar = numberOfStars >= starCount
-        local star = components.newStar(self.contentView, 20, 20)
-        star.anchorY = 0
-        star.x = levelButton.x + (starCount - 2) * 25
-        star.y = y + 190
+        local star = components.newStar(startStack, 20, 20)
         star.fill.effect = not isFullStar and "filter.grayscale" or nil
       end
-    end
-
-    if isEven then
-      y = y + 240
     end
   end
 
   if not world.isBuiltIn then
-    isEven = not isEven
-
-    local newLevelGroup = components.newGroup(self.contentView)
-    newLevelGroup.x = isEven and centerX + 60 + spaceWidth / 2 or centerX - 60 - spaceWidth / 2
-    newLevelGroup.y = y + 90
+    local newLevelGroup = components.newGroup(self.contentView, true)
 
     local newLevelBackground = display.newRoundedRect(newLevelGroup, 0, 0, 120, 180, 15)
     newLevelBackground.fill.effect = "generator.linearGradient"
@@ -114,6 +96,8 @@ function scene:createContentView()
       scrollView = self.scrollView,
     })
   end
+
+  layouts.center(self.contentView, self.scrollView)
 end
 
 function scene:show(event)

@@ -11,7 +11,6 @@ local topInset, leftInset, bottomInset, rightInset = display.getSafeAreaInsets()
 
 components.newBackground = function(parent)
   local background = display.newRect(screenX, screenY, screenWidth, screenHeight)
-  parent:insert(background)
   background.anchorX = 0
   background.anchorY = 0
   display.setDefault("textureWrapX", "repeat")
@@ -19,11 +18,13 @@ components.newBackground = function(parent)
   background.fill = { type = "image", filename = "images/background.png" }
   display.setDefault("textureWrapX", "clampToEdge")
   display.setDefault("textureWrapY", "clampToEdge")
+  parent:insert(background)
   return background
 end
 
-components.newGroup = function(parent)
+components.newGroup = function(parent, anchorChildren)
   local group = display.newGroup()
+  group.anchorChildren = anchorChildren or false
   parent:insert(group)
   return group
 end
@@ -122,7 +123,6 @@ end
 
 components.newTextButton = function(parent, text, width, height, options)
   local container = display.newContainer(width, height)
-  parent:insert(container)
   local rectangle = display.newRoundedRect(container, 0, 0, width - 2, height - 2, 5)
   rectangle.fill.effect = "generator.linearGradient"
   rectangle.fill.effect.color1 = { 0.24, 0.60, 0.79, 1 }
@@ -132,6 +132,7 @@ components.newTextButton = function(parent, text, width, height, options)
   rectangle.strokeWidth = 1
   rectangle:setStrokeColor(1, 1, 1, 0.75)
   label = display.newText({ text = text, fontSize = height * 0.4, parent = container })
+  parent:insert(container)
   return components.newObjectButton(container, options)
 end
 
