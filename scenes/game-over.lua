@@ -41,7 +41,6 @@ function scene:create(event)
   background:setFillColor(0, 0, 0, 0.9)
 
   display.newText({
-    align = "center",
     text = i18n.p("finished_in", numberOfShots),
     fontSize = 20,
     parent = self.view,

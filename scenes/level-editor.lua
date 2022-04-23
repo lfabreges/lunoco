@@ -42,7 +42,7 @@ local elementDefaults = {
     height = 30,
     minWidth = 100,
     minHeight = 30,
-    maxWidth = 300,
+    maxWidth = 250,
     maxHeight = 120,
   },
   ["obstacle-vertical-barrier"] = {
@@ -59,7 +59,7 @@ local elementDefaults = {
     minWidth = 30,
     minHeight = 100,
     maxWidth = 150,
-    maxHeight = 460,
+    maxHeight = 350,
   },
   ["target-easy"] = {
     width = 40,
@@ -88,10 +88,7 @@ local elementDefaults = {
 }
 
 local elementTypes = {
-  "obstacle-corner-0",
-  "obstacle-corner-270",
-  "obstacle-corner-90",
-  "obstacle-corner-180",
+  "obstacle-corner",
   "obstacle-horizontal-barrier",
   "obstacle-horizontal-barrier-large",
   "obstacle-vertical-barrier",
@@ -106,14 +103,6 @@ local function goBack()
     navigation.gotoWorlds()
   else
     navigation.gotoLevels(level.world)
-  end
-end
-
-local function clearElementSelection()
-  if selectedElement then
-    display.remove(selectedElement.handle)
-    selectedElement.handle = nil
-    selectedElement = nil
   end
 end
 
@@ -267,6 +256,7 @@ function scene:create(event)
   middleGround.isVisible = false
   middleGround.isHitTestable = true
 
+  scene.toolBarGroup = components.newGroup(self.view)
   scene:createHelp()
   scene:createSideBar()
 
@@ -274,7 +264,7 @@ function scene:create(event)
     if event.phase == "began" then
       removeHelp()
       if selectedElement and not utils.isEventWithinBounds(selectedElement.handle, event) then
-        clearElementSelection()
+        scene:selectElement(nil)
       end
       if sideBar.isOpened then
         sideBar.close()
@@ -301,9 +291,14 @@ function scene:createHelp()
     160,
     10
   )
+  display.setDefault("textureWrapX", "repeat")
+  display.setDefault("textureWrapY", "repeat")
   helpFrame.anchorY = 0
-  helpFrame:setFillColor(0, 0, 0, 0.75)
+  helpFrame.fill = { type = "image", filename = "images/background.png" }
+  helpFrame.fill.a = 0.5
   helpFrame.strokeWidth = 1
+  display.setDefault("textureWrapX", "clampToEdge")
+  display.setDefault("textureWrapY", "clampToEdge")
 
   local helpContentGroup = components.newGroup(self.help)
 
@@ -537,26 +532,14 @@ function scene:createSideBar()
 
   for index, elementType in ipairs(elementTypes) do
     local isEven = index % 2 == 0
-    local elementTypeWithRotation, rotation = elementType:match("^(.+)-(%d+)$")
-
-    if elementTypeWithRotation then
-      elementType = elementTypeWithRotation
-    else
-      rotation = 0
-    end
-
     local element = newElement(self.view, elementType)
-    element.rotation = rotation
 
     local elementButton = newButton(elementGroup, isEven and 100 or 10, elementY, element, {
       onRelease = function()
         local newElement = scene:newLevelElement(elementType)
-        newElement.rotation = rotation
-
         local fromX = (newElement.anchorX - element.anchorX) * element.contentWidth
         local fromY = (newElement.anchorY - element.anchorX) * element.contentHeight
         fromX, fromY = element:localToContent(fromX, fromY)
-
         transition.from(newElement, {
           xScale = element.width / newElement.width,
           yScale = element.height / newElement.height,
@@ -608,8 +591,6 @@ function scene:configureElement(element)
         return false
       end
 
-      clearElementSelection()
-
       local handle = display.newRoundedRect(
         levelView,
         element.contentBounds.xMin + element.contentWidth * 0.5,
@@ -628,29 +609,14 @@ function scene:configureElement(element)
       display.setDefault("textureWrapY", "clampToEdge")
 
       element:toFront()
-      selectedElement = element
-      selectedElement.handle = handle
+      element.handle = handle
       handle.element = element
+      scene:selectElement(element)
 
       multitouch.addMovePinchRotateListener(handle, {
         onFocus = onFocus,
         onMovePinchRotate = onMovePinchRotate,
       })
-
-      handle:addEventListener("tap", function(event)
-        if event.numTaps == 2 then
-          clearElementSelection()
-          display.remove(element)
-          for _, objects in pairs({ elements.obstacles, elements.targets }) do
-            local index = table.indexOf(objects, element)
-            if index then
-              table.remove(objects, index)
-              break
-            end
-          end
-        end
-        return true
-      end)
 
       event.target = handle
       handle:dispatchEvent(event)
@@ -658,9 +624,7 @@ function scene:configureElement(element)
     return true
   end)
 
-  element:addEventListener("tap", function()
-    return not (selectedElement and selectedElement == element)
-  end)
+  element:addEventListener("tap", function() return true end)
 end
 
 function scene:newLevelElement(elementType)
@@ -679,6 +643,93 @@ function scene:newLevelElement(elementType)
   end
 
   return element
+end
+
+function scene:selectElement(element)
+  if selectedElement == element then
+    return
+  end
+
+  if not element or selectedElement ~= element then
+    if selectedElement then
+      display.remove(selectedElement.handle)
+      display.remove(selectedElement.toolBar)
+      selectedElement.handle = nil
+      selectedElement.toolBar = nil
+      selectedElement = nil
+    end
+  end
+
+  if element then
+    selectedElement = element
+    selectedElement.toolBar = components.newGroup(scene.toolBarGroup)
+    selectedElement.toolBar.x = elements.background.contentBounds.xMin + elements.background.contentWidth * 0.5
+    selectedElement.toolBar.y = elements.background.contentBounds.yMin + 40
+
+    local toolBarFrame = display.newRoundedRect(selectedElement.toolBar, 0, 0, 1, 38, 10)
+    display.setDefault("textureWrapX", "repeat")
+    display.setDefault("textureWrapY", "repeat")
+    toolBarFrame.fill = { type = "image", filename = "images/background.png" }
+    toolBarFrame.fill.a = 0.5
+    toolBarFrame.strokeWidth = 1
+    display.setDefault("textureWrapX", "clampToEdge")
+    display.setDefault("textureWrapY", "clampToEdge")
+
+    local toolBarContent = components.newGroup(selectedElement.toolBar)
+
+    local elementNameText = display.newText({
+      text = i18n.t((element.family == "root" and "" or (element.family .. "-")) .. element.type),
+      fontSize = 14,
+      parent = toolBarContent,
+    })
+    elementNameText.anchorX = 0
+
+    local x = elementNameText.x + elementNameText.width
+
+    if element.family == "obstacle" and element.type == "corner" then
+      x = x + 20
+      local separator = display.newLine(toolBarContent, x, -8, x, 8)
+      separator.anchorX = 0
+
+      x = x + 20
+      local rotateRightIcon = display.newImageRect(toolBarContent, "images/icons/rotate-right.png", 20, 20)
+      rotateRightIcon.anchorX = 0
+      rotateRightIcon.x = x
+
+      local rotateRightButton = components.newObjectButton(rotateRightIcon, { onRelease = function()
+        element.rotation = (element.rotation + 90) % 360
+        return true
+      end})
+      rotateRightButton:addEventListener("tap", function() return true end)
+
+      x = x + rotateRightButton.contentWidth
+    end
+
+    if element.family == "obstacle" or element.family == "target" then
+      x = x + 20
+      local separator = display.newLine(toolBarContent, x, -8, x, 8)
+      separator.anchorX = 0
+
+      local deleteIcon = display.newImageRect(toolBarContent, "images/icons/trash.png", 20, 20)
+      deleteIcon.anchorX = 0
+      deleteIcon.x = x + 20
+
+      local deleteButton = components.newObjectButton(deleteIcon, { onRelease = function()
+        scene:selectElement(nil)
+        display.remove(element)
+        local objects = element.family == "obstacle" and elements.obstacles or elements.targets
+        local index = table.indexOf(objects, element)
+        table.remove(objects, index)
+        return true
+      end})
+      deleteButton:addEventListener("tap", function() return true end)
+    end
+
+    toolBarFrame.path.width = toolBarContent.contentWidth + 40
+    toolBarContent.x = -toolBarContent.contentWidth * 0.5
+
+    transition.from(selectedElement.toolBar, { alpha = 0, time = 100 })
+  end
 end
 
 function scene:show(event)

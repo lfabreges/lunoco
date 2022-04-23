@@ -1,5 +1,4 @@
 # Next
-* Rendre plus sure la suppression d'un élément de niveau
 
 # Nice to have
 * Revoir les boutons en y ajoutant des icones
