@@ -207,6 +207,13 @@ local function onMovePinchRotate(event)
   end
 
   element.handle.x, element.handle.y = element:localToContent(0, 0)
+
+  local toolBarPosition = element.toolBar.position()
+  if element.toolBar.y ~= toolBarPosition then
+    element.toolBar.alpha = 0
+    element.toolBar.y = toolBarPosition
+    transition.to(element.toolBar, { alpha = 1, time = 100 })
+  end
 end
 
 local function removeHelp()
@@ -664,7 +671,17 @@ function scene:selectElement(element)
     selectedElement = element
     selectedElement.toolBar = components.newGroup(scene.toolBarGroup)
     selectedElement.toolBar.x = elements.background.contentBounds.xMin + elements.background.contentWidth * 0.5
-    selectedElement.toolBar.y = elements.background.contentBounds.yMin + 40
+    selectedElement.toolBar.yBottom =  elements.background.contentBounds.yMax - 40
+    selectedElement.toolBar.yTop = elements.background.contentBounds.yMin + 40
+    selectedElement.toolBar.position = function()
+      local _, handleCenterY = selectedElement.handle:localToContent(0, 0)
+      if handleCenterY < display.contentCenterY then
+        return selectedElement.toolBar.yBottom
+      else
+        return selectedElement.toolBar.yTop
+      end
+    end
+    selectedElement.toolBar.y = selectedElement.toolBar.position()
 
     local toolBarFrame = display.newRoundedRect(selectedElement.toolBar, 0, 0, 1, 38, 10)
     display.setDefault("textureWrapX", "repeat")
