@@ -9,7 +9,7 @@ local backPhoto = nil
 local backPhotoBackground = nil
 local background = nil
 local content = nil
-local elementConfiguration = nil
+local elementDescriptor = nil
 local filename = nil
 local frontContainer = nil
 local frontPhoto = nil
@@ -82,7 +82,7 @@ end
 local function saveImage()
   local b = frontContainer.contentBounds
   local elementCapture = display.captureBounds({ xMin = b.xMin, xMax = b.xMax - 1, yMin = b.yMin, yMax = b.yMax - 1 })
-  level:saveImage(elementCapture, elementConfiguration.family, elementConfiguration.name)
+  level:saveImage(elementCapture, elementDescriptor.family, elementDescriptor.name)
   display.remove(elementCapture)
   navigation.gotoCustomizeLevel(level)
 end
@@ -107,7 +107,7 @@ end
 function scene:show(event)
   if event.phase == "will" then
     level = event.params.level
-    elementConfiguration = event.params.elementConfiguration
+    elementDescriptor = event.params.elementDescriptor
     filename = event.params.filename
 
     local centerX = display.contentCenterX
@@ -130,7 +130,7 @@ function scene:show(event)
     backPhotoBackground.yScale = photoScale
     backPhotoBackground:setFillColor(0)
 
-    local elementWidth, elementHeight = elementConfiguration.size(250, 300)
+    local elementWidth, elementHeight = elementDescriptor.size(250, 300)
     frontContainer = display.newContainer(content, elementWidth, elementHeight)
     frontContainer.x = centerX
     frontContainer.y = centerY
@@ -139,8 +139,8 @@ function scene:show(event)
     frontPhoto.xScale = photoScale
     frontPhoto.yScale = photoScale
 
-    if elementConfiguration.mask then
-      local frontPhotoMask = graphics.newMask(elementConfiguration.mask)
+    if elementDescriptor.mask then
+      local frontPhotoMask = graphics.newMask(elementDescriptor.mask)
       frontContainer:setMask(frontPhotoMask)
       frontContainer.maskScaleX = frontContainer.width / 394
       frontContainer.maskScaleY = frontContainer.height / 394

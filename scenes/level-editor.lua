@@ -76,10 +76,10 @@ local function onMovePinchRotate(event)
 
   if element.family ~= "root" then
     if event.xDistanceDelta then
-      local minWidth = element.configuration.minWidth
-      local maxWidth = element.configuration.maxWidth
-      local minHeight = element.configuration.minHeight
-      local maxHeight = element.configuration.maxHeight
+      local minWidth = element.descriptor.minWidth
+      local maxWidth = element.descriptor.maxWidth
+      local minHeight = element.descriptor.minHeight
+      local maxHeight = element.descriptor.maxHeight
       local newWidth = min(maxWidth, max(minWidth, element.contentWidthStart + event.xDistanceDelta))
       local newHeight = min(maxHeight, max(minHeight, element.contentHeightStart + event.yDistanceDelta))
       newWidth = newWidth - newWidth % 5
@@ -330,14 +330,14 @@ function scene:createSideBar()
   scrollViewStack:insert(separator)
   separator.y = separator.y + (separator.contentHeight - separator.strokeWidth) * 0.5
 
-  local defaultElementConfigurations = level:defaultElementConfigurations()
+  local elementDescriptors = level:elementDescriptors()
   local elementGrid = layouts.newGrid({ parent = scrollViewStack, separator = 10 })
 
-  for _, elementConfiguration in ipairs(defaultElementConfigurations) do
-    if elementConfiguration.family == "obstacle" or elementConfiguration.family == "target" then
-      local elementWidth, elementHeight = elementConfiguration.size(50, 50)
-      local elementFamily = elementConfiguration.family
-      local elementName = elementConfiguration.name
+  for _, elementDescriptor in ipairs(elementDescriptors) do
+    if elementDescriptor.family ~= "root" then
+      local elementWidth, elementHeight = elementDescriptor.size(50, 50)
+      local elementFamily = elementDescriptor.family
+      local elementName = elementDescriptor.name
       local element = level:newElement(self.view, elementFamily, elementName, elementWidth, elementHeight)
       newButton(elementGrid, element, {
         onRelease = function()
@@ -467,13 +467,8 @@ function scene:newLevelElement(elementFamily, elementName)
   local element = level:newElement(levelView, elementFamily, elementName)
   level:positionElement(element, 150 - element.contentWidth * 0.5, 230 - element.contentHeight * 0.5)
   scene:configureElement(element)
-
-  if elementFamily == "obstacle" then
-    elements.obstacles[#elements.obstacles + 1] = element
-  else
-    elements.targets[#elements.targets + 1] = element
-  end
-
+  local configurationField = elementFamily .. "s"
+  elements[configurationField][#elements[configurationField] + 1] = element
   return element
 end
 

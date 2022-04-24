@@ -97,26 +97,27 @@ function scene:createContentView()
   self.contentView = layouts.newStack({ parent = self.scrollView, separator = 20 })
 
   local levelConfiguration = level:configuration()
-  local defaultElementConfigurations = level:defaultElementConfigurations()
-  local levelElementTable = {}
-  local elementConfigurations = {}
+  local elementDescriptors = level:elementDescriptors()
+  local levelElements = {}
+  local levelElementDescriptors = {}
 
-  for _, elementConfiguration in pairs(levelConfiguration.obstacles) do
-    utils.nestedSet(levelElementTable, "obstacle", elementConfiguration.name, true)
+  for _, configuration in pairs(levelConfiguration.obstacles) do
+    utils.nestedSet(levelElements, "obstacle", configuration.name, true)
   end
-  for _, elementConfiguration in pairs(levelConfiguration.targets) do
-    utils.nestedSet(levelElementTable, "target", elementConfiguration.name, true)
+  for _, configuration in pairs(levelConfiguration.targets) do
+    utils.nestedSet(levelElements, "target", configuration.name, true)
   end
-  for _, elementConfiguration in ipairs(defaultElementConfigurations) do
-    local isLevelElement = utils.nestedGet(levelElementTable, elementConfiguration.family, elementConfiguration.name)
-    if isLevelElement or elementConfiguration.family == "root" then
-      elementConfigurations[#elementConfigurations + 1] = elementConfiguration
+  for _, elementDescriptor in ipairs(elementDescriptors) do
+    if   elementDescriptor.family == "root"
+      or utils.nestedGet(levelElements, elementDescriptor.family, elementDescriptor.name)
+    then
+      levelElementDescriptors[#levelElementDescriptors + 1] = elementDescriptor
     end
   end
 
-  for _, elementConfiguration in ipairs(elementConfigurations) do
-    local elementFamily = elementConfiguration.family
-    local elementName = elementConfiguration.name
+  for _, elementDescriptor in ipairs(levelElementDescriptors) do
+    local elementFamily = elementDescriptor.family
+    local elementName = elementDescriptor.name
     local elementGroup = components.newGroup(self.contentView)
 
     local elementText = display.newText({
@@ -132,7 +133,7 @@ function scene:createContentView()
 
     local elementFrame = newFrame(elementGroup, 20, elementText.height + 50, 78, 78)
 
-    local elementWidth, elementHeight = elementConfiguration.size(50, 50)
+    local elementWidth, elementHeight = elementDescriptor.size(50, 50)
     local element = level:newElement(elementGroup, elementFamily, elementName, elementWidth, elementHeight)
     element.x = elementFrame.x + elementFrame.width / 2
     element.y = elementFrame.y
@@ -146,7 +147,7 @@ function scene:createContentView()
     )
 
     local onCapturePhotoOrSelectPhotoComplete = function(filename)
-      navigation.gotoElementImage(level, elementConfiguration, filename)
+      navigation.gotoElementImage(level, elementDescriptor, filename)
     end
 
     local selectPhotoButton = components.newImageButton(
