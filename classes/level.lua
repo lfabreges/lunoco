@@ -283,7 +283,7 @@ function levelClass:save(elements, stars)
     utils.saveJson(newConfiguration, self.directory .. ".json", system.DocumentsDirectory)
     self._configuration = newConfiguration
     self:deleteScores()
-    self:removeImage("screenshot")
+    self:takeScreenshot()
     self.world:saveLevel(self)
   end
 end
@@ -302,6 +302,29 @@ function levelClass:saveImage(object, imageName)
   self:removeImage(imageName)
   local imageNames = self:imageNames()
   imageNames[imageName] = filename
+end
+
+function levelClass:screenshotImage()
+  local levelImageName, levelImageBaseDir, isDefault = self:image("screenshot")
+  if isDefault then
+    self:takeScreenshot()
+    return self:image("screenshot")
+  else
+    return levelImageName, levelImageBaseDir, isDefault
+  end
+end
+
+function levelClass:takeScreenshot()
+  local screenshotContainer = display.newContainer(320, 480)
+  screenshotContainer.anchorX = 0
+  screenshotContainer.anchorY = 0
+  screenshotContainer.anchorChildren = false
+  local elements = self:createElements(screenshotContainer)
+  local screenshot = display.capture(screenshotContainer, { captureOffscreenArea = true })
+  screenshot:scale(0.33, 0.33)
+  self:saveImage(screenshot, "screenshot")
+  display.remove(screenshot)
+  display.remove(screenshotContainer)
 end
 
 return levelClass

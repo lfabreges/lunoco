@@ -23,6 +23,12 @@ utils.fileExists = function(filename, baseDirectory)
   return os.rename(filepath, filepath) and true or false
 end
 
+utils.forEach = function(objects, callback)
+  for index, object in pairs(objects) do
+    callback(object, index)
+  end
+end
+
 utils.isAndroid = function()
   return platform == "android"
 end

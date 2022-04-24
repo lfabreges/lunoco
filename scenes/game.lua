@@ -23,15 +23,6 @@ local sounds = {
   targetDestroyed = audio.loadSound("sounds/target-destroyed.wav"),
 }
 
-local function takeLevelScreenshot()
-  local screenshot = display.captureBounds(display.currentStage.contentBounds)
-  local screenshotScale = screenshot.xScale * 0.33
-  screenshot.xScale = screenshotScale
-  screenshot.yScale = screenshotScale
-  level:saveImage(screenshot, "screenshot")
-  display.remove(screenshot)
-end
-
 function scene:create(event)
   level = event.params.level
 
@@ -218,12 +209,10 @@ end
 
 function scene:show(event)
   if event.phase == "did" then
-    timer.performWithDelay(0, function()
-      takeLevelScreenshot()
-      Runtime:addEventListener("lateUpdate", scene)
-      Runtime:addEventListener("touch", scene)
-      physics.start()
-    end)
+    level:takeScreenshot()
+    Runtime:addEventListener("lateUpdate", scene)
+    Runtime:addEventListener("touch", scene)
+    physics.start()
   end
 end
 

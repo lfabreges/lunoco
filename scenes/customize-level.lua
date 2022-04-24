@@ -1,6 +1,7 @@
 local components = require "modules.components"
 local composer = require "composer"
 local i18n = require "modules.i18n"
+local layouts = require "modules.layouts"
 local navigation = require "modules.navigation"
 local utils = require "modules.utils"
 
@@ -150,13 +151,10 @@ end
 
 function scene:createContentView()
   local elementTypes = elementTypesFromLevelConfiguration()
-  local y = 0
-
-  self.contentView = components.newGroup(self.scrollView)
+  self.contentView = layouts.newStack({ parent = self.scrollView, separator = 20 })
 
   for _, elementType in ipairs(elementTypes) do
     local elementGroup = components.newGroup(self.contentView)
-    elementGroup.y = y
 
     local elementText = display.newText({
       text = i18n.t(elementType),
@@ -249,8 +247,6 @@ function scene:createContentView()
       removeCustomizationButton.x = removeCustomizationButtonFrame.x + removeCustomizationButtonFrame.width / 2
       removeCustomizationButton.y = element.y
     end
-
-    y = y + elementGroup.height + 20
   end
 end
 

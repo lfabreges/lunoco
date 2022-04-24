@@ -50,7 +50,7 @@ function scene:createContentView()
     for levelNumber = 1, 5 do
       local level = worldLevels[levelNumber]
       if level then
-        local levelImageName, levelImageBaseDir = level:image("screenshot", "images/level-unknown.png")
+        local levelImageName, levelImageBaseDir = level:screenshotImage()
         local levelImage = display.newImageRect(worldButtonContainer, levelImageName, levelImageBaseDir, 70, 105)
         levelImage.anchorX = 0
         levelImage.anchorY = 0

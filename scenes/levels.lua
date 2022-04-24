@@ -52,7 +52,7 @@ function scene:createContentView()
 
   for _, level in ipairs(worldLevels) do
     local levelStack = layouts.newStack({ align = "center", parent = self.contentView, separator = 10 })
-    local levelImageName, levelImageBaseDir = level:image("screenshot", "images/level-unknown.png")
+    local levelImageName, levelImageBaseDir = level:screenshotImage()
 
     local levelButton = components.newImageButton(
       levelStack,

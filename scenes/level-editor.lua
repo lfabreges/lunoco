@@ -1,6 +1,7 @@
 local components = require "modules.components"
 local composer = require "composer"
 local i18n = require "modules.i18n"
+local layouts = require "modules.layouts"
 local multitouch = require "libraries.multitouch"
 local navigation = require "modules.navigation"
 local utils = require "modules.utils"
@@ -111,19 +112,17 @@ local function deleteLevel()
   goBack()
 end
 
-local function newButton(parent, x, y, content, options)
-  local group = components.newGroup(parent)
-  group.x = x
-  group.y = y
+local function newButton(parent, content, options)
+  local buttonGroup = components.newGroup(parent)
 
-  local frame = display.newRoundedRect(group, 0, 0, 78, 78, 5)
+  local frame = display.newRoundedRect(buttonGroup, 0, 0, 78, 78, 5)
   frame.anchorX = 0
   frame.anchorY = 0
   frame:setFillColor(0.5, 0.5, 0.5, 0.25)
   frame:setStrokeColor(0.5, 0.5, 0.5, 0.75)
   frame.strokeWidth = 1
 
-  local contentGroup = components.newGroup(group)
+  local contentGroup = components.newGroup(buttonGroup)
 
   local background = display.newRect(contentGroup, frame.x, frame.y, frame.width, frame.height)
   background.anchorX = frame.anchorX
@@ -137,7 +136,7 @@ local function newButton(parent, x, y, content, options)
 
   components.newObjectButton(contentGroup, options)
 
-  return group
+  return buttonGroup
 end
 
 local function newElement(parent, elementType)
@@ -239,6 +238,7 @@ local function saveAndGoBack()
   goBack()
 end
 
+-- TODO Garder saveAndPlay ou non ?
 local function saveAndPlay()
   save()
   navigation.gotoGame(level)
@@ -246,9 +246,9 @@ end
 
 function scene:create(event)
   level = event.params.level
-
   levelView = components.newGroup(self.view)
   elements = level:createElements(levelView)
+
   scene:configureElement(elements.ball)
   for _, element in pairs(elements.obstacles) do
     scene:configureElement(element)
@@ -350,14 +350,6 @@ function scene:createSideBar()
     sideBar.isOpened = false
   end
 
-  sideBar.toggle = function()
-    if sideBar.isOpened then
-      sideBar.close()
-    else
-      sideBar.open()
-    end
-  end
-
   local sideBarBackground = display.newRoundedRect(sideBar, -10, 0, sideBarWidth + 10, screenHeight, 10)
   sideBarBackground.anchorX = 0
   sideBarBackground.anchorY = 0
@@ -399,11 +391,9 @@ function scene:createSideBar()
         display.getCurrentStage():setFocus(sideBarHandleBackground, nil)
         sideBarHandleBackground.isFocus = false
         if math.abs(sideBar.x - sideBar.xStart) > 20 then
-          sideBar.toggle()
-        elseif sideBar.isOpened then
-          sideBar.open()
+          sideBar[sideBar.isOpened and "close" or "open"]()
         else
-          sideBar.close()
+          sideBar[sideBar.isOpened and "open" or "close"]()
         end
       end
     end
@@ -418,65 +408,48 @@ function scene:createSideBar()
     bottomPadding = 10,
   })
 
-  local scrollViewContent = components.newGroup(scrollView)
-  local bottomGroup = components.newGroup(scrollViewContent)
+  local scrollViewStack = layouts.newStack({ align = "center", parent = scrollView, separator = 20 })
 
-  local pickerWheelGroup = components.newGroup(scrollViewContent)
-  pickerWheelGroup.alpha = 0
-
+  local actionGrid = layouts.newGrid({ parent = scrollViewStack, separator = 10 })
   local cancelButtonIcon = display.newImageRect("images/icons/cancel.png", 35, 35)
-  local cancelButton = newButton(scrollViewContent, 10, 0, cancelButtonIcon, { onRelease = goBack })
-
   local acceptButtonIcon = display.newImageRect("images/icons/accept.png", 35, 35)
-  local acceptButton = newButton(scrollViewContent, 100, 0, acceptButtonIcon, { onRelease = saveAndGoBack })
+  newButton(actionGrid, cancelButtonIcon, { onRelease = goBack })
+  newButton(actionGrid, acceptButtonIcon, { onRelease = saveAndGoBack })
 
-  local playButtonIcon = display.newImageRect("images/icons/resume.png", 30, 30)
-  local playButton = newButton(
-    scrollViewContent,
-    100,
-    cancelButton.y + cancelButton.contentHeight + 10,
-    playButtonIcon,
-    { onRelease = saveAndPlay }
-  )
+  local separator = display.newLine(0, 0, 150, 0)
+  separator:setStrokeColor(0.5, 0.5, 0.5, 0.75)
+  scrollViewStack:insert(separator)
+  separator.y = separator.y + (separator.contentHeight - separator.strokeWidth) * 0.5
 
-  local starImage = components.newStar(self.view, 35, 35)
+  local elementGrid = layouts.newGrid({ parent = scrollViewStack, separator = 10 })
 
-  local starButton = newButton(scrollViewContent, 10, playButton.y, starImage, { onRelease = function(event)
-    local self = event.target
-    self.isPressed = not self.isPressed and true or false
-    if self.isPressed then
-      starImage.fill.effect = "filter.grayscale"
-      transition.to(bottomGroup, { y = 220, time = 100 })
-      transition.to(pickerWheelGroup, {
-        alpha = 1,
-        delay = 100,
-        time = 100,
-        onComplete = function()
-          scrollView:setScrollHeight(scrollViewContent.contentHeight)
-        end
-      })
-    else
-      starImage.fill.effect = nil
-      transition.to(pickerWheelGroup, { alpha = 0, time = 100 })
-      transition.to(bottomGroup, {
-        y = 0,
-        delay = 100,
-        time = 100,
-        onComplete = function()
-          scrollView:setScrollHeight(scrollViewContent.contentHeight)
-        end
-      })
-    end
-  end })
+  for index, elementType in ipairs(elementTypes) do
+    local element = newElement(self.view, elementType)
+    newButton(elementGrid, element, {
+      onRelease = function()
+        local newElement = scene:newLevelElement(elementType)
+        local fromX = (newElement.anchorX - element.anchorX) * element.contentWidth
+        local fromY = (newElement.anchorY - element.anchorX) * element.contentHeight
+        fromX, fromY = element:localToContent(fromX, fromY)
+        transition.from(newElement, {
+          xScale = element.width / newElement.width,
+          yScale = element.height / newElement.height,
+          x = fromX,
+          y = fromY,
+          time = 100,
+        })
+      end,
+      scrollView = scrollView,
+    })
+  end
 
-  local pickerWheelFrame = display.newRoundedRect(
-    pickerWheelGroup,
-    10,
-    playButton.y + playButton.contentHeight + 10,
-    168,
-    210,
-    5
-  )
+  local separator = display.newLine(0, 0, 150, 0)
+  separator:setStrokeColor(0.5, 0.5, 0.5, 0.75)
+  scrollViewStack:insert(separator)
+  separator.y = separator.y + (separator.contentHeight - separator.strokeWidth) * 0.5
+
+  local pickerWheelGroup = components.newGroup(scrollViewStack)
+  local pickerWheelFrame = display.newRoundedRect(pickerWheelGroup, 0, 0, 168, 210, 5)
   pickerWheelFrame.anchorX = 0
   pickerWheelFrame.anchorY = 0
   pickerWheelFrame:setFillColor(0.5, 0.5, 0.5, 0.25)
@@ -484,7 +457,7 @@ function scene:createSideBar()
   pickerWheelFrame.strokeWidth = 1
 
   local configuration = level:configuration()
-  local pickerWheel
+  local pickerWheel = nil
 
   local pickerWheelColumns = {
     { startIndex = configuration.stars.one, labels = { 1, 2, 3, 4, 5, 6, 7, 8, 9 } },
@@ -493,7 +466,7 @@ function scene:createSideBar()
   }
 
   pickerWheel = widget.newPickerWheel({
-    left = 20,
+    left = 10,
     top = pickerWheelFrame.y + 40,
     columns = pickerWheelColumns,
     style = "resizable",
@@ -529,66 +502,7 @@ function scene:createSideBar()
     columnStarImage.y = pickerWheelFrame.y + 10
   end
 
-  local y = playButton.y + playButton.contentHeight + 20
-  local sideBarSeparatorTop = display.newLine(bottomGroup, 20, y, 170, y)
-  sideBarSeparatorTop:setStrokeColor(0.5, 0.5, 0.5, 0.75)
-
-  local elementY = 0
-  local elementGroup = components.newGroup(bottomGroup)
-  elementGroup.y = y + 20
-
-  for index, elementType in ipairs(elementTypes) do
-    local isEven = index % 2 == 0
-    local element = newElement(self.view, elementType)
-
-    local elementButton = newButton(elementGroup, isEven and 100 or 10, elementY, element, {
-      onRelease = function()
-        local newElement = scene:newLevelElement(elementType)
-        local fromX = (newElement.anchorX - element.anchorX) * element.contentWidth
-        local fromY = (newElement.anchorY - element.anchorX) * element.contentHeight
-        fromX, fromY = element:localToContent(fromX, fromY)
-        transition.from(newElement, {
-          xScale = element.width / newElement.width,
-          yScale = element.height / newElement.height,
-          x = fromX,
-          y = fromY,
-          time = 100,
-        })
-      end,
-      scrollView = scrollView,
-    })
-
-    elementY = isEven and elementY + elementButton.contentHeight + 10 or elementY
-  end
-
-  y = elementGroup.y + elementGroup.contentHeight + 20
-  local sideBarSeparatorBottom = display.newLine(bottomGroup, 20, y, 170, y)
-  sideBarSeparatorBottom:setStrokeColor(0.5, 0.5, 0.5, 0.75)
-
-  y = y + 20
-
-  local confirmDeleteButton
-  local deleteButtonIcon = display.newImageRect("images/icons/trash.png", 30, 30)
-
-  newButton(bottomGroup, 10, y, deleteButtonIcon, { onRelease = function()
-    confirmDeleteButton.showConfirm = not confirmDeleteButton.showConfirm
-    transition.to(confirmDeleteButton, { alpha = confirmDeleteButton.showConfirm and 1 or 0, time = 100 })
-  end })
-
-  local confirmDeleteButtonGroup = display.newGroup()
-
-  local confirmDeleteButtonBackground = display.newRoundedRect(confirmDeleteButtonGroup, 0, 0, 78, 78, 5)
-  confirmDeleteButtonBackground:setFillColor(0.67, 0.2, 0.2, 0.75)
-
-  local confirmDeleteButtonText = display.newText({
-    align = "center",
-    text = i18n.t("click-here-to-confirm"),
-    fontSize = 14,
-    parent = confirmDeleteButtonGroup,
-    width = 70,
-  })
-  confirmDeleteButton = newButton(bottomGroup, 100, y, confirmDeleteButtonGroup, { onRelease = deleteLevel })
-  confirmDeleteButton.alpha = 0
+  layouts.center(scrollViewStack, scrollView)
 end
 
 function scene:configureElement(element)
