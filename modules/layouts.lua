@@ -1,9 +1,67 @@
 local layouts = {}
 
-layouts.center = function(object, reference)
+layouts.alignCenter = function(object, reference)
   local anchorX = object.anchorChildren == false and 0 or object.anchorX
   reference = reference or object.parent
   object.x = reference.contentWidth * 0.5 + (anchorX - 0.5) * object.contentWidth
+end
+
+layouts.alignLeft = function(object, reference)
+  local anchorX = object.anchorChildren == false and 0 or object.anchorX
+  reference = reference or object.parent
+  object.x = anchorX * object.contentWidth
+end
+
+layouts.alignMiddle = function(object, reference)
+  local anchorY = object.anchorChildren == false and 0 or object.anchorY
+  reference = reference or object.parent
+  object.y = reference.contentHeight * 0.5 + (anchorY - 0.5) * object.contentHeight
+end
+
+layouts.alignTop = function(object, reference)
+  local anchorY = object.anchorChildren == false and 0 or object.anchorY
+  reference = reference or object.parent
+  object.y = anchorY * object.contentHeight
+end
+
+layouts.newBlackHole = function(options)
+  options = options or {}
+
+  local blackHole = display.newGroup()
+
+  if options.parent then
+    options.parent:insert(blackHole)
+  end
+
+  local align = nil
+  local insert = blackHole.insert
+  local shouldAlignNextFrame = false
+
+  align = function()
+    for index = 1, blackHole.numChildren do
+      local child = blackHole[index]
+      layouts.alignCenter(child)
+      layouts.alignMiddle(child)
+    end
+    shouldAlignNextFrame = false
+    Runtime:removeEventListener("enterFrame", align)
+  end
+
+  function blackHole:insert(child)
+    if not shouldAlignNextFrame then
+      Runtime:addEventListener("enterFrame", align)
+      shouldAlignNextFrame = true
+    end
+    layouts.alignLeft(child, self)
+    layouts.alignTop(child, self)
+    insert(self, child)
+  end
+
+  blackHole:addEventListener("finalize", function()
+    Runtime:removeEventListener("enterFrame", align)
+  end)
+
+  return blackHole
 end
 
 layouts.newGrid = function(options)

@@ -45,12 +45,7 @@ local function newButton(parent, content, options)
   frame.strokeWidth = 1
 
   local contentGroup = components.newGroup(buttonGroup)
-
-  local background = display.newRect(contentGroup, frame.x, frame.y, frame.width, frame.height)
-  background.anchorX = frame.anchorX
-  background.anchorY = frame.anchorY
-  background.isVisible = false
-  background.isHitTestable = true
+  components.newHitTestableSurface(contentGroup, frame)
 
   contentGroup:insert(content)
   content.x = frame.x + frame.contentWidth * 0.5
@@ -166,11 +161,7 @@ function scene:create(event)
     scene:configureElement(element)
   end
 
-  local middleGround = display.newRect(self.view, screenX, screenY, screenWidth, screenHeight)
-  middleGround.anchorX = 0
-  middleGround.anchorY = 0
-  middleGround.isVisible = false
-  middleGround.isHitTestable = true
+  local middleGround = components.newHitTestableSurface(self.view, elements.frame)
 
   scene.toolBarGroup = components.newGroup(self.view)
   scene:createHelp()
@@ -417,7 +408,7 @@ function scene:createSideBar()
     columnStarImage.y = pickerWheelFrame.y + 10
   end
 
-  layouts.center(scrollViewStack, scrollView)
+  layouts.alignCenter(scrollViewStack, scrollView)
 end
 
 function scene:configureElement(element)

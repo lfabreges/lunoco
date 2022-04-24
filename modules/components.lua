@@ -22,11 +22,33 @@ components.newBackground = function(parent)
   return background
 end
 
+-- TODO A positionner au bon endroit
+components.newFrame = function(parent, width, height)
+  local frame = display.newRoundedRect(0, 0, width - 2, height - 2, 5)
+  frame.strokeWidth = 1
+  parent:insert(frame)
+  frame:setFillColor(0.5, 0.5, 0.5, 0.25)
+  frame:setStrokeColor(0.5, 0.5, 0.5, 0.75)
+  return frame
+end
+
 components.newGroup = function(parent, anchorChildren)
   local group = display.newGroup()
   group.anchorChildren = anchorChildren or false
   parent:insert(group)
   return group
+end
+
+-- TODO A garder comme cela ?
+components.newHitTestableSurface = function(parent, reference)
+  local surface = display.newRect(parent, reference.x, reference.y, reference.width, reference.height)
+  surface.anchorX = reference.anchorX
+  surface.anchorY = reference.anchorY
+  surface.xScale = reference.xScale
+  surface.yScale = reference.yScale
+  surface.isVisible = false
+  surface.isHitTestable = true
+  return surface
 end
 
 components.newImageButton = function(parent, imageName, imageBaseDir, width, height, options)
@@ -101,7 +123,7 @@ end
 
 components.newPlusButton = function(parent, width, height, options)
   local plusButtonGroup = components.newGroup(parent, true)
-  local plusButtonBackground = display.newRoundedRect(plusButtonGroup, 0, 0, width, height, 15)
+  local plusButtonBackground = display.newRect(plusButtonGroup, 0, 0, width, height)
   plusButtonBackground.fill.effect = "generator.linearGradient"
   plusButtonBackground.fill.effect.color1 = { 0.25, 0.25, 0.25, 0.75 }
   plusButtonBackground.fill.effect.position1  = { 0, 0 }

@@ -62,6 +62,7 @@ function scene:createContentView()
           levelImage.fill.effect.progress = 0.5
         end
       else
+        -- TODO Remplir le vide avec quelque chose !
         local x = (levelNumber - 1) * 52.5
         local width = worldButtonContainer.width - x
         local noMoreLevelBackground = display.newRect(worldButtonContainer, x, 0, width, 105)

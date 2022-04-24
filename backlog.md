@@ -1,4 +1,5 @@
 # Next
+* newFrame, newHitTestableSurface
 * Simplifier l'édition de niveau, passer une partie des fonctionnalités au niveau de levels
 * Permettre de tester un niveau en cours d'édition (pas avec le même menu de pause, mode à part, ni
   même le même menu de gameover)

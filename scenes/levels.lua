@@ -81,7 +81,7 @@ function scene:createContentView()
     })
   end
 
-  layouts.center(self.contentView, self.scrollView)
+  layouts.alignCenter(self.contentView, self.scrollView)
 end
 
 function scene:show(event)

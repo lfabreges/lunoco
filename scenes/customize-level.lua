@@ -60,16 +60,6 @@ local function goBack()
   navigation.gotoGame(level)
 end
 
-local function newFrame(parent, x, y, width, height)
-  local frame = display.newRoundedRect(x, y, width, height, 5)
-  parent:insert(frame)
-  frame.anchorX = 0
-  frame:setFillColor(0.5, 0.5, 0.5, 0.25)
-  frame:setStrokeColor(0.5, 0.5, 0.5, 0.75)
-  frame.strokeWidth = 1
-  return frame
-end
-
 local function selectPhoto(onComplete)
   if media.hasSource(media.PhotoLibrary) then
     local options = captureAndSelectPhotoOptions(onComplete)
@@ -115,102 +105,53 @@ function scene:createContentView()
     end
   end
 
-  for _, elementDescriptor in ipairs(levelElementDescriptors) do
-    local elementFamily = elementDescriptor.family
-    local elementName = elementDescriptor.name
-    local elementGroup = components.newGroup(self.contentView)
+  for _, descriptor in ipairs(levelElementDescriptors) do
+    local family = descriptor.family
+    local name = descriptor.name
+    local width, height = descriptor.size(50, 50)
 
-    local elementText = display.newText({
-      text = i18n.t(elementFamily .. "-" .. elementName),
-      font = native.systemFont,
-      fontSize = 20,
-      parent = elementGroup,
-      x = 20,
-      y = 0,
-    })
-    elementText.anchorX = 0
-    elementText.anchorY = 0
+    local primaryStack = layouts.newStack({ parent = self.contentView, separator = 10 })
+    primaryStack.x = 20
 
-    local elementFrame = newFrame(elementGroup, 20, elementText.height + 50, 78, 78)
+    local text = display.newText({ text = i18n.t(family .. "-" .. name), font = native.systemFont, fontSize = 20 })
+    primaryStack:insert(text)
 
-    local elementWidth, elementHeight = elementDescriptor.size(50, 50)
-    local element = level:newElement(elementGroup, elementFamily, elementName, elementWidth, elementHeight)
-    element.x = elementFrame.x + elementFrame.width / 2
-    element.y = elementFrame.y
+    local secondaryStack = layouts.newStack({ mode = "horizontal", parent = primaryStack, separator = 5 })
 
-    local customizeButtonsFrame = newFrame(
-      elementGroup,
-      elementFrame.x + elementFrame.width + 5,
-      element.y,
-      122,
-      78
-    )
+    local elementBlackHole = layouts.newBlackHole({ parent = secondaryStack })
+    components.newFrame(elementBlackHole, 80, 80)
+    local element = level:newElement(elementBlackHole, family, name, width, height)
+
+    local customizeBlackHole = layouts.newBlackHole({ parent = secondaryStack })
+    components.newFrame(customizeBlackHole, 124, 80)
+    local customizeStack = layouts.newStack({ mode = "horizontal", parent = customizeBlackHole, separator = 14 })
 
     local onCapturePhotoOrSelectPhotoComplete = function(filename)
-      navigation.gotoElementImage(level, elementDescriptor, filename)
+      navigation.gotoElementImage(level, descriptor, filename)
     end
-
-    local selectPhotoButton = components.newImageButton(
-      elementGroup,
-      "images/icons/photo.png",
-      40,
-      40,
-      {
-        onRelease = function() selectPhoto(onCapturePhotoOrSelectPhotoComplete) end,
-        scrollView = self.scrollView
-      }
-    )
-    selectPhotoButton.anchorX = 0
-    selectPhotoButton.x = customizeButtonsFrame.x + 14
-    selectPhotoButton.y = element.y
-
-    local takePhotoButton = components.newImageButton(
-      elementGroup,
-      "images/icons/take-photo.png",
-      40,
-      40,
-      {
-        onRelease = function() capturePhoto(onCapturePhotoOrSelectPhotoComplete) end,
-        scrollView = self.scrollView
-      }
-    )
-    takePhotoButton.anchorX = 0
-    takePhotoButton.x = selectPhotoButton.x + selectPhotoButton.width + 14
-    takePhotoButton.y = element.y
+    components.newImageButton(customizeStack, "images/icons/photo.png", 40, 40, {
+      onRelease = function() selectPhoto(onCapturePhotoOrSelectPhotoComplete) end,
+      scrollView = self.scrollView,
+    })
+    components.newImageButton(customizeStack, "images/icons/take-photo.png", 40, 40, {
+      onRelease = function() capturePhoto(onCapturePhotoOrSelectPhotoComplete) end,
+      scrollView = self.scrollView,
+    })
 
     if not element.isDefault then
-      local removeCustomizationButtonFrame = newFrame(
-        elementGroup,
-        customizeButtonsFrame.x + customizeButtonsFrame.width + 5,
-        element.y,
-        64,
-        78
-      )
-
-      local removeCustomizationButton
-
-      removeCustomizationButton = components.newImageButton(
-        elementGroup,
-        "images/icons/trash.png",
-        40,
-        40,
-        {
-          onRelease = function()
-            level:removeImage(elementFamily, elementName)
-            local defaultElement = level:newElement(elementGroup, elementFamily, elementName, width, height)
-            defaultElement.x = element.x
-            defaultElement.y = element.y
-            defaultElement.alpha = 0
-            transition.to(defaultElement, { time = 500, alpha = 1 } )
-            transition.to(element, { time = 500, alpha = 0, onComplete = function() display.remove(element) end } )
-            display.remove(removeCustomizationButtonFrame)
-            display.remove(removeCustomizationButton)
-          end,
-          scrollView = self.scrollView
-        }
-      )
-      removeCustomizationButton.x = removeCustomizationButtonFrame.x + removeCustomizationButtonFrame.width / 2
-      removeCustomizationButton.y = element.y
+      local removeBlackHole = layouts.newBlackHole({ parent = secondaryStack })
+      local removeFrame = components.newFrame(removeBlackHole, 66, 80)
+      components.newImageButton(removeBlackHole, "images/icons/trash.png", 40, 40, {
+        onRelease = function(event)
+          level:removeImage(family, name)
+          local defaultElement = level:newElement(elementBlackHole, family, name, width, height)
+          transition.from(defaultElement, { time = 500, alpha = 0 } )
+          transition.to(element, { time = 500, alpha = 0, onComplete = function() display.remove(element) end })
+          display.remove(removeFrame)
+          display.remove(event.target)
+        end,
+        scrollView = self.scrollView,
+      })
     end
   end
 end
