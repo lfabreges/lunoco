@@ -117,11 +117,11 @@ end
 
 local function newFrame(parent, x, y, width, height)
   local frame = display.newRoundedRect(x, y, width, height, 5)
+  parent:insert(frame)
   frame.anchorX = 0
   frame:setFillColor(0.5, 0.5, 0.5, 0.25)
   frame:setStrokeColor(0.5, 0.5, 0.5, 0.75)
   frame.strokeWidth = 1
-  parent:insert(frame)
   return frame
 end
 
