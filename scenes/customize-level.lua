@@ -12,20 +12,6 @@ local screenY = display.screenOriginY
 local screenWidth = display.actualContentWidth
 local screenHeight = display.actualContentHeight
 
-local customizableElementTypes = {
-  "background",
-  "frame",
-  "ball",
-  "obstacle-corner",
-  "obstacle-horizontal-barrier",
-  "obstacle-horizontal-barrier-large",
-  "obstacle-vertical-barrier",
-  "obstacle-vertical-barrier-large",
-  "target-easy",
-  "target-normal",
-  "target-hard",
-}
-
 local function captureAndSelectPhotoOptions(onComplete)
   local filename = "element-image." .. math.random() .. ".png"
   local options = {}
@@ -70,50 +56,8 @@ local function capturePhoto(onComplete, shouldRequestAppPermission)
   end
 end
 
-local function elementTypesFromLevelConfiguration()
-  local configuration = level:configuration()
-  local levelElementTypeSet = { ["background"] = true, ["frame"] = true, ["ball"] = true }
-  local elementTypes = {}
-
-  for _, elementConfiguration in pairs(configuration.obstacles) do
-    levelElementTypeSet["obstacle-" .. elementConfiguration.type] = true
-  end
-  for _, elementConfiguration in pairs(configuration.targets) do
-    levelElementTypeSet["target-" .. elementConfiguration.type] = true
-  end
-  for _, elementType in ipairs(customizableElementTypes) do
-    if levelElementTypeSet[elementType] then
-      elementTypes[#elementTypes + 1] = elementType
-    end
-  end
-
-  return elementTypes
-end
-
 local function goBack()
   navigation.gotoGame(level)
-end
-
-local function newElement(parent, elementType)
-  local element = nil
-
-  if elementType == "background" then
-    element = level:newBackground(parent, 32, 50)
-  elseif elementType == "ball" then
-    element = level:newBall(parent, 50, 50)
-  elseif elementType == "frame" then
-    element = level:newFrame(parent, 50, 50)
-  elseif elementType == "obstacle-corner" then
-    element = level:newObstacleCorner(parent, 50, 50)
-  elseif elementType:starts("obstacle-horizontal-barrier") then
-    element = level:newObstacleBarrier(parent, elementType:sub(10), 50, 20)
-  elseif elementType:starts("obstacle-vertical-barrier") then
-    element = level:newObstacleBarrier(parent, elementType:sub(10), 20, 50)
-  elseif elementType:starts("target-") then
-    element = level:newTarget(parent, elementType:sub(8), 50, 50)
-  end
-
-  return element
 end
 
 local function newFrame(parent, x, y, width, height)
@@ -150,14 +94,33 @@ function scene:create(event)
 end
 
 function scene:createContentView()
-  local elementTypes = elementTypesFromLevelConfiguration()
   self.contentView = layouts.newStack({ parent = self.scrollView, separator = 20 })
 
-  for _, elementType in ipairs(elementTypes) do
+  local levelConfiguration = level:configuration()
+  local defaultElementConfigurations = level:defaultElementConfigurations()
+  local levelElementTable = {}
+  local elementConfigurations = {}
+
+  for _, elementConfiguration in pairs(levelConfiguration.obstacles) do
+    utils.nestedSet(levelElementTable, "obstacle", elementConfiguration.name, true)
+  end
+  for _, elementConfiguration in pairs(levelConfiguration.targets) do
+    utils.nestedSet(levelElementTable, "target", elementConfiguration.name, true)
+  end
+  for _, elementConfiguration in ipairs(defaultElementConfigurations) do
+    local isLevelElement = utils.nestedGet(levelElementTable, elementConfiguration.family, elementConfiguration.name)
+    if isLevelElement or elementConfiguration.family == "root" then
+      elementConfigurations[#elementConfigurations + 1] = elementConfiguration
+    end
+  end
+
+  for _, elementConfiguration in ipairs(elementConfigurations) do
+    local elementFamily = elementConfiguration.family
+    local elementName = elementConfiguration.name
     local elementGroup = components.newGroup(self.contentView)
 
     local elementText = display.newText({
-      text = i18n.t(elementType),
+      text = i18n.t(elementFamily .. "-" .. elementName),
       font = native.systemFont,
       fontSize = 20,
       parent = elementGroup,
@@ -169,7 +132,8 @@ function scene:createContentView()
 
     local elementFrame = newFrame(elementGroup, 20, elementText.height + 50, 78, 78)
 
-    local element = newElement(elementGroup, elementType)
+    local elementWidth, elementHeight = elementConfiguration.size(50, 50)
+    local element = level:newElement(elementGroup, elementFamily, elementName, elementWidth, elementHeight)
     element.x = elementFrame.x + elementFrame.width / 2
     element.y = elementFrame.y
 
@@ -182,7 +146,7 @@ function scene:createContentView()
     )
 
     local onCapturePhotoOrSelectPhotoComplete = function(filename)
-      navigation.gotoElementImage(level, elementType, filename)
+      navigation.gotoElementImage(level, elementConfiguration, filename)
     end
 
     local selectPhotoButton = components.newImageButton(
@@ -231,8 +195,8 @@ function scene:createContentView()
         40,
         {
           onRelease = function()
-            level:removeImage(elementType)
-            local defaultElement = newElement(elementGroup, elementType)
+            level:removeImage(elementFamily, elementName)
+            local defaultElement = level:newElement(elementGroup, elementFamily, elementName, width, height)
             defaultElement.x = element.x
             defaultElement.y = element.y
             defaultElement.alpha = 0

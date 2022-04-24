@@ -5,42 +5,42 @@
   },
   "obstacles": [
     {
-      "type": "vertical-barrier-large",
+      "name": "vertical-barrier-large",
       "x": 50,
       "y": 150,
       "width": 30,
       "height": 200
     },
     {
-      "type": "horizontal-barrier",
+      "name": "horizontal-barrier",
       "x": 0,
       "y": 320,
       "width": 50,
       "height": 30
     },
     {
-      "type": "vertical-barrier-large",
+      "name": "vertical-barrier-large",
       "x": 220,
       "y": 150,
       "width": 30,
       "height": 200
     },
     {
-      "type": "horizontal-barrier",
+      "name": "horizontal-barrier",
       "x": 250,
       "y": 320,
       "width": 50,
       "height": 30
     },
     {
-      "type": "horizontal-barrier",
+      "name": "horizontal-barrier",
       "x": 130,
       "y": 235,
       "width": 90,
       "height": 30
     },
     {
-      "type": "horizontal-barrier",
+      "name": "horizontal-barrier",
       "x": 100,
       "y": 80,
       "width": 100,
@@ -54,14 +54,14 @@
   },
   "targets": [
     {
-      "type": "normal",
+      "name": "normal",
       "x": 130,
       "y": 20,
       "width": 40,
       "height": 40
     },
     {
-      "type": "hard",
+      "name": "hard",
       "x": 130,
       "y": 170,
       "width": 40,

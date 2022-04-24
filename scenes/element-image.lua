@@ -9,7 +9,7 @@ local backPhoto = nil
 local backPhotoBackground = nil
 local background = nil
 local content = nil
-local elementType = nil
+local elementConfiguration = nil
 local filename = nil
 local frontContainer = nil
 local frontPhoto = nil
@@ -22,20 +22,6 @@ local screenY = display.screenOriginY
 local screenWidth = display.actualContentWidth
 local screenHeight = display.actualContentHeight
 local topInset, leftInset, bottomInset, rightInset = display.getSafeAreaInsets()
-
-local elements = {
-  ["background"] = { width = 200, height = 306 },
-  ["ball"] = { width = 200, height = 200, mask = "images/elements/ball-mask.png" },
-  ["frame"] = { width = 200, height = 200 },
-  ["obstacle-corner"] = { width = 200, height = 200, mask = "images/elements/corner-mask.png" },
-  ["obstacle-horizontal-barrier"] = { width = 200, height = 50 },
-  ["obstacle-horizontal-barrier-large"] = { width = 200, height = 50 },
-  ["obstacle-vertical-barrier"] = { width = 75, height = 300 },
-  ["obstacle-vertical-barrier-large"] = { width = 75, height = 300 },
-  ["target-easy"] = { width = 200, height = 200 },
-  ["target-normal"] = { width = 200, height = 200 },
-  ["target-hard"] = { width = 200, height = 200 },
-}
 
 local function goBack()
   navigation.gotoCustomizeLevel(level)
@@ -96,7 +82,7 @@ end
 local function saveImage()
   local b = frontContainer.contentBounds
   local elementCapture = display.captureBounds({ xMin = b.xMin, xMax = b.xMax - 1, yMin = b.yMin, yMax = b.yMax - 1 })
-  level:saveImage(elementCapture, elementType)
+  level:saveImage(elementCapture, elementConfiguration.family, elementConfiguration.name)
   display.remove(elementCapture)
   navigation.gotoCustomizeLevel(level)
 end
@@ -121,12 +107,11 @@ end
 function scene:show(event)
   if event.phase == "will" then
     level = event.params.level
-    elementType = event.params.elementType
+    elementConfiguration = event.params.elementConfiguration
     filename = event.params.filename
 
     local centerX = display.contentCenterX
     local centerY = display.contentCenterY
-    local element = elements[elementType]
 
     backPhotoBackground = display.newRect(content, centerX, centerY, 1, 1)
     backPhoto = display.newImage(content, filename, system.TemporaryDirectory, centerX, centerY)
@@ -145,7 +130,8 @@ function scene:show(event)
     backPhotoBackground.yScale = photoScale
     backPhotoBackground:setFillColor(0)
 
-    frontContainer = display.newContainer(content, element.width, element.height)
+    local elementWidth, elementHeight = elementConfiguration.size(250, 300)
+    frontContainer = display.newContainer(content, elementWidth, elementHeight)
     frontContainer.x = centerX
     frontContainer.y = centerY
 
@@ -153,8 +139,8 @@ function scene:show(event)
     frontPhoto.xScale = photoScale
     frontPhoto.yScale = photoScale
 
-    if element.mask then
-      local frontPhotoMask = graphics.newMask(element.mask)
+    if elementConfiguration.mask then
+      local frontPhotoMask = graphics.newMask(elementConfiguration.mask)
       frontContainer:setMask(frontPhotoMask)
       frontContainer.maskScaleX = frontContainer.width / 394
       frontContainer.maskScaleY = frontContainer.height / 394

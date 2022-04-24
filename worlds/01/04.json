@@ -5,14 +5,14 @@
   },
   "obstacles": [
     {
-      "type": "corner",
+      "name": "corner",
       "x": 0,
       "y": 380,
       "width": 80,
       "height": 80
     },
     {
-      "type": "corner",
+      "name": "corner",
       "x": 220,
       "y": 380,
       "width": 80,
@@ -20,7 +20,7 @@
       "rotation": 270
     },
     {
-      "type": "corner",
+      "name": "corner",
       "x": 220,
       "y": 0,
       "width": 80,
@@ -28,7 +28,7 @@
       "rotation": 180
     },
     {
-      "type": "corner",
+      "name": "corner",
       "x": 0,
       "y": 0,
       "width": 80,
@@ -36,21 +36,21 @@
       "rotation": 90
     },
     {
-      "type": "vertical-barrier-large",
+      "name": "vertical-barrier-large",
       "x": 50,
       "y": 100,
       "width": 40,
       "height": 180
     },
     {
-      "type": "vertical-barrier-large",
+      "name": "vertical-barrier-large",
       "x": 210,
       "y": 100,
       "width": 40,
       "height": 180
     },
     {
-      "type": "horizontal-barrier",
+      "name": "horizontal-barrier",
       "x": 100,
       "y": 240,
       "width": 100,
@@ -64,7 +64,7 @@
   },
   "targets": [
     {
-      "type": "normal",
+      "name": "normal",
       "x": 130,
       "y": 180,
       "width": 40,

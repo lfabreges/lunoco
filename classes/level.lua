@@ -3,6 +3,39 @@ local utils = require "modules.utils"
 
 local levelClass = {}
 
+local min = math.min
+local round = math.round
+
+local elementConfigurations = {
+  { family = "root", name = "background", width = 300, height = 460 },
+  { family = "root", name = "ball", width = 30, height = 30, mask = "root-ball-mask.png" },
+  { family = "root", name = "frame", width = 128, height = 128 },
+  { family = "obstacle", name = "corner", width = 80, height = 80, mask = "obstacle-corner-mask.png" },
+  { family = "obstacle", name = "horizontal-barrier", width = 80, height = 30 },
+  { family = "obstacle", name = "horizontal-barrier-large", width = 150, height = 30 },
+  { family = "obstacle", name = "vertical-barrier", width = 30, height = 80 },
+  { family = "obstacle", name = "vertical-barrier-large", width = 30, height = 150 },
+  { family = "target", name = "easy", width = 40, height = 40, minWidth = 30, minHeight = 30 },
+  { family = "target", name = "normal", width = 40, height = 40, minWidth = 30, minHeight = 30 },
+  { family = "target", name = "hard", width = 40, height = 40, minWidth = 30, minHeight = 30 },
+}
+
+for _, elementConfiguration in pairs(elementConfigurations) do
+  elementConfiguration.mask = elementConfiguration.mask and ("images/elements/" .. elementConfiguration.mask) or nil
+  elementConfiguration.minWidth = elementConfiguration.minWidth or elementConfiguration.width * 0.5
+  elementConfiguration.minHeight = elementConfiguration.minHeight or elementConfiguration.height * 0.5
+  elementConfiguration.maxWidth = elementConfiguration.maxWidth or elementConfiguration.width * 2
+  elementConfiguration.maxHeight = elementConfiguration.maxHeight or elementConfiguration.height * 2
+
+  elementConfiguration.size = function(maxWidth, maxHeight)
+    if elementConfiguration.width >= elementConfiguration.height then
+      return maxWidth, elementConfiguration.height * (maxWidth / elementConfiguration.width)
+    else
+      return elementConfiguration.width * (maxHeight / elementConfiguration.height), maxHeight
+    end
+  end
+end
+
 local function isObjectEqual(firstObject, secondObject)
   for key, value in pairs(firstObject) do
     if secondObject[key] == nil or secondObject[key] ~= value then
@@ -65,20 +98,20 @@ function levelClass:createElements(parent)
   elements.background = background
 
   for index, configuration in ipairs(configuration.obstacles) do
-    if configuration.type == "corner" then
+    if configuration.name == "corner" then
       local corner = self:newObstacleCorner(parent, configuration.width, configuration.height)
       self:positionElement(corner, configuration.x, configuration.y)
       corner.rotation = configuration.rotation
       elements.obstacles[index] = corner
-    elseif configuration.type:starts("horizontal-barrier") or configuration.type:starts("vertical-barrier") then
-      local barrier = self:newObstacleBarrier(parent, configuration.type, configuration.width, configuration.height)
+    elseif configuration.name:starts("horizontal-barrier") or configuration.name:starts("vertical-barrier") then
+      local barrier = self:newObstacleBarrier(parent, configuration.name, configuration.width, configuration.height)
       self:positionElement(barrier, configuration.x, configuration.y)
       elements.obstacles[index] = barrier
     end
   end
 
   for index, configuration in ipairs(configuration.targets) do
-    local target = self:newTarget(parent, configuration.type, configuration.width, configuration.height)
+    local target = self:newTarget(parent, configuration.name, configuration.width, configuration.height)
     self:positionElement(target, configuration.x, configuration.y)
     elements.targets[index] = target
   end
@@ -88,6 +121,10 @@ function levelClass:createElements(parent)
   elements.ball = ball
 
   return elements
+end
+
+function levelClass:defaultElementConfigurations()
+  return elementConfigurations
 end
 
 function levelClass:delete()
@@ -105,10 +142,10 @@ function levelClass:deleteScores()
   end
 end
 
-function levelClass:image(imageName, defaultImageName)
-  local imageNames = self:imageNames()
-  if imageNames[imageName] then
-    return imageNames[imageName], system.DocumentsDirectory, false
+function levelClass:image(imageFamily, imageName, defaultImageName)
+  local fullImageName = utils.nestedGet(self:imageNames(), imageFamily, imageName)
+  if fullImageName then
+    return fullImageName, system.DocumentsDirectory, false
   else
     return defaultImageName, system.ResourceDirectory, true
   end
@@ -120,9 +157,9 @@ function levelClass:imageNames()
     if utils.fileExists(self.directory, system.DocumentsDirectory) then
       local path = system.pathForFile(self.directory, system.DocumentsDirectory)
       for filename in lfs.dir(path) do
-        local nocacheImageName, imageName = filename:match("^((.+)%.nocache%..+%.png)$")
-        if nocacheImageName then
-          self._imageNames[imageName] = self.directory .. "/" .. nocacheImageName
+        local fullImageName, imageFamily, imageName = filename:match("^(([^-]+)-(.+)%.nocache%..+%.png)$")
+        if fullImageName then
+          utils.nestedSet(self._imageNames, imageFamily, imageName, self.directory .. "/" .. fullImageName)
         end
       end
     end
@@ -130,97 +167,84 @@ function levelClass:imageNames()
   return self._imageNames
 end
 
+function levelClass:newElement(parent, family, name, width, height)
+  local configuration = nil
+  local defaultImageName = "images/elements/" .. family .. "-" .. name .. ".png"
+  local imageName, imageBaseDir, isDefault = self:image(family, name, defaultImageName)
+  local element = nil
+
+  for index = 1, #elementConfigurations do
+    configuration = elementConfigurations[index]
+    if configuration.family == family and configuration.name == name then
+      break
+    end
+  end
+
+  width = width or configuration.width
+  height = height or configuration.height
+
+  if family == "root" and name == "frame" then
+    element = display.newContainer(width, height)
+    local imageWidth = min(128, width)
+    local imageHeight = min(128, height)
+    for x = 0, width, 128 do
+      for y = 0, height, 128 do
+        local frameImage = display.newImageRect(element, imageName, imageBaseDir, imageWidth, imageHeight)
+        frameImage:translate(-width / 2 + x + imageWidth / 2, -height / 2 + y + imageHeight / 2)
+        frameImage.xScale = x % 256 == 0 and 1 or -1
+        frameImage.yScale = y % 256 == 0 and 1 or -1
+      end
+    end
+  else
+    element = display.newImageRect(imageName, imageBaseDir, width, height)
+  end
+
+  element.configuration = configuration
+  element.isDefault = isDefault
+  element.family = family
+  element.name = name
+  parent:insert(element)
+
+  if configuration.mask then
+    local mask = graphics.newMask(configuration.mask)
+    element:setMask(mask)
+    element.isHitTestMasked = false
+    element.maskScaleX = element.width / 394
+    element.maskScaleY = element.height / 394
+  end
+
+  return element
+end
+
 function levelClass:newBackground(parent, width, height)
-  local imageName, imageBaseDir, isDefault = self:image("background", "images/elements/background.png")
-  local background = display.newImageRect(imageName, imageBaseDir, width, height)
-  parent:insert(background)
-  background.isDefault = isDefault
-  background.family = "root"
-  background.type = "background"
-  return background
+  return self:newElement(parent, "root", "background", width, height)
 end
 
 function levelClass:newBall(parent, width, height)
-  local imageName, imageBaseDir, isDefault = self:image("ball", "images/elements/ball.png")
-  local ball = display.newImageRect(imageName, imageBaseDir, width, height)
-  parent:insert(ball)
-  local ballMask = graphics.newMask("images/elements/ball-mask.png")
-  ball:setMask(ballMask)
-  ball.isHitTestMasked = false
-  ball.maskScaleX = ball.width / 394
-  ball.maskScaleY = ball.height / 394
-  ball.isDefault = isDefault
-  ball.family = "root"
-  ball.type = "ball"
-  return ball
+  return self:newElement(parent, "root", "ball", width, height)
 end
 
 function levelClass:newFrame(parent, width, height)
-  local imageName, imageBaseDir, isDefault = self:image("frame", "images/elements/frame.png")
-  local frame = display.newContainer(width, height)
-  parent:insert(frame)
-  local imageWidth = math.min(128, width)
-  local imageHeight = math.min(128, height)
-  for x = 0, width, 128 do
-    for y = 0, height, 128 do
-      local frameImage = display.newImageRect(frame, imageName, imageBaseDir, imageWidth, imageHeight)
-      frameImage:translate(-width / 2 + x + imageWidth / 2, -height / 2 + y + imageHeight / 2)
-      frameImage.xScale = x % 256 == 0 and 1 or -1
-      frameImage.yScale = y % 256 == 0 and 1 or -1
-    end
-  end
-  frame.isDefault = isDefault
-  frame.family = "root"
-  frame.type = "frame"
-  return frame
+  return self:newElement(parent, "root", "frame", width, height)
 end
 
 function levelClass:newObstacleBarrier(parent, barrierType, width, height)
-  local imageName, imageBaseDir, isDefault = self:image(
-    "obstacle-" .. barrierType,
-    "images/elements/" .. barrierType .. ".png"
-  )
-  local barrier = display.newImageRect(imageName, imageBaseDir, width, height)
-  parent:insert(barrier)
-  barrier.isDefault = isDefault
-  barrier.family = "obstacle"
-  barrier.type = barrierType
-  return barrier
+  return self:newElement(parent, "obstacle", barrierType, width, height)
 end
 
 function levelClass:newObstacleCorner(parent, width, height)
-  local imageName, imageBaseDir, isDefault = self:image("obstacle-corner", "images/elements/corner.png")
-  local corner = display.newImageRect(imageName, imageBaseDir, width, height)
-  parent:insert(corner)
-  local cornerMask = graphics.newMask("images/elements/corner-mask.png")
-  corner:setMask(cornerMask)
-  corner.isHitTestMasked = false
-  corner.maskScaleX = corner.width / 394
-  corner.maskScaleY = corner.height / 394
-  corner.isDefault = isDefault
-  corner.family = "obstacle"
-  corner.type = "corner"
-  return corner
+  return self:newElement(parent, "obstacle", "corner", width, height)
 end
 
 function levelClass:newTarget(parent, targetType, width, height)
-  local imageName, imageBaseDir, isDefault = self:image(
-    "target-" .. targetType,
-    "images/elements/target-" .. targetType .. ".png"
-  )
-  local target = display.newImageRect(imageName, imageBaseDir, width, height)
-  parent:insert(target)
-  target.isDefault = isDefault
-  target.family = "target"
-  target.type = targetType
-  return target
+  return self:newElement(parent, "target", targetType, width, height)
 end
 
 function levelClass:positionElement(element, x, y)
-  if element.type == "ball" then
+  if element.family == "root" and element.name == "ball" then
     element.x = 10 + x
     element.y = 10 + y - element.contentHeight * 0.5
-  elseif element.type == "corner" then
+  elseif element.family == "obstacle" and element.name == "corner" then
     element.x = 10 + x + element.contentWidth * 0.5
     element.y = 10 + y + element.contentHeight * 0.5
   else
@@ -231,17 +255,17 @@ function levelClass:positionElement(element, x, y)
   end
 end
 
-function levelClass:removeImage(imageName)
+function levelClass:removeImage(imageFamily, imageName)
   local imageNames = self:imageNames()
-  if imageNames[imageName] then
-    utils.removeFile(imageNames[imageName], system.DocumentsDirectory)
-    imageNames[imageName] = nil
+  local fullImageName = utils.nestedGet(imageNames, imageFamily, imageName)
+  if fullImageName then
+    utils.removeFile(fullImageName, system.DocumentsDirectory)
+    imageNames[imageFamily][imageName] = nil
   end
 end
 
 function levelClass:save(elements, stars)
   local newConfiguration = { obstacles = {}, stars = stars, targets = {} }
-  local round = math.round
 
   newConfiguration.ball = {
     x = round(elements.ball.contentBounds.xMin + elements.ball.contentWidth * 0.5 - 10),
@@ -251,7 +275,7 @@ function levelClass:save(elements, stars)
   for index = 1, #elements.obstacles do
     local obstacle = elements.obstacles[index]
     newConfiguration.obstacles[index] = {
-      type = obstacle.type,
+      name = obstacle.name,
       x = round(obstacle.contentBounds.xMin - 10),
       y = round(obstacle.contentBounds.yMin - 10),
       width = round(obstacle.contentWidth),
@@ -263,7 +287,7 @@ function levelClass:save(elements, stars)
   for index = 1, #elements.targets do
     local target = elements.targets[index]
     newConfiguration.targets[index] = {
-      type = target.type,
+      name = target.name,
       x = round(target.contentBounds.xMin - 10),
       y = round(target.contentBounds.yMin - 10),
       width = round(target.contentWidth),
@@ -296,19 +320,18 @@ function levelClass:saveScore(numberOfShots, numberOfStars)
   end
 end
 
-function levelClass:saveImage(object, imageName)
-  local filename = self.directory .. "/" .. imageName .. ".nocache." .. math.random() .. ".png"
+function levelClass:saveImage(object, imageFamily, imageName)
+  local filename = self.directory .. "/" .. imageFamily .. "-" .. imageName .. ".nocache." .. math.random() .. ".png"
   display.save(object, { filename = filename, captureOffscreenArea = true })
-  self:removeImage(imageName)
-  local imageNames = self:imageNames()
-  imageNames[imageName] = filename
+  self:removeImage(imageFamily, imageName)
+  utils.nestedSet(self:imageNames(), imageFamily, imageName, filename)
 end
 
 function levelClass:screenshotImage()
-  local levelImageName, levelImageBaseDir, isDefault = self:image("screenshot")
+  local levelImageName, levelImageBaseDir, isDefault = self:image("level", "screenshot")
   if isDefault then
     self:takeScreenshot()
-    return self:image("screenshot")
+    return self:image("level", "screenshot")
   else
     return levelImageName, levelImageBaseDir, isDefault
   end
@@ -322,7 +345,7 @@ function levelClass:takeScreenshot()
   local elements = self:createElements(screenshotContainer)
   local screenshot = display.capture(screenshotContainer, { captureOffscreenArea = true })
   screenshot:scale(0.33, 0.33)
-  self:saveImage(screenshot, "screenshot")
+  self:saveImage(screenshot, "level", "screenshot")
   display.remove(screenshot)
   display.remove(screenshotContainer)
 end

@@ -21,84 +21,6 @@ local selectedElement = nil
 local sideBar = nil
 local stars = {}
 
-local elementDefaults = {
-  ["obstacle-corner"] = {
-    width = 80,
-    height = 80,
-    minWidth = 40,
-    minHeight = 40,
-    maxWidth = 150,
-    maxHeight = 150,
-  },
-  ["obstacle-horizontal-barrier"] = {
-    width = 100,
-    height = 30,
-    minWidth = 30,
-    minHeight = 30,
-    maxWidth = 150,
-    maxHeight = 60,
-  },
-  ["obstacle-horizontal-barrier-large"] = {
-    width = 150,
-    height = 30,
-    minWidth = 100,
-    minHeight = 30,
-    maxWidth = 250,
-    maxHeight = 120,
-  },
-  ["obstacle-vertical-barrier"] = {
-    width = 30,
-    height = 100,
-    minWidth = 30,
-    minHeight = 30,
-    maxWidth = 60,
-    maxHeight = 150,
-  },
-  ["obstacle-vertical-barrier-large"] = {
-    width = 30,
-    height = 200,
-    minWidth = 30,
-    minHeight = 100,
-    maxWidth = 150,
-    maxHeight = 350,
-  },
-  ["target-easy"] = {
-    width = 40,
-    height = 40,
-    minWidth = 30,
-    minHeight = 30,
-    maxWidth = 80,
-    maxHeight = 80,
-  },
-  ["target-normal"] = {
-    width = 40,
-    height = 40,
-    minWidth = 30,
-    minHeight = 30,
-    maxWidth = 80,
-    maxHeight = 80,
-  },
-  ["target-hard"] = {
-    width = 40,
-    height = 40,
-    minWidth = 30,
-    minHeight = 30,
-    maxWidth = 80,
-    maxHeight = 80,
-  },
-}
-
-local elementTypes = {
-  "obstacle-corner",
-  "obstacle-horizontal-barrier",
-  "obstacle-horizontal-barrier-large",
-  "obstacle-vertical-barrier",
-  "obstacle-vertical-barrier-large",
-  "target-easy",
-  "target-normal",
-  "target-hard",
-}
-
 local function goBack()
   if #level.world:levels() == 0 then
     navigation.gotoWorlds()
@@ -139,18 +61,6 @@ local function newButton(parent, content, options)
   return buttonGroup
 end
 
-local function newElement(parent, elementType)
-  if elementType == "obstacle-corner" then
-    return level:newObstacleCorner(parent, 50, 50)
-  elseif elementType:starts("obstacle-horizontal-barrier") then
-    return level:newObstacleBarrier(parent, elementType:sub(10), 50, 20)
-  elseif elementType:starts("obstacle-vertical-barrier") then
-    return level:newObstacleBarrier(parent, elementType:sub(10), 20, 50)
-  elseif elementType:starts("target-") then
-    return level:newTarget(parent, elementType:sub(8), 50, 50)
-  end
-end
-
 local function onFocus(event)
   local element = event.target.element
   element.contentWidthStart = element.contentWidth
@@ -163,14 +73,13 @@ end
 
 local function onMovePinchRotate(event)
   local element = event.target.element
-  local defaults = elementDefaults[element.family .. "-" .. element.type] or {}
 
   if element.family ~= "root" then
     if event.xDistanceDelta then
-      local minWidth = defaults.minWidth
-      local maxWidth = defaults.maxWidth
-      local minHeight = defaults.minHeight
-      local maxHeight = defaults.maxHeight
+      local minWidth = element.configuration.minWidth
+      local maxWidth = element.configuration.maxWidth
+      local minHeight = element.configuration.minHeight
+      local maxHeight = element.configuration.maxHeight
       local newWidth = min(maxWidth, max(minWidth, element.contentWidthStart + event.xDistanceDelta))
       local newHeight = min(maxHeight, max(minHeight, element.contentHeightStart + event.yDistanceDelta))
       newWidth = newWidth - newWidth % 5
@@ -421,26 +330,32 @@ function scene:createSideBar()
   scrollViewStack:insert(separator)
   separator.y = separator.y + (separator.contentHeight - separator.strokeWidth) * 0.5
 
+  local defaultElementConfigurations = level:defaultElementConfigurations()
   local elementGrid = layouts.newGrid({ parent = scrollViewStack, separator = 10 })
 
-  for index, elementType in ipairs(elementTypes) do
-    local element = newElement(self.view, elementType)
-    newButton(elementGrid, element, {
-      onRelease = function()
-        local newElement = scene:newLevelElement(elementType)
-        local fromX = (newElement.anchorX - element.anchorX) * element.contentWidth
-        local fromY = (newElement.anchorY - element.anchorX) * element.contentHeight
-        fromX, fromY = element:localToContent(fromX, fromY)
-        transition.from(newElement, {
-          xScale = element.width / newElement.width,
-          yScale = element.height / newElement.height,
-          x = fromX,
-          y = fromY,
-          time = 100,
-        })
-      end,
-      scrollView = scrollView,
-    })
+  for _, elementConfiguration in ipairs(defaultElementConfigurations) do
+    if elementConfiguration.family == "obstacle" or elementConfiguration.family == "target" then
+      local elementWidth, elementHeight = elementConfiguration.size(50, 50)
+      local elementFamily = elementConfiguration.family
+      local elementName = elementConfiguration.name
+      local element = level:newElement(self.view, elementFamily, elementName, elementWidth, elementHeight)
+      newButton(elementGrid, element, {
+        onRelease = function()
+          local newElement = scene:newLevelElement(elementFamily, elementName)
+          local fromX = (newElement.anchorX - element.anchorX) * element.contentWidth
+          local fromY = (newElement.anchorY - element.anchorX) * element.contentHeight
+          fromX, fromY = element:localToContent(fromX, fromY)
+          transition.from(newElement, {
+            xScale = element.width / newElement.width,
+            yScale = element.height / newElement.height,
+            x = fromX,
+            y = fromY,
+            time = 100,
+          })
+        end,
+        scrollView = scrollView,
+      })
+    end
   end
 
   local separator = display.newLine(0, 0, 150, 0)
@@ -548,19 +463,15 @@ function scene:configureElement(element)
   element:addEventListener("tap", function() return true end)
 end
 
-function scene:newLevelElement(elementType)
-  local element = newElement(levelView, elementType)
-  local defaults = elementDefaults[elementType]
-
-  element.xScale = defaults.width / element.width
-  element.yScale = defaults.height / element.height
+function scene:newLevelElement(elementFamily, elementName)
+  local element = level:newElement(levelView, elementFamily, elementName)
   level:positionElement(element, 150 - element.contentWidth * 0.5, 230 - element.contentHeight * 0.5)
   scene:configureElement(element)
 
-  if elementType:starts("target-") then
-    elements.targets[#elements.targets + 1] = element
-  else
+  if elementFamily == "obstacle" then
     elements.obstacles[#elements.obstacles + 1] = element
+  else
+    elements.targets[#elements.targets + 1] = element
   end
 
   return element
@@ -609,7 +520,7 @@ function scene:selectElement(element)
     local toolBarContent = components.newGroup(selectedElement.toolBar)
 
     local elementNameText = display.newText({
-      text = i18n.t((element.family == "root" and "" or (element.family .. "-")) .. element.type),
+      text = i18n.t((element.family == "root" and "" or (element.family .. "-")) .. element.name),
       fontSize = 14,
       parent = toolBarContent,
     })
@@ -617,7 +528,7 @@ function scene:selectElement(element)
 
     local x = elementNameText.x + elementNameText.width
 
-    if element.family == "obstacle" and element.type == "corner" then
+    if element.family == "obstacle" and element.name == "corner" then
       x = x + 20
       local separator = display.newLine(toolBarContent, x, -8, x, 8)
       separator.anchorX = 0

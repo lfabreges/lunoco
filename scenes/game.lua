@@ -70,7 +70,7 @@ function scene:configureObstacles()
   for index = 1, #elements.obstacles do
     local obstacle = elements.obstacles[index]
 
-    if obstacle.type == "corner" then
+    if obstacle.name == "corner" then
       local chain = {
         -50, -50, -49, -44, -47, -38, -45, -33, -41, -26, -35, -17, -27, -7, -20, 1, -14, 8,
         -8, 14, -1, 20, 7, 27, 17, 35, 26, 41, 33, 45, 38, 47, 44, 49, 50, 50, -50, 50, -50, -50
@@ -83,7 +83,7 @@ function scene:configureObstacles()
 
       physics.addBody(obstacle, "static", { bounce = 0.5, density = 1.0, friction = 0.3, chain = chain })
 
-    elseif obstacle.type:starts("horizontal-barrier") or obstacle.type:starts("vertical-barrier") then
+    elseif obstacle.name:starts("horizontal-barrier") or obstacle.name:starts("vertical-barrier") then
       physics.addBody(obstacle, "static", { bounce = 0.5, density = 1.0, friction = 0.3 })
     end
   end
@@ -94,7 +94,7 @@ function scene:configureTargets()
 
   for index = 1, numberOfTargets do
     local target = elements.targets[index]
-    target.resistance = ({ easy = 4, normal = 8, hard = 16 })[target.type]
+    target.resistance = ({ easy = 4, normal = 8, hard = 16 })[target.name]
 
     physics.addBody(target, "static", { bounce = 0.5, density = 1.0, friction = 0.3 })
 

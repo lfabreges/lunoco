@@ -1,6 +1,4 @@
 {
-  "background": "Background",
-  "ball": "Ball",
   "click-here-to-confirm": "Click here to confirm",
   "customize": "Customize",
   "edit-level": "Edit level",
@@ -8,7 +6,6 @@
     "one": "Finished in 1 shot !",
     "other": "Finished in {count} shots !"
   },
-  "frame": "Frame",
   "level-editor-help": "Double tap to open the sidebar",
   "levels": "Levels",
   "obstacle-corner": "Corner",
@@ -22,6 +19,9 @@
   "permission-denied-photo-library": "Lunoco doesn't have permission to access your photo library",
   "progress": "%0d%%",
   "retry": "Retry",
+  "root-background": "Background",
+  "root-ball": "Ball",
+  "root-frame": "Frame",
   "target-easy": "Easy target",
   "target-hard": "Hard target",
   "target-normal": "Normal target",

@@ -27,9 +27,25 @@ if version.number == nil then
   for levelNumber = 1, 10 do
     local levelName = string.format("%03d", levelNumber)
     if utils.fileExists(levelName, system.DocumentsDirectory) then
-      local oldFilePath = system.pathForFile(levelName, system.DocumentsDirectory)
-      local newFilePath = system.pathForFile(directory .. "/" .. levelName:sub(2), system.DocumentsDirectory)
-      os.rename(oldFilePath, newFilePath)
+      local oldLevelPath = system.pathForFile(levelName, system.DocumentsDirectory)
+      for filename in lfs.dir(oldLevelPath) do
+        local fullName, name = filename:match("^((.+)%.nocache%..+%.png)$")
+        if fullName then
+          local prefix = ""
+          if name == "background" or name == "ball" or name == "frame" then
+            prefix = "root-"
+          elseif name == "screenshot" then
+            prefix = "level-"
+          elseif not name:starts("target-") then
+            prefix = "obstacle-"
+          end
+          local oldImagePath = system.pathForFile(levelName .. "/" .. fullName, system.DocumentsDirectory)
+          local newImagePath = system.pathForFile(levelName .. "/" .. prefix .. fullName, system.DocumentsDirectory)
+          os.rename(oldImagePath, newImagePath)
+        end
+      end
+      local newLevelPath = system.pathForFile(directory .. "/" .. levelName:sub(2), system.DocumentsDirectory)
+      os.rename(oldLevelPath, newLevelPath)
     end
   end
 

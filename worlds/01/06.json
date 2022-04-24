@@ -5,14 +5,14 @@
   },
   "obstacles": [
     {
-      "type": "horizontal-barrier",
+      "name": "horizontal-barrier",
       "x": 80,
       "y": 160,
       "width": 140,
       "height": 30
     },
     {
-      "type": "vertical-barrier",
+      "name": "vertical-barrier",
       "x": 135,
       "y": 330,
       "width": 30,
@@ -26,21 +26,21 @@
   },
   "targets": [
     {
-      "type": "hard",
+      "name": "hard",
       "x": 130,
       "y": 40,
       "width": 40,
       "height": 40
     },
     {
-      "type": "easy",
+      "name": "easy",
       "x": 75,
       "y": 350,
       "width": 40,
       "height": 40
     },
     {
-      "type": "easy",
+      "name": "easy",
       "x": 185,
       "y": 350,
       "width": 40,
