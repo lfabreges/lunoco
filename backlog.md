@@ -4,7 +4,6 @@
   même le même menu de gameover)
 
 # Refactoring
-* Simplifier la lecture de configuration dans la partie customize
 * Créer un layout pour répartir équitablement les éléments
 
 # Nice to have

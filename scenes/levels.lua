@@ -75,24 +75,8 @@ function scene:createContentView()
   end
 
   if not world.isBuiltIn then
-    local newLevelGroup = components.newGroup(self.contentView, true)
-
-    local newLevelBackground = display.newRoundedRect(newLevelGroup, 0, 0, 120, 180, 15)
-    newLevelBackground.fill.effect = "generator.linearGradient"
-    newLevelBackground.fill.effect.color1 = { 0.25, 0.25, 0.25, 0.75 }
-    newLevelBackground.fill.effect.position1  = { 0, 0 }
-    newLevelBackground.fill.effect.color2 = { 0.5, 0.5, 0.5, 0.25 }
-    newLevelBackground.fill.effect.position2  = { 1, 1 }
-    newLevelBackground.strokeWidth = 1
-    newLevelBackground:setStrokeColor(0.5, 0.5, 0.5, 0.75)
-
-    display.newImageRect(newLevelGroup, "images/icons/plus.png", 50, 50)
-
-    components.newObjectButton(newLevelGroup, {
-      onRelease = function()
-        local level = world:newLevel()
-        navigation.gotoLevelEditor(level)
-      end,
+    components.newPlusButton(self.contentView, 120, 180, {
+      onRelease = function() navigation.gotoLevelEditor(world:newLevel()) end,
       scrollView = self.scrollView,
     })
   end

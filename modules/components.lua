@@ -99,6 +99,20 @@ components.newObjectButton = function(object, options)
   return object
 end
 
+components.newPlusButton = function(parent, width, height, options)
+  local plusButtonGroup = components.newGroup(parent, true)
+  local plusButtonBackground = display.newRoundedRect(plusButtonGroup, 0, 0, width, height, 15)
+  plusButtonBackground.fill.effect = "generator.linearGradient"
+  plusButtonBackground.fill.effect.color1 = { 0.25, 0.25, 0.25, 0.75 }
+  plusButtonBackground.fill.effect.position1  = { 0, 0 }
+  plusButtonBackground.fill.effect.color2 = { 0.5, 0.5, 0.5, 0.25 }
+  plusButtonBackground.fill.effect.position2  = { 1, 1 }
+  plusButtonBackground.strokeWidth = 1
+  plusButtonBackground:setStrokeColor(0.5, 0.5, 0.5, 0.75)
+  display.newImageRect(plusButtonGroup, "images/icons/plus.png", 50, 50)
+  return components.newObjectButton(plusButtonGroup, options)
+end
+
 components.newStar = function(parent, width, height)
   local star = display.newImageRect("images/star.png", width, height)
   parent:insert(star)

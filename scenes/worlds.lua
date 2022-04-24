@@ -108,29 +108,12 @@ function scene:createContentView()
     y = worldProgressText.y + worldProgressText.contentHeight + 30
   end
 
-  local newWorldGroup = components.newGroup(self.contentView)
-  newWorldGroup.x = centerX
-  newWorldGroup.y = y + 52.5
-
-  local newWorldBackground = display.newRoundedRect(newWorldGroup, 0, 0, 278, 103, 15)
-  newWorldBackground.fill.effect = "generator.linearGradient"
-  newWorldBackground.fill.effect.color1 = { 0.25, 0.25, 0.25, 0.75 }
-  newWorldBackground.fill.effect.position1  = { 0, 0 }
-  newWorldBackground.fill.effect.color2 = { 0.5, 0.5, 0.5, 0.25 }
-  newWorldBackground.fill.effect.position2  = { 1, 1 }
-  newWorldBackground.strokeWidth = 1
-  newWorldBackground:setStrokeColor(0.5, 0.5, 0.5, 0.75)
-
-  display.newImageRect(newWorldGroup, "images/icons/plus.png", 50, 50)
-
-  components.newObjectButton(newWorldGroup, {
-    onRelease = function()
-      local world = universe:newWorld()
-      local level = world:newLevel()
-      navigation.gotoLevelEditor(level)
-    end,
+  local newWorlButton = components.newPlusButton(self.contentView, 278, 103, {
+    onRelease = function() navigation.gotoLevelEditor(universe:newWorld():newLevel()) end,
     scrollView = self.scrollView,
   })
+  newWorlButton.x = centerX
+  newWorlButton.y = y + 52.5
 end
 
 function scene:show(event)
