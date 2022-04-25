@@ -95,7 +95,7 @@ function worldClass:progress()
       totalNumberOfStars = totalNumberOfStars + levelNumberOfStars
       worldNumberOfStars = math.min(worldNumberOfStars, levelNumberOfStars)
     else
-      worldNumberOfStars = 0
+      worldNumberOfStars = -1
     end
   end
 

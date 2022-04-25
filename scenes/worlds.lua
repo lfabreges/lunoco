@@ -77,7 +77,7 @@ function scene:createContentView()
     worldProgressGroup:insert(worldProgressText)
     layouts.alignHorizontal(worldProgressText, "left", worldButtonContainer)
 
-    if worldNumberOfStars > 0 then
+    if worldNumberOfStars > -1 then
       local starStack = layouts.newStack({ mode = "horizontal", parent = worldProgressGroup, separator = 5 })
       for starCount = 1, 3 do
         local isFullStar = worldNumberOfStars >= starCount
