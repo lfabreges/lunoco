@@ -24,6 +24,14 @@ layouts.alignCenter = function(object, reference)
   layouts.align(object, "center", nil, reference)
 end
 
+layouts.alignHorizontal = function(object, horizontalAlign, reference)
+  layouts.align(object, horizontalAlign, nil, reference)
+end
+
+layouts.alignVertical = function(object, verticalAlign, reference)
+  layouts.align(object, nil, verticalAlign, reference)
+end
+
 layouts.newGrid = function(options)
   options = options or {}
   options.mode = options.mode == "horizontal" and "horizontal" or "vertical"

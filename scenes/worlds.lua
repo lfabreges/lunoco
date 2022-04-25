@@ -31,22 +31,19 @@ function scene:create(event)
 end
 
 function scene:createContentView()
-  local centerX = self.scrollView.width * 0.5
-  local y = 110
   local worlds = universe:worlds()
 
-  self.contentView = components.newGroup(self.scrollView)
+  self.contentView = layouts.newStack({ parent = self.scrollView, separator = 30 })
+  self.contentView.y = 110
 
   for _, world in ipairs(worlds) do
     local worldLevels = world:levels()
     local worldProgress, worldNumberOfStars = world:progress()
+    local worldStack = layouts.newStack({ parent = self.contentView, separator = 10 })
 
-    local worldButtonContainer = display.newContainer(self.contentView, 280, 105)
+    local worldButtonContainer = display.newContainer(280, 105)
+    worldStack:insert(worldButtonContainer)
     worldButtonContainer.anchorChildren = false
-    worldButtonContainer.anchorX = 0
-    worldButtonContainer.anchorY = 0
-    worldButtonContainer.x = centerX - 140
-    worldButtonContainer.y = y
 
     for levelNumber = 1, 5 do
       local level = worldLevels[levelNumber]
@@ -69,42 +66,35 @@ function scene:createContentView()
       end
     end
 
-    local worldButton = components.newObjectButton(worldButtonContainer, {
+    components.newObjectButton(worldButtonContainer, {
       onRelease = function() navigation.gotoLevels(world) end,
       scrollView = self.scrollView,
     })
 
-    local worldProgressText = display.newText({
-      text = i18n.t("progress", worldProgress),
-      fontSize = 20,
-      parent = self.contentView,
-      x = centerX - worldButton.contentWidth * 0.5,
-      y = y + worldButton.height + 10,
-    })
-    worldProgressText.anchorX = 0
-    worldProgressText.anchorY = 0
+    local worldProgressGroup = components.newGroup(worldStack)
+
+    local worldProgressText = display.newText({ text = i18n.t("progress", worldProgress), fontSize = 20 })
+    worldProgressGroup:insert(worldProgressText)
+    layouts.alignHorizontal(worldProgressText, "left", worldButtonContainer)
 
     if worldNumberOfStars > 0 then
+      local starStack = layouts.newStack({ mode = "horizontal", parent = worldProgressGroup, separator = 5 })
       for starCount = 1, 3 do
         local isFullStar = worldNumberOfStars >= starCount
-        local star = components.newStar(self.contentView, 20, 20)
-        star.anchorX = 1
-        star.anchorY = 0
-        star.x = centerX + worldButton.contentWidth * 0.5 + (starCount - 3) * 25
-        star.y = worldProgressText.y
+        local star = components.newStar(starStack, 20, 20)
         star.fill.effect = not isFullStar and "filter.grayscale" or nil
       end
+      layouts.alignHorizontal(starStack, "right", worldButtonContainer)
+      layouts.alignVertical(starStack, "center", worldProgressText)
     end
-
-    y = worldProgressText.y + worldProgressText.contentHeight + 30
   end
 
   local newWorlButton = components.newPlusButton(self.contentView, 278, 103, {
     onRelease = function() navigation.gotoLevelEditor(universe:newWorld():newLevel()) end,
     scrollView = self.scrollView,
   })
-  newWorlButton.x = centerX
-  newWorlButton.y = y + 52.5
+
+  layouts.alignCenter(self.contentView, self.scrollView)
 end
 
 function scene:show(event)
