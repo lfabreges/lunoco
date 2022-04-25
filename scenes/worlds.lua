@@ -1,6 +1,7 @@
 local components = require "modules.components"
 local composer = require "composer"
 local i18n = require "modules.i18n"
+local layouts = require "modules.layouts"
 local navigation = require "modules.navigation"
 local universeClass = require "classes.universe"
 local utils = require "modules.utils"
@@ -16,23 +17,17 @@ function scene:create(event)
   components.newBackground(self.view)
   self.scrollView = components.newScrollView(self.view, { topPadding = 50, bottomPadding = 40 })
 
-  local titleGroup = components.newGroup(self.scrollView)
-
-  local gameIcon = display.newImageRect(titleGroup, "images/icon.png", 60, 60)
-  gameIcon.anchorX = 0
-  gameIcon.anchorY = 0
-
-  local gameTitle = display.newText({
-    text = i18n.t("title"),
-    font = native.systemFontBold,
-    fontSize = 40,
-    parent = titleGroup,
-    x = gameIcon.width + 20,
-    y = gameIcon.height / 2,
+  local titleStack = layouts.newStack({
+    align = "center",
+    mode = "horizontal",
+    parent = self.scrollView,
+    separator = 20,
   })
-  gameTitle.anchorX = 0
-
-  titleGroup.x = screenWidth / 2 - titleGroup.contentWidth / 2
+  local gameIcon = display.newImageRect("images/icon.png", 60, 60)
+  titleStack:insert(gameIcon)
+  local gameTitle = display.newText({ text = i18n.t("title"), font = native.systemFontBold, fontSize = 40 })
+  titleStack:insert(gameTitle)
+  layouts.alignCenter(titleStack, self.scrollView)
 end
 
 function scene:createContentView()

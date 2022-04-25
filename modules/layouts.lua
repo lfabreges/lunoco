@@ -78,9 +78,9 @@ layouts.newStack = function(options)
     for index = 1, stack.numChildren do
       local child = stack[index]
       if options.mode == "horizontal" then
-        layouts.align(child, nil, options.mode)
+        layouts.align(child, nil, options.align)
       else
-        layouts.align(child, options.mode, nil)
+        layouts.align(child, options.align, nil)
       end
     end
     shouldAlignNextFrame = false
