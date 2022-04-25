@@ -492,7 +492,7 @@ function scene:selectElement(element)
     local toolBarContent = components.newGroup(selectedElement.toolBar)
 
     local elementNameText = display.newText({
-      text = i18n.t((element.family == "root" and "" or (element.family .. "-")) .. element.name),
+      text = i18n.t(element.family .. "-" .. element.name),
       fontSize = 14,
       parent = toolBarContent,
     })
