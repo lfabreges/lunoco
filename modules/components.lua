@@ -137,6 +137,17 @@ components.newPlusButton = function(parent, width, height, options)
   return components.newObjectButton(plusButtonGroup, options)
 end
 
+components.newScore = function(parent, size, numberOfStars)
+  local stack = layouts.newStack({ mode = "horizontal", parent = parent, separator = size * 0.25 })
+  for starCount = 1, 3 do
+    local isFullStar = numberOfStars >= starCount
+    local star = components.newStar(stack, size, size)
+    star.fill.effect = not isFullStar and "filter.grayscale" or nil
+    star.isFullStar = isFullStar
+  end
+  return stack
+end
+
 components.newStar = function(parent, width, height)
   local star = display.newImageRect("images/star.png", width, height)
   parent:insert(star)

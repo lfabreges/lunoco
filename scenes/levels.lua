@@ -64,13 +64,7 @@ function scene:createContentView()
     )
 
     if worldScores[level.name] then
-      local numberOfStars = worldScores[level.name].numberOfStars
-      local starStack = layouts.newStack({ mode = "horizontal", parent = levelStack, separator = 5 })
-      for starCount = 1, 3 do
-        local isFullStar = numberOfStars >= starCount
-        local star = components.newStar(starStack, 20, 20)
-        star.fill.effect = not isFullStar and "filter.grayscale" or nil
-      end
+      components.newScore(levelStack, 20, worldScores[level.name].numberOfStars)
     end
   end
 

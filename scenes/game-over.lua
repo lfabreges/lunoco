@@ -1,6 +1,7 @@
 local components = require "modules.components"
 local composer = require "composer"
 local i18n = require "modules.i18n"
+local layouts = require "modules.layouts"
 local navigation = require "modules.navigation"
 local utils = require "modules.utils"
 
@@ -8,21 +9,11 @@ local level = nil
 local numberOfShots = nil
 local numberOfStars = nil
 local scene = composer.newScene()
-local stars = nil
 
 local sounds = {
   starEmpty = audio.loadSound("sounds/star-empty.wav"),
   starFull = audio.loadSound("sounds/star-full.wav"),
 }
-
-local function displayStars(event)
-  local isFullStar = numberOfStars >= event.count
-  local star = components.newStar(stars, 75, 75)
-  star.x = display.contentCenterX + (event.count - 2) * 90
-  star.y = display.contentCenterY
-  star.fill.effect = not isFullStar and "filter.grayscale" or nil
-  utils.playAudio(isFullStar and sounds.starFull or sounds.starEmpty, 1.0)
-end
 
 local function gotoLevels()
   navigation.gotoLevels(level.world)
@@ -56,12 +47,26 @@ function scene:create(event)
   levelsButton.x = display.contentCenterX + 70
   levelsButton.y = display.contentCenterY + display.contentCenterY / 2
 
-  stars = components.newGroup(self.view)
+  scene.score = components.newScore(self.view, 75, numberOfStars)
+  layouts.align(scene.score, "center", "center")
+
+  for starCount = 1, 3 do
+    scene.score[starCount].alpha = 0
+  end
 end
 
 function scene:show(event)
   if event.phase == "did" then
-    timer.performWithDelay(500, displayStars, 3, "displayStars")
+    timer.performWithDelay(
+      500,
+      function(event)
+        local star = scene.score[event.count]
+        transition.to(scene.score[event.count], { alpha = 1, time = 100 })
+        utils.playAudio(star.isFullStar and sounds.starFull or sounds.starEmpty, 1.0)
+      end,
+      3,
+      "displayStars"
+    )
   end
 end
 

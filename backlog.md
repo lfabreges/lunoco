@@ -3,9 +3,6 @@
 * Permettre de tester un niveau en cours d'édition (pas avec le même menu de pause, mode à part, ni
   même le même menu de gameover)
 
-# Refactoring
-* Créer un layout pour répartir équitablement les éléments
-
 # Nice to have
 * Revoir les boutons en y ajoutant des icones
 * Ajouter des vérifications pour les fichiers issus du dossier utilisateur

@@ -78,14 +78,9 @@ function scene:createContentView()
     layouts.alignHorizontal(worldProgressText, "left", worldButtonContainer)
 
     if worldNumberOfStars > -1 then
-      local starStack = layouts.newStack({ mode = "horizontal", parent = worldProgressGroup, separator = 5 })
-      for starCount = 1, 3 do
-        local isFullStar = worldNumberOfStars >= starCount
-        local star = components.newStar(starStack, 20, 20)
-        star.fill.effect = not isFullStar and "filter.grayscale" or nil
-      end
-      layouts.alignHorizontal(starStack, "right", worldButtonContainer)
-      layouts.alignVertical(starStack, "center", worldProgressText)
+      local worldScore = components.newScore(worldProgressGroup, 20, worldNumberOfStars)
+      layouts.alignHorizontal(worldScore, "right", worldButtonContainer)
+      layouts.alignVertical(worldScore, "center", worldProgressText)
     end
   end
 
