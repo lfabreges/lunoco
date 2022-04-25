@@ -23,6 +23,18 @@ components.newBackground = function(parent)
   return background
 end
 
+components.newEmptyShape = function(parent, width, height)
+  local emptyShape = display.newRect(parent, 0, 0, width, height)
+  emptyShape.fill.effect = "generator.linearGradient"
+  emptyShape.fill.effect.color1 = { 0.25, 0.25, 0.25, 0.75 }
+  emptyShape.fill.effect.position1  = { 0, 0 }
+  emptyShape.fill.effect.color2 = { 0.5, 0.5, 0.5, 0.25 }
+  emptyShape.fill.effect.position2  = { 1, 1 }
+  emptyShape.strokeWidth = 1
+  emptyShape:setStrokeColor(0.5, 0.5, 0.5, 0.75)
+  return emptyShape
+end
+
 components.newFrame = function(parent, width, height)
   local frame = display.newRoundedRect(0, 0, width - 2, height - 2, 5)
   frame.strokeWidth = 1
@@ -32,9 +44,8 @@ components.newFrame = function(parent, width, height)
   return frame
 end
 
-components.newGroup = function(parent, anchorChildren)
+components.newGroup = function(parent)
   local group = display.newGroup()
-  group.anchorChildren = anchorChildren or false
   parent:insert(group)
   return group
 end
@@ -120,15 +131,8 @@ components.newObjectButton = function(object, options)
 end
 
 components.newPlusButton = function(parent, width, height, options)
-  local plusButtonGroup = components.newGroup(parent, true)
-  local plusButtonBackground = display.newRect(plusButtonGroup, 0, 0, width, height)
-  plusButtonBackground.fill.effect = "generator.linearGradient"
-  plusButtonBackground.fill.effect.color1 = { 0.25, 0.25, 0.25, 0.75 }
-  plusButtonBackground.fill.effect.position1  = { 0, 0 }
-  plusButtonBackground.fill.effect.color2 = { 0.5, 0.5, 0.5, 0.25 }
-  plusButtonBackground.fill.effect.position2  = { 1, 1 }
-  plusButtonBackground.strokeWidth = 1
-  plusButtonBackground:setStrokeColor(0.5, 0.5, 0.5, 0.75)
+  local plusButtonGroup = components.newGroup(parent)
+  components.newEmptyShape(plusButtonGroup, width, height)
   display.newImageRect(plusButtonGroup, "images/icons/plus.png", 50, 50)
   return components.newObjectButton(plusButtonGroup, options)
 end

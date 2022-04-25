@@ -55,21 +55,22 @@ function scene:createContentView()
 
     for levelNumber = 1, 5 do
       local level = worldLevels[levelNumber]
+      local levelImage = nil
       if level then
         local levelImageName, levelImageBaseDir = level:screenshotImage()
-        local levelImage = display.newImageRect(worldButtonContainer, levelImageName, levelImageBaseDir, 70, 105)
-        levelImage.anchorX = 0
-        levelImage.anchorY = 0
-        levelImage.x = (levelNumber - 1) * 52.5
-        if levelNumber > 1 then
-          levelImage.fill.effect = "filter.linearWipe"
-          levelImage.fill.effect.direction = { -1, 0 }
-          levelImage.fill.effect.smoothness = 0.75
-          levelImage.fill.effect.progress = 0.5
-        end
+        levelImage = display.newImageRect(worldButtonContainer, levelImageName, levelImageBaseDir, 70, 105)
       else
-        components.newHitTestableSurface(worldButtonContainer)
-        break
+        levelImage = components.newEmptyShape(worldButtonContainer, 70, 105)
+      end
+      levelImage.anchorX = 0
+      levelImage.anchorY = 0
+      levelImage.x = (levelNumber - 1) * 52.5
+      if levelNumber > 1 then
+        local levelMask = graphics.newMask("images/level-mask.png")
+        levelImage:setMask(levelMask)
+        levelImage.isHitTestMasked = false
+        levelImage.maskScaleX = levelImage.width / 274
+        levelImage.maskScaleY = levelImage.height / 414
       end
     end
 
