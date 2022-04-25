@@ -1,3 +1,4 @@
+local layouts = require "modules.layouts"
 local utils = require "modules.utils"
 local widget = require "widget"
 
@@ -22,7 +23,6 @@ components.newBackground = function(parent)
   return background
 end
 
--- TODO A positionner au bon endroit
 components.newFrame = function(parent, width, height)
   local frame = display.newRoundedRect(0, 0, width - 2, height - 2, 5)
   frame.strokeWidth = 1
@@ -39,15 +39,13 @@ components.newGroup = function(parent, anchorChildren)
   return group
 end
 
--- TODO A garder comme cela ?
 components.newHitTestableSurface = function(parent, reference)
-  local surface = display.newRect(parent, reference.x, reference.y, reference.width, reference.height)
-  surface.anchorX = reference.anchorX
-  surface.anchorY = reference.anchorY
-  surface.xScale = reference.xScale
-  surface.yScale = reference.yScale
+  reference = reference or parent
+  local surface = display.newRect(0, 0, reference.contentWidth, reference.contentHeight)
   surface.isVisible = false
   surface.isHitTestable = true
+  parent:insert(surface)
+  layouts.align(surface, "left", "top", reference)
   return surface
 end
 

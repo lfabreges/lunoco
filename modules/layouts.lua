@@ -1,67 +1,27 @@
 local layouts = {}
 
+layouts.align = function(object, horizontalAlign, verticalAlign, reference)
+  reference = reference or object.parent
+  if horizontalAlign then
+    object.x = object.x + (reference.contentBounds.xMin - object.contentBounds.xMin)
+    if horizontalAlign == "center" then
+      object.x = object.x + reference.contentWidth * 0.5 - object.contentWidth * 0.5
+    elseif horizontalAlign == "right" then
+      object.x = object.x + reference.contentWidth - object.contentWidth
+    end
+  end
+  if verticalAlign then
+    object.y = object.y + (reference.contentBounds.yMin - object.contentBounds.yMin)
+    if verticalAlign == "center" then
+      object.y = object.y + reference.contentHeight * 0.5 - object.contentHeight * 0.5
+    elseif verticalAlign == "bottom" then
+      object.y = object.y + reference.contentHeight - object.contentHeight
+    end
+  end
+end
+
 layouts.alignCenter = function(object, reference)
-  local anchorX = object.anchorChildren == false and 0 or object.anchorX
-  reference = reference or object.parent
-  object.x = reference.contentWidth * 0.5 + (anchorX - 0.5) * object.contentWidth
-end
-
-layouts.alignLeft = function(object, reference)
-  local anchorX = object.anchorChildren == false and 0 or object.anchorX
-  reference = reference or object.parent
-  object.x = anchorX * object.contentWidth
-end
-
-layouts.alignMiddle = function(object, reference)
-  local anchorY = object.anchorChildren == false and 0 or object.anchorY
-  reference = reference or object.parent
-  object.y = reference.contentHeight * 0.5 + (anchorY - 0.5) * object.contentHeight
-end
-
-layouts.alignTop = function(object, reference)
-  local anchorY = object.anchorChildren == false and 0 or object.anchorY
-  reference = reference or object.parent
-  object.y = anchorY * object.contentHeight
-end
-
-layouts.newBlackHole = function(options)
-  options = options or {}
-
-  local blackHole = display.newGroup()
-
-  if options.parent then
-    options.parent:insert(blackHole)
-  end
-
-  local align = nil
-  local insert = blackHole.insert
-  local shouldAlignNextFrame = false
-
-  align = function()
-    for index = 1, blackHole.numChildren do
-      local child = blackHole[index]
-      layouts.alignCenter(child)
-      layouts.alignMiddle(child)
-    end
-    shouldAlignNextFrame = false
-    Runtime:removeEventListener("enterFrame", align)
-  end
-
-  function blackHole:insert(child)
-    if not shouldAlignNextFrame then
-      Runtime:addEventListener("enterFrame", align)
-      shouldAlignNextFrame = true
-    end
-    layouts.alignLeft(child, self)
-    layouts.alignTop(child, self)
-    insert(self, child)
-  end
-
-  blackHole:addEventListener("finalize", function()
-    Runtime:removeEventListener("enterFrame", align)
-  end)
-
-  return blackHole
+  layouts.align(object, "center", nil, reference)
 end
 
 layouts.newGrid = function(options)
@@ -96,21 +56,12 @@ end
 
 layouts.newStack = function(options)
   options = options or {}
-  options.mode = options.mode == "horizontal" and "horizontal" or "vertical"
   options.separator = options.separator or 0
 
   if options.mode == "horizontal" then
-    options.align = (
-         options.align == "center" and "center"
-      or options.align == "bottom" and "bottom"
-      or "top"
-    )
+    options.align = options.align == "center" and "center" or options.align == "right" and "right" or "left"
   else
-    options.align = (
-         options.align == "center" and "center"
-      or options.align == "right" and "right"
-      or "left"
-    )
+    options.align = options.align == "center" and "center" or options.align == "bottom" and "bottom" or "top"
   end
 
   local stack = display.newGroup()
@@ -121,34 +72,16 @@ layouts.newStack = function(options)
 
   local align = nil
   local insert = stack.insert
-  local keys = nil
   local shouldAlignNextFrame = false
 
-  if options.mode == "vertical" then
-    keys = {
-      alignAxis = "x",
-      alignContentSize = "contentWidth",
-      alignStart = "left",
-      axis = "y",
-      contentSize = "contentHeight",
-    }
-  else
-    keys = {
-      alignAxis = "y",
-      alignContentSize = "contentHeight",
-      alignStart = "top",
-      axis = "x",
-      contentSize = "contentWidth"
-    }
-  end
-
   align = function()
-    local alignContentSize = stack[keys.alignContentSize]
     for index = 1, stack.numChildren do
       local child = stack[index]
-      local difference = alignContentSize - child[keys.alignContentSize]
-      local delta = options.align == "center" and difference * 0.5 or difference
-      child[keys.alignAxis] = child[keys.alignAxis] + delta
+      if options.mode == "horizontal" then
+        layouts.align(child, nil, options.mode)
+      else
+        layouts.align(child, options.mode, nil)
+      end
     end
     shouldAlignNextFrame = false
     Runtime:removeEventListener("enterFrame", align)
@@ -156,16 +89,22 @@ layouts.newStack = function(options)
 
   function stack:insert(child)
     local previousChild = stack[stack.numChildren]
+    insert(self, child)
+    child.anchorX = 0
+    child.anchorY = 0
+    child.anchorChildren = true
     if previousChild then
-      child[keys.axis] = previousChild[keys.axis] + previousChild[keys.contentSize] + options.separator
-      if options.align ~= keys.alignStart and not shouldAlignNextFrame then
+      layouts.align(child, "left", "top", previousChild)
+      if options.mode == "horizontal" then
+        child.x = child.x + previousChild.contentWidth + options.separator
+      else
+        child.y = child.y + previousChild.contentHeight + options.separator
+      end
+      if not shouldAlignNextFrame then
         Runtime:addEventListener("enterFrame", align)
         shouldAlignNextFrame = true
       end
     end
-    child.anchorX = 0
-    child.anchorY = 0
-    insert(self, child)
   end
 
   stack:addEventListener("finalize", function()
@@ -173,6 +112,47 @@ layouts.newStack = function(options)
   end)
 
   return stack
+end
+
+layouts.newVortex = function(options)
+  options = options or {}
+
+  local vortex = display.newGroup()
+
+  if options.parent then
+    options.parent:insert(vortex)
+  end
+
+  local align = nil
+  local insert = vortex.insert
+  local shouldAlignNextFrame = false
+
+  align = function()
+    for index = 1, vortex.numChildren do
+      local child = vortex[index]
+      layouts.align(child, "center", "center")
+    end
+    shouldAlignNextFrame = false
+    Runtime:removeEventListener("enterFrame", align)
+  end
+
+  function vortex:insert(child)
+    local previousChild = vortex[vortex.numChildren]
+    insert(self, child)
+    if previousChild then
+      layouts.align(child, "left", "top", previousChild)
+      if not shouldAlignNextFrame then
+        Runtime:addEventListener("enterFrame", align)
+        shouldAlignNextFrame = true
+      end
+    end
+  end
+
+  vortex:addEventListener("finalize", function()
+    Runtime:removeEventListener("enterFrame", align)
+  end)
+
+  return vortex
 end
 
 return layouts

@@ -45,7 +45,13 @@ function scene:createContentView()
   for _, world in ipairs(worlds) do
     local worldLevels = world:levels()
     local worldProgress, worldNumberOfStars = world:progress()
+
     local worldButtonContainer = display.newContainer(self.contentView, 280, 105)
+    worldButtonContainer.anchorChildren = false
+    worldButtonContainer.anchorX = 0
+    worldButtonContainer.anchorY = 0
+    worldButtonContainer.x = centerX - 140
+    worldButtonContainer.y = y
 
     for levelNumber = 1, 5 do
       local level = worldLevels[levelNumber]
@@ -62,14 +68,7 @@ function scene:createContentView()
           levelImage.fill.effect.progress = 0.5
         end
       else
-        -- TODO Remplir le vide avec quelque chose !
-        local x = (levelNumber - 1) * 52.5
-        local width = worldButtonContainer.width - x
-        local noMoreLevelBackground = display.newRect(worldButtonContainer, x, 0, width, 105)
-        noMoreLevelBackground.anchorX = 0
-        noMoreLevelBackground.anchorY = 0
-        noMoreLevelBackground.isVisible = false
-        noMoreLevelBackground.isHitTestable = true
+        components.newHitTestableSurface(worldButtonContainer)
         break
       end
     end
@@ -78,11 +77,6 @@ function scene:createContentView()
       onRelease = function() navigation.gotoLevels(world) end,
       scrollView = self.scrollView,
     })
-    worldButton.anchorChildren = false
-    worldButton.anchorX = 0
-    worldButton.anchorY = 0
-    worldButton.x = centerX - 140
-    worldButton.y = y
 
     local worldProgressText = display.newText({
       text = i18n.t("progress", worldProgress),

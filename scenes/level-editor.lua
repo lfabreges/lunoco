@@ -36,23 +36,11 @@ end
 
 local function newButton(parent, content, options)
   local buttonGroup = components.newGroup(parent)
-
-  local frame = display.newRoundedRect(buttonGroup, 0, 0, 78, 78, 5)
-  frame.anchorX = 0
-  frame.anchorY = 0
-  frame:setFillColor(0.5, 0.5, 0.5, 0.25)
-  frame:setStrokeColor(0.5, 0.5, 0.5, 0.75)
-  frame.strokeWidth = 1
-
+  local frame = components.newFrame(buttonGroup, 80, 80)
   local contentGroup = components.newGroup(buttonGroup)
   components.newHitTestableSurface(contentGroup, frame)
-
   contentGroup:insert(content)
-  content.x = frame.x + frame.contentWidth * 0.5
-  content.y = frame.y + frame.contentWidth * 0.5
-
   components.newObjectButton(contentGroup, options)
-
   return buttonGroup
 end
 
@@ -355,12 +343,10 @@ function scene:createSideBar()
   separator.y = separator.y + (separator.contentHeight - separator.strokeWidth) * 0.5
 
   local pickerWheelGroup = components.newGroup(scrollViewStack)
-  local pickerWheelFrame = display.newRoundedRect(pickerWheelGroup, 0, 0, 168, 210, 5)
+
+  local pickerWheelFrame = components.newFrame(pickerWheelGroup, 170, 210)
   pickerWheelFrame.anchorX = 0
   pickerWheelFrame.anchorY = 0
-  pickerWheelFrame:setFillColor(0.5, 0.5, 0.5, 0.25)
-  pickerWheelFrame:setStrokeColor(0.5, 0.5, 0.5, 0.75)
-  pickerWheelFrame.strokeWidth = 1
 
   local configuration = level:configuration()
   local pickerWheel = nil

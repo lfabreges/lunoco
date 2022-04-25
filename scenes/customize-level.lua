@@ -117,14 +117,13 @@ function scene:createContentView()
     primaryStack:insert(text)
 
     local secondaryStack = layouts.newStack({ mode = "horizontal", parent = primaryStack, separator = 5 })
+    local elementVortex = layouts.newVortex({ parent = secondaryStack })
+    components.newFrame(elementVortex, 80, 80)
+    local element = level:newElement(elementVortex, family, name, width, height)
 
-    local elementBlackHole = layouts.newBlackHole({ parent = secondaryStack })
-    components.newFrame(elementBlackHole, 80, 80)
-    local element = level:newElement(elementBlackHole, family, name, width, height)
-
-    local customizeBlackHole = layouts.newBlackHole({ parent = secondaryStack })
-    components.newFrame(customizeBlackHole, 124, 80)
-    local customizeStack = layouts.newStack({ mode = "horizontal", parent = customizeBlackHole, separator = 14 })
+    local customizeVortex = layouts.newVortex({ parent = secondaryStack })
+    components.newFrame(customizeVortex, 124, 80)
+    local customizeStack = layouts.newStack({ mode = "horizontal", parent = customizeVortex, separator = 14 })
 
     local onCapturePhotoOrSelectPhotoComplete = function(filename)
       navigation.gotoElementImage(level, descriptor, filename)
@@ -139,12 +138,12 @@ function scene:createContentView()
     })
 
     if not element.isDefault then
-      local removeBlackHole = layouts.newBlackHole({ parent = secondaryStack })
-      local removeFrame = components.newFrame(removeBlackHole, 66, 80)
-      components.newImageButton(removeBlackHole, "images/icons/trash.png", 40, 40, {
+      local removeVortex = layouts.newVortex({ parent = secondaryStack })
+      local removeFrame = components.newFrame(removeVortex, 66, 80)
+      components.newImageButton(removeVortex, "images/icons/trash.png", 40, 40, {
         onRelease = function(event)
           level:removeImage(family, name)
-          local defaultElement = level:newElement(elementBlackHole, family, name, width, height)
+          local defaultElement = level:newElement(elementVortex, family, name, width, height)
           transition.from(defaultElement, { time = 500, alpha = 0 } )
           transition.to(element, { time = 500, alpha = 0, onComplete = function() display.remove(element) end })
           display.remove(removeFrame)

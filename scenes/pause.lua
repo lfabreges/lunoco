@@ -1,6 +1,7 @@
 local components = require "modules.components"
 local composer = require "composer"
 local i18n = require "modules.i18n"
+local layouts = require "modules.layouts"
 local navigation = require "modules.navigation"
 
 local level = nil
@@ -47,14 +48,12 @@ function scene:create(event)
   remainingBackground.height = screenHeight - resumeBackground.height
   remainingBackground:setFillColor(0, 0, 0, 0.9)
 
-  local resumeButtonGroup = components.newGroup(self.view)
-  local resumeButtonImage = display.newImageRect(resumeButtonGroup, "images/icons/resume.png", 40, 40)
-  local resumeButtonArea = display.newRect(resumeButtonGroup, 0, 0, resumeBackground.width, resumeBackground.height)
-  resumeButtonArea.isVisible = false
-  resumeButtonArea.isHitTestable = true
-  local resumeButton = components.newObjectButton(resumeButtonGroup, { onRelease = resumeGame })
-  resumeButton.x = display.contentCenterX
-  resumeButton.y = screenY + resumeBackground.height * 0.5
+  local resumeButtonVortex = layouts.newVortex({ parent = self.view })
+  components.newHitTestableSurface(resumeButtonVortex, resumeBackground)
+  local resumeButtonImage = display.newImageRect("images/icons/resume.png", 40, 40)
+  resumeButtonVortex:insert(resumeButtonImage)
+  components.newObjectButton(resumeButtonVortex, { onRelease = resumeGame })
+  layouts.align(resumeButtonVortex, "center", "center", resumeBackground)
 
   local retryButton = components.newTextButton(
     self.view,
