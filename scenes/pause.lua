@@ -55,47 +55,17 @@ function scene:create(event)
   components.newObjectButton(resumeButtonVortex, { onRelease = resumeGame })
   layouts.align(resumeButtonVortex, "center", "center", resumeBackground)
 
-  local retryButton = components.newTextButton(
-    self.view,
-    i18n.t("retry"),
-    160,
-    40,
-    { onRelease = retryLevel }
-  )
-  retryButton.x = display.contentCenterX
-  retryButton.y = remainingBackground.y + remainingBackground.height * 0.5 - (isLevelBuiltIn and 60 or 90)
+  local actionStack = layouts.newStack({ parent = self.view, separator = 20 })
 
-  local levelsButton = components.newTextButton(
-    self.view,
-    i18n.t("levels"),
-    160,
-    40,
-    { onRelease = gotoLevels }
-  )
-  levelsButton.x = display.contentCenterX
-  levelsButton.y = retryButton.y + 60
-
-  local customizeButton = components.newTextButton(
-    self.view,
-    i18n.t("customize"),
-    160,
-    40,
-    { onRelease = gotoCustomizeLevel }
-  )
-  customizeButton.x = display.contentCenterX
-  customizeButton.y = levelsButton.y + 60
+  components.newTextButton(actionStack, i18n.t("retry"), 160, 40, { onRelease = retryLevel })
+  components.newTextButton(actionStack, i18n.t("levels"), 160, 40, { onRelease = gotoLevels })
+  components.newTextButton(actionStack, i18n.t("customize"), 160, 40, { onRelease = gotoCustomizeLevel })
 
   if not isLevelBuiltIn then
-    local editButton = components.newTextButton(
-      self.view,
-      i18n.t("edit-level"),
-      160,
-      40,
-      { onRelease = gotoLevelEditor }
-    )
-    editButton.x = display.contentCenterX
-    editButton.y = customizeButton.y + 60
+    components.newTextButton(actionStack, i18n.t("edit-level"), 160, 40, { onRelease = gotoLevelEditor })
   end
+
+  layouts.align(actionStack, "center", "center", remainingBackground)
 end
 
 function scene:hide(event)
