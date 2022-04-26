@@ -10,16 +10,20 @@ local screenWidth = display.actualContentWidth
 local screenHeight = display.actualContentHeight
 local topInset, leftInset, bottomInset, rightInset = display.getSafeAreaInsets()
 
+components.fillWithBackground = function(object)
+  display.setDefault("textureWrapX", "repeat")
+  display.setDefault("textureWrapY", "repeat")
+  object.fill = { type = "image", filename = "images/background.png" }
+  display.setDefault("textureWrapX", "clampToEdge")
+  display.setDefault("textureWrapY", "clampToEdge")
+end
+
 components.newBackground = function(parent)
   local background = display.newRect(screenX, screenY, screenWidth, screenHeight)
   parent:insert(background)
   background.anchorX = 0
   background.anchorY = 0
-  display.setDefault("textureWrapX", "repeat")
-  display.setDefault("textureWrapY", "repeat")
-  background.fill = { type = "image", filename = "images/background.png" }
-  display.setDefault("textureWrapX", "clampToEdge")
-  display.setDefault("textureWrapY", "clampToEdge")
+  components.fillWithBackground(background)
   return background
 end
 

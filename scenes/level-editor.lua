@@ -178,6 +178,7 @@ end
 function scene:createHelp()
   self.help = components.newGroup(self.view)
 
+
   local helpFrame = display.newRoundedRect(
     self.help,
     elements.background.contentBounds.xMin + elements.background.contentWidth * 0.5,
@@ -186,14 +187,10 @@ function scene:createHelp()
     160,
     10
   )
-  display.setDefault("textureWrapX", "repeat")
-  display.setDefault("textureWrapY", "repeat")
+  components.fillWithBackground(helpFrame)
   helpFrame.anchorY = 0
-  helpFrame.fill = { type = "image", filename = "images/background.png" }
   helpFrame.fill.a = 0.5
   helpFrame.strokeWidth = 1
-  display.setDefault("textureWrapX", "clampToEdge")
-  display.setDefault("textureWrapY", "clampToEdge")
 
   local helpContentGroup = components.newGroup(self.help)
 
@@ -244,12 +241,7 @@ function scene:createSideBar()
   sideBarBackground.alpha = 0.9
   sideBarBackground:addEventListener("tap", function() return true end)
   sideBarBackground:addEventListener("touch", function() return true end)
-
-  display.setDefault("textureWrapX", "repeat")
-  display.setDefault("textureWrapY", "repeat")
-  sideBarBackground.fill = { type = "image", filename = "images/background.png" }
-  display.setDefault("textureWrapX", "clampToEdge")
-  display.setDefault("textureWrapY", "clampToEdge")
+  components.fillWithBackground(sideBarBackground)
 
   local sideBarHandle = components.newGroup(sideBar)
   sideBarHandle.x = sideBarWidth - 6
@@ -412,14 +404,9 @@ function scene:configureElement(element)
         element.contentHeight + 40,
         10
       )
-
-      display.setDefault("textureWrapX", "repeat")
-      display.setDefault("textureWrapY", "repeat")
-      handle.fill = { type = "image", filename = "images/background.png" }
+      components.fillWithBackground(handle)
       handle.fill.a = 0.5
       handle.strokeWidth = 1
-      display.setDefault("textureWrapX", "clampToEdge")
-      display.setDefault("textureWrapY", "clampToEdge")
 
       element:toFront()
       element.handle = handle
@@ -481,13 +468,9 @@ function scene:selectElement(element)
     selectedElement.toolBar.y = selectedElement.toolBar.position()
 
     local toolBarFrame = display.newRoundedRect(selectedElement.toolBar, 0, 0, 1, 38, 10)
-    display.setDefault("textureWrapX", "repeat")
-    display.setDefault("textureWrapY", "repeat")
-    toolBarFrame.fill = { type = "image", filename = "images/background.png" }
+    components.fillWithBackground(toolBarFrame)
     toolBarFrame.fill.a = 0.5
     toolBarFrame.strokeWidth = 1
-    display.setDefault("textureWrapX", "clampToEdge")
-    display.setDefault("textureWrapY", "clampToEdge")
 
     local toolBarContent = components.newGroup(selectedElement.toolBar)
 
