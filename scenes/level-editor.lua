@@ -162,7 +162,11 @@ function scene:create(event)
   local middleGround = components.newHitTestableSurface(self.view, elements.frame)
 
   scene.toolBarGroup = components.newGroup(self.view)
-  scene:createHelp()
+
+  if #elements.obstacles == 0 and #elements.targets == 0 then
+    scene:createHelp()
+  end
+
   scene:createSideBar()
 
   middleGround:addEventListener("touch", function(event)
