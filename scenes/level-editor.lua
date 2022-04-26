@@ -44,6 +44,15 @@ local function newButton(parent, content, options)
   return buttonGroup
 end
 
+local function newFrame(parent, width, height)
+  local frame = display.newRoundedRect(0, 0, width, height, 10)
+  parent:insert(frame)
+  components.fillWithBackground(frame)
+  frame.fill.a = 0.5
+  frame.strokeWidth = 1
+  return frame
+end
+
 local function onFocus(event)
   local element = event.target.element
   element.contentWidthStart = element.contentWidth
@@ -178,41 +187,24 @@ end
 function scene:createHelp()
   self.help = components.newGroup(self.view)
 
+  local helpFrame = newFrame(self.help, 260, 0)
+  local helpContentStack = layouts.newStack({ align = "center", parent = self.help, separator = 10 })
 
-  local helpFrame = display.newRoundedRect(
-    self.help,
-    elements.background.contentBounds.xMin + elements.background.contentWidth * 0.5,
-    elements.background.contentBounds.yMin + 20,
-    elements.background.contentWidth - 40,
-    160,
-    10
-  )
-  components.fillWithBackground(helpFrame)
-  helpFrame.anchorY = 0
-  helpFrame.fill.a = 0.5
-  helpFrame.strokeWidth = 1
-
-  local helpContentGroup = components.newGroup(self.help)
-
-  local helpIcon = display.newImageRect(helpContentGroup, "images/icons/tap.png", 40, 40)
-  helpIcon.anchorY = 0
-  helpIcon.x = 0
-  helpIcon.y = 0
+  local helpIcon = display.newImageRect("images/icons/tap.png", 40, 40)
+  helpContentStack:insert(helpIcon)
 
   local helpText = display.newText({
     align = "center",
     text = i18n.t("level-editor-help"),
     fontSize = 14,
-    parent = helpContentGroup,
-    x = 0,
-    y = helpIcon.contentHeight + 10,
     width = helpFrame.contentWidth - 20,
   })
-  helpText.anchorY = 0
+  helpContentStack:insert(helpText)
 
-  helpFrame.path.height = helpContentGroup.contentHeight + 40
-  helpContentGroup.x = helpFrame.x
-  helpContentGroup.y = helpFrame.contentBounds.yMin + 20
+  helpFrame.path.height = helpContentStack.contentHeight + 40
+  layouts.align(helpContentStack, "center", "center", helpFrame)
+  layouts.align(self.help, "center", "top", elements.background)
+  self.help.y = self.help.y + 20
 end
 
 function scene:createSideBar()
@@ -396,17 +388,8 @@ function scene:configureElement(element)
         return false
       end
 
-      local handle = display.newRoundedRect(
-        levelView,
-        element.contentBounds.xMin + element.contentWidth * 0.5,
-        element.contentBounds.yMin + element.contentHeight * 0.5,
-        element.contentWidth + 40,
-        element.contentHeight + 40,
-        10
-      )
-      components.fillWithBackground(handle)
-      handle.fill.a = 0.5
-      handle.strokeWidth = 1
+      local handle = newFrame(levelView, element.contentWidth + 40, element.contentHeight + 40)
+      layouts.align(handle, "center", "center", element)
 
       element:toFront()
       element.handle = handle
@@ -467,49 +450,37 @@ function scene:selectElement(element)
     end
     selectedElement.toolBar.y = selectedElement.toolBar.position()
 
-    local toolBarFrame = display.newRoundedRect(selectedElement.toolBar, 0, 0, 1, 38, 10)
-    components.fillWithBackground(toolBarFrame)
-    toolBarFrame.fill.a = 0.5
-    toolBarFrame.strokeWidth = 1
-
-    local toolBarContent = components.newGroup(selectedElement.toolBar)
-
-    local elementNameText = display.newText({
-      text = i18n.t(element.family .. "-" .. element.name),
-      fontSize = 14,
-      parent = toolBarContent,
+    local toolBarFrame = newFrame(selectedElement.toolBar, 0, 38)
+    local toolBarStack = layouts.newStack({
+      align = "center",
+      mode = "horizontal",
+      parent = selectedElement.toolBar,
+      separator = 20,
     })
-    elementNameText.anchorX = 0
 
-    local x = elementNameText.x + elementNameText.width
+    local elementNameText = display.newText({ text = i18n.t(element.family .. "-" .. element.name), fontSize = 14 })
+    toolBarStack:insert(elementNameText)
 
     if element.family == "obstacle" and element.name == "corner" then
-      x = x + 20
-      local separator = display.newLine(toolBarContent, x, -8, x, 8)
-      separator.anchorX = 0
+      local separator = display.newLine(0, -8, 0, 8)
+      toolBarStack:insert(separator)
 
-      x = x + 20
-      local rotateRightIcon = display.newImageRect(toolBarContent, "images/icons/rotate-right.png", 20, 20)
-      rotateRightIcon.anchorX = 0
-      rotateRightIcon.x = x
+      local rotateRightIcon = display.newImageRect("images/icons/rotate-right.png", 20, 20)
+      toolBarStack:insert(rotateRightIcon)
 
       local rotateRightButton = components.newObjectButton(rotateRightIcon, { onRelease = function()
         element.rotation = (element.rotation + 90) % 360
         return true
       end})
       rotateRightButton:addEventListener("tap", function() return true end)
-
-      x = x + rotateRightButton.contentWidth
     end
 
     if element.family == "obstacle" or element.family == "target" then
-      x = x + 20
-      local separator = display.newLine(toolBarContent, x, -8, x, 8)
-      separator.anchorX = 0
+      local separator = display.newLine(0, -8, 0, 8)
+      toolBarStack:insert(separator)
 
-      local deleteIcon = display.newImageRect(toolBarContent, "images/icons/trash.png", 20, 20)
-      deleteIcon.anchorX = 0
-      deleteIcon.x = x + 20
+      local deleteIcon = display.newImageRect("images/icons/trash.png", 20, 20)
+      toolBarStack:insert(deleteIcon)
 
       local deleteButton = components.newObjectButton(deleteIcon, { onRelease = function()
         scene:selectElement(nil)
@@ -522,9 +493,8 @@ function scene:selectElement(element)
       deleteButton:addEventListener("tap", function() return true end)
     end
 
-    toolBarFrame.path.width = toolBarContent.contentWidth + 40
-    toolBarContent.x = -toolBarContent.contentWidth * 0.5
-
+    toolBarFrame.path.width = toolBarStack.contentWidth + 40
+    layouts.align(toolBarStack, "center", "center", toolBarFrame)
     transition.from(selectedElement.toolBar, { alpha = 0, time = 100 })
   end
 end
