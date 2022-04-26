@@ -29,6 +29,7 @@ local function goBack()
   end
 end
 
+-- TODO A garder ici ?
 local function deleteLevel()
   level:delete()
   goBack()
@@ -176,6 +177,7 @@ function scene:create(event)
     end
     return false
   end)
+
   elements.frame:addEventListener("tap", function(event)
     if event.numTaps == 2 and not sideBar.isOpened then
       sideBar.open()
