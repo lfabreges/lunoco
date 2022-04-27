@@ -72,12 +72,11 @@ function scene:create(event)
   })
   customizeButton.x = 75
 
-  if not isLevelBuiltIn then
-    local editLevelButton = components.newCircleButton(actionGroup, "images/icons/edit.png", 40, {
-      onRelease = editLevel
-    })
-    editLevelButton.y = 75
-  end
+  local editLevelButton = components.newCircleButton(actionGroup, "images/icons/edit.png", 40, {
+    onRelease = editLevel
+  })
+  editLevelButton.y = 75
+  editLevelButton.isVisible = not isLevelBuiltIn
 
   layouts.align(actionGroup, "center", "center", remainingBackground)
 end
