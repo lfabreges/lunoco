@@ -385,6 +385,37 @@ function scene:createSideBar()
     columnStarImage.y = pickerWheelFrame.y + 10
   end
 
+  local separator = display.newLine(0, 0, 150, 0)
+  separator:setStrokeColor(0.5, 0.5, 0.5, 0.75)
+  scrollViewStack:insert(separator)
+  separator.y = separator.y + (separator.contentHeight - separator.strokeWidth) * 0.5
+
+  local deleteGrid = layouts.newGrid({ parent = scrollViewStack, separator = 10 })
+  local deleteButtonIcon = display.newImageRect("images/icons/trash.png", 35, 35)
+  local confirmDeleteButton = nil
+
+  newButton(deleteGrid, deleteButtonIcon, { onRelease = function(event)
+    local deleteButton = event.target
+    deleteButton.isPressed = not deleteButton.isPressed
+    transition.to(confirmDeleteButton, { alpha = deleteButton.isPressed and 1 or 0, time = 100 })
+  end })
+
+  local confirmDeleteButtonVortex = layouts.newVortex()
+  local confirmDeleteButtonBackground = display.newRoundedRect(0, 0, 78, 78, 5)
+  confirmDeleteButtonVortex:insert(confirmDeleteButtonBackground)
+  confirmDeleteButtonBackground:setFillColor(0.67, 0.2, 0.2, 0.75)
+
+  local confirmDeleteButtonText = display.newText({
+    align = "center",
+    text = i18n.t("click-here-to-confirm"),
+    fontSize = 14,
+    width = 70,
+  })
+  confirmDeleteButtonVortex:insert(confirmDeleteButtonText)
+
+  confirmDeleteButton = newButton(deleteGrid, confirmDeleteButtonVortex, { onRelease = deleteLevel })
+  confirmDeleteButton.alpha = 0
+
   layouts.alignCenter(scrollViewStack, scrollView)
 end
 
