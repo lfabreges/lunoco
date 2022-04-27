@@ -31,28 +31,26 @@ function scene:create(event)
   local background = components.newBackground(self.view)
   background:setFillColor(0, 0, 0, 0.9)
 
-  display.newText({
+  local stack = layouts.newStack({ align = "center", parent = self.view, separator = 60 })
+
+  local finishedInText = display.newText({
     text = i18n.p("finished_in", numberOfShots),
+    font = native.systemFontBold,
     fontSize = 20,
-    parent = self.view,
-    x = display.contentCenterX,
-    y = display.contentCenterY / 2,
   })
+  stack:insert(finishedInText)
 
-  local retryButton = components.newTextButton(self.view, i18n.t("retry"), 120, 40, { onRelease = retryLevel })
-  retryButton.x = display.contentCenterX - 70
-  retryButton.y = display.contentCenterY + display.contentCenterY / 2
-
-  local levelsButton = components.newTextButton(self.view, i18n.t("levels"), 120, 40, { onRelease = gotoLevels })
-  levelsButton.x = display.contentCenterX + 70
-  levelsButton.y = display.contentCenterY + display.contentCenterY / 2
-
-  scene.score = components.newScore(self.view, 75, numberOfStars)
-  layouts.align(scene.score, "center", "center")
+  scene.score = components.newScore(stack, 75, numberOfStars)
 
   for starCount = 1, 3 do
     scene.score[starCount].alpha = 0
   end
+
+  local actionStack = layouts.newStack({ mode = "horizontal", parent = stack, separator = 40 })
+  components.newCircleButton(actionStack, "images/icons/reload.png", 40, { onRelease = retryLevel })
+  components.newCircleButton(actionStack, "images/icons/menu.png", 40, { onRelease = gotoLevels })
+
+  layouts.align(stack, "center", "center")
 end
 
 function scene:show(event)

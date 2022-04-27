@@ -27,6 +27,20 @@ components.newBackground = function(parent)
   return background
 end
 
+components.newCircleButton = function(parent, imageName, size, options)
+  local vortex = layouts.newVortex()
+  local circle = display.newCircle(0, 0, size)
+  circle:setFillColor(0, 0, 0, 0)
+  circle.isHitTestable = true
+  circle.strokeWidth = 1
+  vortex:insert(circle)
+  local image = display.newImageRect(imageName, size, size)
+  vortex:insert(image)
+  local button = components.newObjectButton(vortex, options)
+  parent:insert(button)
+  return button
+end
+
 components.newEmptyShape = function(parent, width, height)
   local emptyShape = display.newRect(parent, 0, 0, width, height)
   emptyShape.fill.effect = "generator.linearGradient"

@@ -1,13 +1,10 @@
 {
   "click-here-to-confirm": "Cliquez ici pour confirmer",
-  "customize": "Personnaliser",
-  "edit-level": "Editer le niveau",
   "finished_in": {
     "one": "Terminé en 1 tir !",
     "other": "Terminé en {count} tirs !"
   },
   "level-editor-help": "Tapez deux fois pour ouvrir la barre latérale",
-  "levels": "Niveaux",
   "obstacle-corner": "Coin",
   "obstacle-horizontal-barrier": "Barrière horizontale",
   "obstacle-horizontal-barrier-large": "Grande barrière horizontale",
@@ -16,7 +13,6 @@
   "permission-denied": "Permission refusée",
   "permission-denied-camera": "Lunoco n'a pas la permission d'utiliser votre appareil photo",
   "permission-denied-photo-library": "Lunoco n'a pas la permission d'accéder à votre bibliothèque de photos",
-  "retry": "Réessayer",
   "root-background": "Arrière-plan",
   "root-ball": "Balle",
   "root-frame": "Cadre",

@@ -12,11 +12,11 @@ local screenWidth = display.actualContentWidth
 local screenHeight = display.actualContentHeight
 local shouldResumeGame = false
 
-local function gotoCustomizeLevel()
+local function customizeLevel()
   navigation.gotoCustomizeLevel(level)
 end
 
-local function gotoLevelEditor()
+local function editLevel()
   navigation.gotoLevelEditor(level)
 end
 
@@ -55,17 +55,31 @@ function scene:create(event)
   components.newObjectButton(resumeButtonVortex, { onRelease = resumeGame })
   layouts.align(resumeButtonVortex, "center", "center", resumeBackground)
 
-  local actionStack = layouts.newStack({ parent = self.view, separator = 20 })
+  local actionGroup = components.newGroup(self.view)
 
-  components.newTextButton(actionStack, i18n.t("retry"), 160, 40, { onRelease = retryLevel })
-  components.newTextButton(actionStack, i18n.t("levels"), 160, 40, { onRelease = gotoLevels })
-  components.newTextButton(actionStack, i18n.t("customize"), 160, 40, { onRelease = gotoCustomizeLevel })
+  local retryButton = components.newCircleButton(actionGroup, "images/icons/reload.png", 40, {
+    onRelease = retryLevel
+  })
+  retryButton.x = -75
+
+  local menuButton = components.newCircleButton(actionGroup, "images/icons/menu.png", 40, {
+    onRelease = gotoLevels
+  })
+  menuButton.y = -75
+
+  local customizeButton = components.newCircleButton(actionGroup, "images/icons/customize.png", 40, {
+    onRelease = customizeLevel
+  })
+  customizeButton.x = 75
 
   if not isLevelBuiltIn then
-    components.newTextButton(actionStack, i18n.t("edit-level"), 160, 40, { onRelease = gotoLevelEditor })
+    local editLevelButton = components.newCircleButton(actionGroup, "images/icons/edit.png", 40, {
+      onRelease = editLevel
+    })
+    editLevelButton.y = 75
   end
 
-  layouts.align(actionStack, "center", "center", remainingBackground)
+  layouts.align(actionGroup, "center", "center", remainingBackground)
 end
 
 function scene:hide(event)

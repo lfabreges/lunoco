@@ -30,7 +30,6 @@ local function goBack()
   end
 end
 
--- TODO A garder ici ?
 local function deleteLevel()
   level:delete()
   goBack()
@@ -139,12 +138,6 @@ end
 local function saveAndGoBack()
   save()
   goBack()
-end
-
--- TODO Garder saveAndPlay ou non ?
-local function saveAndPlay()
-  save()
-  navigation.gotoGame(level)
 end
 
 function scene:create(event)
