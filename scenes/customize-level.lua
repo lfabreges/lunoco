@@ -11,6 +11,7 @@ local screenX = display.screenOriginX
 local screenY = display.screenOriginY
 local screenWidth = display.actualContentWidth
 local screenHeight = display.actualContentHeight
+local topInset, leftInset, bottomInset, rightInset = display.getSafeAreaInsets()
 
 local function captureAndSelectPhotoOptions(onComplete)
   local filename = "element-image." .. math.random() .. ".png"
@@ -79,7 +80,7 @@ function scene:create(event)
     top = topBar.contentBounds.yMax,
     height = screenHeight - topBar.contentHeight,
     topPadding = 20,
-    bottomPadding = 20,
+    bottomPadding = bottomInset + 20,
   })
 end
 

@@ -8,6 +8,7 @@
   même le même menu de gameover)
 
 # Nice to have
+* Refaire toutes les icones en plus grand
 * Revoir les boutons en y ajoutant des icones
 * Ajouter des vérifications pour les fichiers issus du dossier utilisateur
 

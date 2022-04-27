@@ -167,8 +167,8 @@ components.newScrollView = function(parent, options)
     hideBackground = true,
     hideScrollBar = true,
     horizontalScrollDisabled = true,
-    topPadding = topInset + (options.topPadding or 0),
-    bottomPadding = bottomInset + (options.bottomPadding or 0),
+    topPadding = options.topPadding or 0,
+    bottomPadding = options.bottomPadding or 0,
   })
   parent:insert(scrollView)
   return scrollView

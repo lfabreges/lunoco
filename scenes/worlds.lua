@@ -11,11 +11,16 @@ local screenX = display.screenOriginX
 local screenY = display.screenOriginY
 local screenWidth = display.actualContentWidth
 local screenHeight = display.actualContentHeight
+local topInset, leftInset, bottomInset, rightInset = display.getSafeAreaInsets()
 local universe = universeClass:new(1)
 
 function scene:create(event)
   components.newBackground(self.view)
-  self.scrollView = components.newScrollView(self.view, { topPadding = 50, bottomPadding = 40 })
+
+  self.scrollView = components.newScrollView(self.view, {
+    topPadding = topInset + 50,
+    bottomPadding = bottomInset + 40,
+  })
 
   local titleStack = layouts.newStack({
     align = "center",

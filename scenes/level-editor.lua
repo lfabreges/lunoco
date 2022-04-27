@@ -20,6 +20,7 @@ local screenHeight = display.actualContentHeight
 local selectedElement = nil
 local sideBar = nil
 local stars = {}
+local topInset, leftInset, bottomInset, rightInset = display.getSafeAreaInsets()
 
 local function goBack()
   if #level.world:levels() == 0 then
@@ -282,8 +283,8 @@ function scene:createSideBar()
     top = 0,
     width = sideBarWidth - 10,
     height = sideBarBackground.contentHeight,
-    topPadding = 10,
-    bottomPadding = 10,
+    topPadding = topInset + 10,
+    bottomPadding = bottomInset + 10,
   })
 
   local scrollViewStack = layouts.newStack({ align = "center", parent = scrollView, separator = 20 })

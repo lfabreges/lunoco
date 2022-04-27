@@ -38,7 +38,7 @@ function scene:create(event)
     top = topBar.contentBounds.yMax,
     height = screenHeight - topBar.contentHeight,
     topPadding = 40,
-    bottomPadding = 40,
+    bottomPadding = bottomInset + 40,
   })
 end
 
