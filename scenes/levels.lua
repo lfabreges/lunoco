@@ -66,8 +66,9 @@ function scene:createContentView()
     if worldScores[level.name] then
       components.newScore(levelStack, 20, worldScores[level.name].numberOfStars)
     else
-      local noScore = components.newScore(levelStack, 20, 0)
-      noScore.alpha = 0.2
+      local filler = display.newRect(0, 0, 1, 20)
+      filler.isVisible = false
+      levelStack:insert(filler)
     end
   end
 
