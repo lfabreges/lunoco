@@ -1,7 +1,7 @@
 local components = require "modules.components"
 local composer = require "composer"
 local i18n = require "modules.i18n"
-local multitouch = require "libraries.multitouch"
+local multitouch = require "modules.multitouch"
 local navigation = require "modules.navigation"
 local utils = require "modules.utils"
 
