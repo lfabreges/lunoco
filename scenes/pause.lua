@@ -60,12 +60,12 @@ function scene:create(event)
   local retryButton = components.newCircleButton(actionGroup, "images/icons/reload.png", 40, {
     onRelease = retryLevel
   })
-  retryButton.x = -75
+  retryButton.y = -75
 
   local menuButton = components.newCircleButton(actionGroup, "images/icons/menu.png", 40, {
     onRelease = gotoLevels
   })
-  menuButton.y = -75
+  menuButton.x = -75
 
   local customizeButton = components.newCircleButton(actionGroup, "images/icons/customize.png", 40, {
     onRelease = customizeLevel
