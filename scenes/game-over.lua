@@ -33,11 +33,7 @@ function scene:create(event)
 
   local stack = layouts.newStack({ align = "center", parent = self.view, separator = 60 })
 
-  local finishedInText = display.newText({
-    text = i18n.p("finished_in", numberOfShots),
-    font = native.systemFontBold,
-    fontSize = 30,
-  })
+  local finishedInText = display.newText({ text = i18n.p("finished_in", numberOfShots), fontSize = 30 })
   stack:insert(finishedInText)
 
   scene.score = components.newScore(stack, 75, numberOfStars)
