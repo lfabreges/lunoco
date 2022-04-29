@@ -36,7 +36,7 @@ function scene:create(event)
   local finishedInText = display.newText({
     text = i18n.p("finished_in", numberOfShots),
     font = native.systemFontBold,
-    fontSize = 20,
+    fontSize = 30,
   })
   stack:insert(finishedInText)
 
