@@ -188,6 +188,49 @@ components.newScrollView = function(parent, options)
   return scrollView
 end
 
+components.newTabBar = function(parent, tabs, icons)
+  local tabBar = components.newGroup(parent)
+  tabBar.x = screenX
+  tabBar.y = screenY + screenHeight - bottomInset - 60
+
+  local background = display.newRect(tabBar, 0, 0, screenWidth, bottomInset + 60)
+  background.anchorX = 0
+  background.anchorY = 0
+  background.strokeWidth = 1
+  background:setFillColor(0, 0, 0, 0.33)
+  background:setStrokeColor(0.5, 0.5, 0.5, 0.75)
+
+  local iconImages = {}
+  local selectedTab = tabs:selectedTab()
+  local spaceSize = display.actualContentWidth / #icons
+
+  for index, icon in ipairs(icons) do
+    local buttonGroup = components.newGroup(tabBar)
+    iconImages[index] = display.newImageRect(buttonGroup, "images/icons/" .. icon .. ".png", 40, 40)
+    components.newObjectButton(buttonGroup, { onRelease = function() tabs:select(index) end })
+    iconImages[index].alpha = selectedTab == index and 1 or 0.2
+    buttonGroup.x = (index - 1) * spaceSize + spaceSize * 0.5
+    buttonGroup.y = 30
+  end
+
+  local function onSelect(event)
+    if event.index ~= event.previous then
+      if event.time == 0 then
+        iconImages[event.previous].alpha = 0.2
+        iconImages[event.index].alpha = 1
+      else
+        transition.to(iconImages[event.previous], { alpha = 0.2, time = event.time })
+        transition.to(iconImages[event.index], { alpha = 1, time = event.time })
+      end
+    end
+  end
+
+  tabs:addEventListener("select", onSelect)
+  tabBar:addEventListener("finalize", function() tabs:removeEventListener("select", onSelect) end)
+
+  return tabBar
+end
+
 components.newTextButton = function(parent, text, width, height, options)
   local container = display.newContainer(width, height)
   parent:insert(container)

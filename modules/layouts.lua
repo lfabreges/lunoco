@@ -1,5 +1,8 @@
 local layouts = {}
 
+local max = math.max
+local min = math.min
+
 layouts.align = function(object, horizontalAlign, verticalAlign, reference)
   reference = reference or object.parent
   if horizontalAlign then
@@ -120,6 +123,56 @@ layouts.newStack = function(options)
   end)
 
   return stack
+end
+
+layouts.newTabs = function(options)
+  options = options or {}
+
+  local tabs = display.newGroup()
+  local view = display.newGroup()
+  tabs:insert(view)
+
+  if options.parent then
+    options.parent:insert(tabs)
+  end
+
+  local selectedTab = options.selectedTab or 1
+  view.x = (1 - selectedTab) * display.actualContentWidth
+
+  function tabs:insert(child)
+    local index = view.numChildren
+    view:insert(child)
+    child.x = child.x + index * display.actualContentWidth
+  end
+
+  function tabs:selectedTab()
+    return selectedTab
+  end
+
+  function tabs:select(index, selectOptions)
+    selectOptions = selectOptions or {}
+
+    local previousSelectedTab = selectedTab
+    local time = selectOptions.time or 100
+
+    if previousSelectedTab ~= index then
+      local x = (1 - index) * display.actualContentWidth
+      if time == 0 then
+        view.x = x
+      else
+        transition.to(view, { x = x, time = time })
+      end
+      selectedTab = index
+    end
+
+    self:dispatchEvent({ name = "select", index = index, previous = previousSelectedTab, time = time })
+  end
+
+  view:addEventListener("finalize", function()
+    transition.cancel(view)
+  end)
+
+  return tabs
 end
 
 layouts.newVortex = function(options)

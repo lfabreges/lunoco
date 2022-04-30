@@ -34,12 +34,21 @@ function scene:create(event)
   })
   self.worldProgressText.anchorX = 1
 
-  self.scrollView = components.newScrollView(self.view, {
+  self.tabs = layouts.newTabs({ parent = self.view })
+  local tabBar = components.newTabBar(self.view, self.tabs, { "menu", "speedrun" })
+
+  self.scrollView = components.newScrollView(self.tabs, {
     top = topBar.contentBounds.yMax,
-    height = screenHeight - topBar.contentHeight,
+    height = screenHeight - topBar.contentHeight - tabBar.contentHeight,
     topPadding = 40,
-    bottomPadding = bottomInset + 40,
+    bottomPadding = 40,
   })
+
+  self.tabs:addEventListener("select", function(event)
+    if event.index == event.previous then
+      self.scrollView:scrollTo("top", { time = event.time })
+    end
+  end)
 end
 
 function scene:createContentView()
@@ -88,6 +97,7 @@ function scene:show(event)
     world = event.params.world
     self:createContentView()
     if isNewWorld then
+      self.tabs:select(1, { time = 0 })
       self.scrollView:scrollTo("top", { time = 0 })
     end
   end
