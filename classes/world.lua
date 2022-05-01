@@ -103,11 +103,6 @@ function worldClass:progress()
   return progress, worldNumberOfStars
 end
 
-function worldClass:saveScores(scores)
-  utils.saveJson(scores, self.directory .. "/scores.json", system.DocumentsDirectory)
-  self._scores = scores
-end
-
 function worldClass:saveLevel(level)
   if not self.isBuiltIn then
     local configuration = self:configuration()
@@ -126,11 +121,28 @@ function worldClass:saveLevel(level)
   end
 end
 
+function worldClass:saveScores(scores)
+  utils.saveJson(scores, self.directory .. "/scores.json", system.DocumentsDirectory)
+  self._scores = scores
+end
+
+function worldClass:saveSpeedruns(speedruns)
+  utils.saveJson(speedruns, self.directory .. "/speedruns.json", system.DocumentsDirectory)
+  self._speedruns = speedruns
+end
+
 function worldClass:scores()
   if self._scores == nil then
     self._scores = utils.loadJson(self.directory .. "/scores.json", system.DocumentsDirectory)
   end
   return self._scores
+end
+
+function worldClass:speedruns()
+  if self._speedruns == nil then
+    self._speedruns = utils.loadJson(self.directory .. "/speedruns.json", system.DocumentsDirectory)
+  end
+  return self._speedruns
 end
 
 return worldClass

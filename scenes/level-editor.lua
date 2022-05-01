@@ -409,7 +409,7 @@ function scene:createSideBar()
   confirmDeleteButton = newButton(deleteGrid, confirmDeleteButtonVortex, { onRelease = deleteLevel })
   confirmDeleteButton.alpha = 0
 
-  layouts.alignCenter(scrollViewStack, scrollView)
+  layouts.alignHorizontal(scrollViewStack, "center", scrollView)
 end
 
 function scene:configureElement(element)

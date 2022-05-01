@@ -32,7 +32,7 @@ function scene:create(event)
   titleStack:insert(gameIcon)
   local gameTitle = display.newText({ text = i18n.t("title"), font = native.systemFontBold, fontSize = 40 })
   titleStack:insert(gameTitle)
-  layouts.alignCenter(titleStack, self.scrollView)
+  layouts.alignHorizontal(titleStack, "center", self.scrollView)
 end
 
 function scene:createContentView()
@@ -94,7 +94,7 @@ function scene:createContentView()
     scrollView = self.scrollView,
   })
 
-  layouts.alignCenter(self.contentView, self.scrollView)
+  layouts.alignHorizontal(self.contentView, "center", self.scrollView)
 end
 
 function scene:show(event)

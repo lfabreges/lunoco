@@ -23,10 +23,6 @@ layouts.align = function(object, horizontalAlign, verticalAlign, reference)
   end
 end
 
-layouts.alignCenter = function(object, reference)
-  layouts.align(object, "center", nil, reference)
-end
-
 layouts.alignHorizontal = function(object, horizontalAlign, reference)
   layouts.align(object, horizontalAlign, nil, reference)
 end
@@ -89,9 +85,9 @@ layouts.newStack = function(options)
     for index = 1, stack.numChildren do
       local child = stack[index]
       if options.mode == "horizontal" then
-        layouts.align(child, nil, options.align)
+        layouts.alignVertical(child, options.align)
       else
-        layouts.align(child, options.align, nil)
+        layouts.alignHorizontal(child, options.align)
       end
     end
     shouldAlignNextFrame = false

@@ -1,7 +1,7 @@
 # Next
 * Mode speedrun pour un monde
-  * Sauvegarde du meilleur temps pour chaque niveau ?
-  * Sauvegarde du speedrun dans le fichier scores du monde
+* Supprimer le speedrun lorsqu'un niveau est ajouté ou modifié
+* Ajuster le speedrun si un niveau est supprimé
 * Nommer les mondes ?
 
 # Nice to have

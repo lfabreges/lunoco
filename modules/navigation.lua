@@ -21,11 +21,11 @@ navigation.gotoElementImage = function(level, elementDescriptor, filename)
   })
 end
 
-navigation.gotoGame = function(level)
+navigation.gotoGame = function(level, mode, data)
   composer.gotoScene("scenes.game", {
     effect = defaultEffect,
     time = defaultTime,
-    params = { level = level },
+    params = { level = level, mode = mode or "classic", data = data or {} },
   })
 end
 

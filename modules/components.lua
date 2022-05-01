@@ -267,9 +267,15 @@ components.newTopBar = function(parent, options)
       { onRelease = options.goBack }
     )
     goBackButton.anchorX = 0
-    goBackButton.anchorY = 0
     goBackButton.x = screenX + leftInset + 20
-    goBackButton.y = screenY + topInset + 10
+    goBackButton.y = screenY + topInset + 30
+  end
+
+  function topBar:insertRight(object)
+    topBar:insert(object)
+    object.anchorX = 1
+    object.x = background.contentBounds.xMax - rightInset - 20
+    object.y = screenY + topInset + 30
   end
 
   return topBar
