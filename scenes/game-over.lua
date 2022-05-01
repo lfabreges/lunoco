@@ -5,9 +5,9 @@ local layouts = require "modules.layouts"
 local navigation = require "modules.navigation"
 local utils = require "modules.utils"
 
+local data = nil
 local level = nil
-local numberOfShots = nil
-local numberOfStars = nil
+local mode = nil
 local scene = composer.newScene()
 
 local sounds = {
@@ -15,52 +15,93 @@ local sounds = {
   starFull = audio.loadSound("sounds/star-full.wav"),
 }
 
+local function isLastLevel()
+  local levels = level.world:levels()
+  return levels[#levels].name == level.name
+end
+
 local function gotoLevels()
   navigation.gotoLevels(level.world)
 end
 
+local function gotoNextLevel()
+  local levels = level.world:levels()
+  local index = table.indexOf(levels, level) or 0
+  navigation.reloadGame(levels[index + 1], mode, data)
+end
+
 local function retryLevel()
-  navigation.reloadGame(level)
+  navigation.reloadGame(level, mode, data)
 end
 
 function scene:create(event)
   level = event.params.level
-  numberOfShots = event.params.numberOfShots
-  numberOfStars = event.params.numberOfStars
+  mode = event.params.mode
+  data = event.params.data
 
   local background = components.newBackground(self.view)
   background:setFillColor(0, 0, 0, 0.9)
 
   local stack = layouts.newStack({ align = "center", parent = self.view, separator = 60 })
 
-  local finishedInText = display.newText({ text = i18n.p("finished_in", numberOfShots), fontSize = 30 })
-  stack:insert(finishedInText)
+  if mode == "classic" then
+    local finishedInText = display.newText({ text = i18n.p("finished_in", data.numberOfShots), fontSize = 30 })
+    stack:insert(finishedInText)
 
-  scene.score = components.newScore(stack, 75, numberOfStars)
+    scene.score = components.newScore(stack, 75, data.numberOfStars)
 
-  for starCount = 1, 3 do
-    scene.score[starCount].alpha = 0
+    for starCount = 1, 3 do
+      scene.score[starCount].alpha = 0
+    end
   end
 
-  local actionStack = layouts.newStack({ mode = "horizontal", parent = stack, separator = 40 })
-  components.newCircleButton(actionStack, "images/icons/reload.png", 40, { onRelease = retryLevel })
-  components.newCircleButton(actionStack, "images/icons/menu.png", 40, { onRelease = gotoLevels })
+  local actionGroup = display.newGroup()
+
+  local retryButton = components.newCircleButton(
+    actionGroup,
+    "images/icons/reload.png",
+    40,
+    { onRelease = retryLevel }
+  )
+  retryButton.x = -75
+
+  if mode == "classic" or isLastLevel() then
+    local menuButton = components.newCircleButton(
+      actionGroup,
+      "images/icons/menu.png",
+      40,
+      { onRelease = gotoLevels }
+    )
+    menuButton.x = 75
+  else
+    local nextButton = components.newCircleButton(
+      actionGroup,
+      "images/icons/next.png",
+      40,
+      { onRelease = gotoNextLevel }
+    )
+    nextButton.x = 75
+  end
+
+  stack:insert(actionGroup)
 
   layouts.align(stack, "center", "center")
 end
 
 function scene:show(event)
   if event.phase == "did" then
-    timer.performWithDelay(
-      500,
-      function(event)
-        local star = scene.score[event.count]
-        transition.to(scene.score[event.count], { alpha = 1, time = 100 })
-        utils.playAudio(star.isFullStar and sounds.starFull or sounds.starEmpty, 1.0)
-      end,
-      3,
-      "displayStars"
-    )
+    if mode == "classic" then
+      timer.performWithDelay(
+        500,
+        function(event)
+          local star = scene.score[event.count]
+          transition.to(scene.score[event.count], { alpha = 1, time = 100 })
+          utils.playAudio(star.isFullStar and sounds.starFull or sounds.starEmpty, 1.0)
+        end,
+        3,
+        "displayStars"
+      )
+    end
   end
 end
 

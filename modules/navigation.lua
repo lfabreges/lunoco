@@ -52,7 +52,7 @@ navigation.gotoWorlds = function()
   })
 end
 
-navigation.reloadGame = function(level)
+navigation.reloadGame = function(level, mode, data)
   composer.hideOverlay()
 
   local screenCapture = display.captureScreen()
@@ -67,21 +67,17 @@ navigation.reloadGame = function(level)
       nextScene = "scenes.game",
       effect = defaultEffect,
       time = defaultTime,
-      nextParams = { level = level },
+      nextParams = { level = level, mode = mode, data = data },
     }
   })
 end
 
-navigation.showGameOver = function(level, numberOfShots, numberOfStars)
+navigation.showGameOver = function(level, mode, data)
   composer.showOverlay("scenes.game-over", {
     isModal = true,
     effect = defaultEffect,
     time = defaultTime,
-    params = {
-      level = level,
-      numberOfShots = numberOfShots,
-      numberOfStars = numberOfStars,
-    },
+    params = { level = level, mode = mode, data = data },
   })
 end
 

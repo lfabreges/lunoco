@@ -1,14 +1,17 @@
 local components = require "modules.components"
 local composer = require "composer"
 local navigation = require "modules.navigation"
+local stopwatchClass = require "classes.stopwatch"
 local utils = require "modules.utils"
 
 local ballImpulseForce = nil
+local data = nil
 local elements = nil
 local fromMKS = physics.fromMKS
 local gravityX = 0
 local gravityY = 9.8
 local level = nil
+local mode = nil
 local numberOfShots = nil
 local predictedBallPath = nil
 local scene = composer.newScene()
@@ -25,6 +28,8 @@ local sounds = {
 
 function scene:create(event)
   level = event.params.level
+  mode = event.params.mode
+  data = event.params.data
 
   physics.start()
   physics.pause()
@@ -183,12 +188,21 @@ end
 function scene:pause()
   audio.pause()
   physics.pause()
-  composer.showOverlay("scenes.pause", { isModal = true, params = { level = level } })
+
+  if mode == "speedrun" then
+    data.stopwatch:pause()
+  end
+
+  composer.showOverlay("scenes.pause", { isModal = true, params = { level = level, mode = mode, data = data } })
 end
 
 function scene:resume()
   physics.start()
   audio.resume()
+
+  if mode == "speedrun" then
+    data.stopwatch:start()
+  end
 end
 
 function scene:gameOver()
@@ -203,16 +217,34 @@ function scene:gameOver()
     numberOfStars = 1
   end
 
+  if mode == "classic" then
+    data.numberOfShots = numberOfShots
+    data.numberOfStars = numberOfStars
+  elseif mode == "speedrun" then
+    data.stopwatch:pause()
+    data.levels[level.name].endTime = data.stopwatch:totalTime()
+    data.levels[level.name].numberOfStars = numberOfStars
+  end
+
   level:saveScore(numberOfShots, numberOfStars)
-  navigation.showGameOver(level, numberOfShots, numberOfStars)
+  navigation.showGameOver(level, mode, data)
 end
 
 function scene:show(event)
   if event.phase == "did" then
     level:takeScreenshot()
+
     Runtime:addEventListener("lateUpdate", scene)
     Runtime:addEventListener("touch", scene)
     physics.start()
+
+    if mode == "classic" then
+      data = {}
+    elseif mode == "speedrun" then
+      data.stopwatch = data.stopwatch or stopwatchClass:new()
+      utils.nestedGetOrSet(data, "levels", level.name, { startTime = data.stopwatch:totalTime() })
+      data.stopwatch:start()
+    end
   end
 end
 

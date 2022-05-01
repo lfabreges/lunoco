@@ -4,7 +4,9 @@ local i18n = require "modules.i18n"
 local layouts = require "modules.layouts"
 local navigation = require "modules.navigation"
 
+local data = nil
 local level = nil
+local mode = nil
 local scene = composer.newScene()
 local screenX = display.screenOriginX
 local screenY = display.screenOriginY
@@ -30,12 +32,13 @@ local function resumeGame()
 end
 
 local function retryLevel()
-  navigation.reloadGame(level)
+  navigation.reloadGame(level, mode, data)
 end
 
 function scene:create(event)
   level = event.params.level
-  shouldResumeGame = false
+  mode = event.params.mode
+  data = event.params.data
 
   local isLevelBuiltIn = level.world.isBuiltIn
 
@@ -57,26 +60,45 @@ function scene:create(event)
 
   local actionGroup = components.newGroup(self.view)
 
-  local retryButton = components.newCircleButton(actionGroup, "images/icons/reload.png", 40, {
-    onRelease = retryLevel
-  })
-  retryButton.y = -75
+  local retryButton = components.newCircleButton(
+    actionGroup,
+    "images/icons/reload.png",
+    40,
+    { onRelease = retryLevel }
+  )
+  local menuButton = components.newCircleButton(
+    actionGroup,
+    "images/icons/menu.png",
+    40,
+    { onRelease = gotoLevels }
+  )
 
-  local menuButton = components.newCircleButton(actionGroup, "images/icons/menu.png", 40, {
-    onRelease = gotoLevels
-  })
-  menuButton.x = -75
+  if mode == "speedrun" then
+    retryButton.x = -75
+    menuButton.x = 75
+  else
+    retryButton.y = -75
+    menuButton.x = -75
+  end
 
-  local customizeButton = components.newCircleButton(actionGroup, "images/icons/customize.png", 40, {
-    onRelease = customizeLevel
-  })
-  customizeButton.x = 75
+  if mode == "classic" then
+    local customizeButton = components.newCircleButton(
+      actionGroup,
+      "images/icons/customize.png",
+      40,
+      { onRelease = customizeLevel }
+    )
+    local editLevelButton = components.newCircleButton(
+      actionGroup,
+      "images/icons/edit.png",
+      40,
+      { onRelease = editLevel }
+    )
 
-  local editLevelButton = components.newCircleButton(actionGroup, "images/icons/edit.png", 40, {
-    onRelease = editLevel
-  })
-  editLevelButton.y = 75
-  editLevelButton.isVisible = not isLevelBuiltIn
+    customizeButton.x = 75
+    editLevelButton.y = 75
+    editLevelButton.isVisible = not isLevelBuiltIn
+  end
 
   layouts.align(actionGroup, "center", "center", remainingBackground)
 end
