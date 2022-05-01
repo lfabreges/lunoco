@@ -39,7 +39,7 @@ function scene:create(event)
 
   self.scrollView = components.newScrollView(self.tabs, {
     top = topBar.contentBounds.yMax,
-    height = screenHeight - topBar.contentHeight - tabBar.contentHeight,
+    height = tabBar.contentBounds.yMin - topBar.contentBounds.yMax,
     topPadding = 40,
     bottomPadding = 40,
   })
