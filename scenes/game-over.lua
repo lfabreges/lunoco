@@ -53,37 +53,18 @@ function scene:create(event)
     for starCount = 1, 3 do
       scene.score[starCount].alpha = 0
     end
+  elseif mode == "speedrun" then
+    -- TODO Afficher le tableau des temps
   end
 
-  local actionGroup = display.newGroup()
+  local actionStack = layouts.newStack({ parent = stack, separator = 10 })
 
-  local retryButton = components.newCircleButton(
-    actionGroup,
-    "images/icons/reload.png",
-    40,
-    { onRelease = retryLevel }
-  )
-  retryButton.x = -75
-
-  if mode == "classic" or isLastLevel() then
-    local menuButton = components.newCircleButton(
-      actionGroup,
-      "images/icons/menu.png",
-      40,
-      { onRelease = gotoLevels }
-    )
-    menuButton.x = 75
-  else
-    local nextButton = components.newCircleButton(
-      actionGroup,
-      "images/icons/next.png",
-      40,
-      { onRelease = gotoNextLevel }
-    )
-    nextButton.x = 75
+  if mode == "speedrun" and not isLastLevel() then
+    components.newTextButton(actionStack, i18n.t("next"), "next", 240, 40, { onRelease = gotoNextLevel })
   end
 
-  stack:insert(actionGroup)
+  components.newTextButton(actionStack, i18n.t("retry"), "reload", 240, 40, { onRelease = retryLevel })
+  components.newTextButton(actionStack, i18n.t("menu"), "menu", 240, 40, { onRelease = gotoLevels })
 
   layouts.align(stack, "center", "center")
 end

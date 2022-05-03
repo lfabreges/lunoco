@@ -162,7 +162,7 @@ function scene:touch(event)
   local distanceX = event.xStart - event.x
   local distanceY = event.yStart - event.y
   local totalDistance = math.sqrt(distanceX * distanceX + distanceY * distanceY)
-  local _ballImpulseForce = { x = distanceX * 4, y = distanceY * 4, hasEnoughForce = totalDistance > 10 }
+  local _ballImpulseForce = { x = distanceX * 4, y = distanceY * 4, hasEnoughForce = totalDistance > 15 }
 
   ballImpulseForce = nil
 

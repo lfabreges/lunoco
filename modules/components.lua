@@ -27,20 +27,6 @@ components.newBackground = function(parent)
   return background
 end
 
-components.newCircleButton = function(parent, imageName, size, options)
-  local vortex = layouts.newVortex()
-  local circle = display.newCircle(0, 0, size)
-  circle:setFillColor(0, 0, 0, 0)
-  circle.isHitTestable = true
-  circle.strokeWidth = 1
-  vortex:insert(circle)
-  local image = display.newImageRect(imageName, size, size)
-  vortex:insert(image)
-  local button = components.newObjectButton(vortex, options)
-  parent:insert(button)
-  return button
-end
-
 components.newEmptyShape = function(parent, width, height)
   local emptyShape = display.newRect(parent, 0, 0, width, height)
   emptyShape.fill.effect = "generator.linearGradient"
@@ -69,7 +55,6 @@ components.newGroup = function(parent)
 end
 
 components.newHitTestableSurface = function(parent, reference)
-  reference = reference or parent
   local surface = display.newRect(0, 0, reference.contentWidth, reference.contentHeight)
   surface.isVisible = false
   surface.isHitTestable = true
@@ -231,19 +216,30 @@ components.newTabBar = function(parent, tabs, icons)
   return tabBar
 end
 
-components.newTextButton = function(parent, text, width, height, options)
-  local container = display.newContainer(width, height)
-  parent:insert(container)
-  local rectangle = display.newRoundedRect(container, 0, 0, width - 2, height - 2, 5)
-  rectangle.fill.effect = "generator.linearGradient"
-  rectangle.fill.effect.color1 = { 0.24, 0.60, 0.79, 1 }
-  rectangle.fill.effect.position1  = { 0, 0 }
-  rectangle.fill.effect.color2 = { 0.15, 0.39, 0.52, 1 }
-  rectangle.fill.effect.position2  = { 1, 1 }
+components.newTextButton = function(parent, text, iconName, width, height, options)
+  local group = display.newGroup()
+  local iconSize = height * 0.7
+  local separator = 10
+
+  local surface = display.newRect(group, 0, 0, width, height)
+  surface.isVisible = false
+  surface.isHitTestable = true
+
+  local icon = display.newImageRect(group, "images/icons/" .. iconName .. ".png", iconSize, iconSize)
+  layouts.alignHorizontal(icon, "left", surface)
+
+  local rectangle = display.newRoundedRect(group, 0, 0, width - 15 - 2 - iconSize, height - 2, 5)
   rectangle.strokeWidth = 1
+  rectangle:setFillColor(0.45, 0.67, 0.89, 0.75)
   rectangle:setStrokeColor(1, 1, 1, 0.75)
-  label = display.newText({ text = text, fontSize = height * 0.4, parent = container })
-  return components.newObjectButton(container, options)
+  layouts.alignHorizontal(rectangle, "left", icon)
+  rectangle.x = rectangle.x + icon.contentWidth + 15
+
+  local label = display.newText({ text = text, fontSize = height * 0.4, parent = group })
+  label.x = rectangle.x
+
+  parent:insert(group)
+  return components.newObjectButton(group, options)
 end
 
 components.newTopBar = function(parent, options)

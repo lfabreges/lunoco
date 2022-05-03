@@ -58,49 +58,19 @@ function scene:create(event)
   components.newObjectButton(resumeButtonVortex, { onRelease = resumeGame })
   layouts.align(resumeButtonVortex, "center", "center", resumeBackground)
 
-  local actionGroup = components.newGroup(self.view)
+  local actionStack = layouts.newStack({ parent = self.view, separator = 10 })
 
-  local retryButton = components.newCircleButton(
-    actionGroup,
-    "images/icons/reload.png",
-    40,
-    { onRelease = retryLevel }
-  )
-  local menuButton = components.newCircleButton(
-    actionGroup,
-    "images/icons/menu.png",
-    40,
-    { onRelease = gotoLevels }
-  )
-
-  if mode == "speedrun" then
-    retryButton.x = -75
-    menuButton.x = 75
-  else
-    retryButton.y = -75
-    menuButton.x = -75
-  end
+  components.newTextButton(actionStack, i18n.t("retry"), "reload", 240, 40, { onRelease = retryLevel })
+  components.newTextButton(actionStack, i18n.t("menu"), "menu", 240, 40, { onRelease = gotoLevels })
 
   if mode == "classic" then
-    local customizeButton = components.newCircleButton(
-      actionGroup,
-      "images/icons/customize.png",
-      40,
-      { onRelease = customizeLevel }
-    )
-    local editLevelButton = components.newCircleButton(
-      actionGroup,
-      "images/icons/edit.png",
-      40,
-      { onRelease = editLevel }
-    )
-
-    customizeButton.x = 75
-    editLevelButton.y = 75
-    editLevelButton.isVisible = not isLevelBuiltIn
+    components.newTextButton(actionStack, i18n.t("customize"), "customize", 240, 40, { onRelease = customizeLevel })
+    if not isLevelBuiltIn then
+      components.newTextButton(actionStack, i18n.t("edit"), "edit", 240, 40, { onRelease = editLevel })
+    end
   end
 
-  layouts.align(actionGroup, "center", "center", remainingBackground)
+  layouts.align(actionStack, "center", "center", remainingBackground)
 end
 
 function scene:hide(event)

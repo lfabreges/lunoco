@@ -132,10 +132,8 @@ function scene:createSpeedrunView()
   layouts.align(stack, "center", "center", frame)
   self.speedrunView:insert(board)
 
-  -- TODO Changer le texte
-  components.newTextButton(self.speedrunView, "Lancer le speedrun", width, 60, {
+  components.newTextButton(self.speedrunView, i18n.t("start-speedrun"), "go", width, 40, {
     onRelease = startSpeedrun,
-    scrollView = self.scrollViews[2],
   })
 
   layouts.alignHorizontal(self.speedrunView, "center", self.scrollViews[2])

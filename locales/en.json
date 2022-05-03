@@ -1,10 +1,14 @@
 {
   "click-here-to-confirm": "Click here to confirm",
+  "customize": "Customize",
+  "edit": "Edit",
   "finished_in": {
     "one": "Finished in 1 shot !",
-    "other": "Finished in {count} shots !"
+    "other": "Finished in {count} shots!"
   },
   "level-editor-help": "Double tap to open the sidebar",
+  "menu": "Menu",
+  "next": "Next",
   "obstacle-corner": "Corner",
   "obstacle-horizontal-barrier": "Horizontal barrier",
   "obstacle-horizontal-barrier-large": "Large horizontal barrier",
@@ -15,9 +19,11 @@
   "permission-denied-camera": "Lunoco doesn't have permission to use your camera",
   "permission-denied-photo-library": "Lunoco doesn't have permission to access your photo library",
   "progress": "%0d%%",
+  "retry": "Retry",
   "root-background": "Background",
   "root-ball": "Ball",
   "root-frame": "Frame",
+  "start-speedrun": "Start speedrun",
   "target-easy": "Easy target",
   "target-hard": "Hard target",
   "target-normal": "Normal target",

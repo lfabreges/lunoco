@@ -341,6 +341,7 @@ function scene:createSideBar()
     { startIndex = configuration.stars.three, labels = { 1, 2, 3, 4, 5, 6, 7, 8, 9 } },
   }
 
+  -- TODO Tester avec des plus un et moins 1 (un widget pour ça)
   pickerWheel = widget.newPickerWheel({
     left = 10,
     top = pickerWheelFrame.y + 40,
