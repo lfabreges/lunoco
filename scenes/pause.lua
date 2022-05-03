@@ -61,13 +61,15 @@ function scene:create(event)
   local actionStack = layouts.newStack({ parent = self.view, separator = 10 })
 
   components.newTextButton(actionStack, i18n.t("retry"), "reload", 240, 40, { onRelease = retryLevel })
-  components.newTextButton(actionStack, i18n.t("menu"), "menu", 240, 40, { onRelease = gotoLevels })
 
   if mode == "classic" then
+    components.newTextButton(actionStack, i18n.t("menu"), "menu", 240, 40, { onRelease = gotoLevels })
     components.newTextButton(actionStack, i18n.t("customize"), "customize", 240, 40, { onRelease = customizeLevel })
     if not isLevelBuiltIn then
       components.newTextButton(actionStack, i18n.t("edit"), "edit", 240, 40, { onRelease = editLevel })
     end
+  elseif mode == "speedrun" then
+    components.newTextButton(actionStack, i18n.t("abort"), "cancel", 240, 40, { onRelease = gotoLevels })
   end
 
   layouts.align(actionStack, "center", "center", remainingBackground)

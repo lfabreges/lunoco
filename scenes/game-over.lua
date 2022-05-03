@@ -64,7 +64,12 @@ function scene:create(event)
   end
 
   components.newTextButton(actionStack, i18n.t("retry"), "reload", 240, 40, { onRelease = retryLevel })
-  components.newTextButton(actionStack, i18n.t("menu"), "menu", 240, 40, { onRelease = gotoLevels })
+
+  if mode == "classic" then
+    components.newTextButton(actionStack, i18n.t("menu"), "menu", 240, 40, { onRelease = gotoLevels })
+  elseif mode == "speedrun" then
+    components.newTextButton(actionStack, i18n.t("abort"), "cancel", 240, 40, { onRelease = gotoLevels })
+  end
 
   layouts.align(stack, "center", "center")
 end
