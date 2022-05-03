@@ -141,7 +141,6 @@ end
 
 function scene:show(event)
   if event.phase == "will" then
-    local isNewWorld = world and world ~= event.params.world
     world = event.params.world
 
     local progress = world:progress()
@@ -150,7 +149,7 @@ function scene:show(event)
     self:createMenuView()
     self:createSpeedrunView()
 
-    if isNewWorld then
+    if composer.getSceneName("previous") == "scenes.worlds" then
       self.tabs:select(1, { time = 0 })
       self.scrollViews[1]:scrollTo("top", { time = 0 })
     end

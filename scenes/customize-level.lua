@@ -158,10 +158,9 @@ end
 
 function scene:show(event)
   if event.phase == "will" then
-    local isNewLevel = level and level ~= event.params.level
     level = event.params.level
     self:createContentView()
-    if isNewLevel then
+    if composer.getSceneName("previous") ~= "scenes.element-image" then
       self.scrollView:scrollTo("top", { time = 0 })
     end
   end
