@@ -33,6 +33,7 @@ function worldClass:deleteLevel(level)
     local levelIndex = table.indexOf(configuration.levels, level.name)
     if levelIndex then
       table.remove(configuration.levels, levelIndex)
+      self:deleteSpeedruns()
       if self._levels then
         table.remove(self._levels, levelIndex)
       end
@@ -45,6 +46,11 @@ function worldClass:deleteLevel(level)
       self.universe:deleteWorld(self)
     end
   end
+end
+
+function worldClass:deleteSpeedruns()
+  utils.removeFile(self.directory .. "/speedruns.json", system.DocumentsDirectory)
+  self._speedruns = nil
 end
 
 function worldClass:levels()
@@ -111,6 +117,7 @@ function worldClass:saveLevel(level)
       levelIndex = #configuration.levels + 1
       configuration.levels[levelIndex] = level.name
       utils.saveJson(configuration, self.directory .. ".json", system.DocumentsDirectory)
+      self:deleteSpeedruns()
       if self._levels then
         self._levels[levelIndex] = level
       end
