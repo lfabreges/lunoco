@@ -282,19 +282,19 @@ function levelClass:save(elements, stars)
   end
 end
 
+function levelClass:saveImage(object, imageFamily, imageName)
+  local filename = self.directory .. "/" .. imageFamily .. "-" .. imageName .. ".nocache." .. math.random() .. ".png"
+  display.save(object, { filename = filename, captureOffscreenArea = true })
+  self:removeImage(imageFamily, imageName)
+  utils.nestedSet(self:imageNames(), imageFamily, imageName, filename)
+end
+
 function levelClass:saveScore(numberOfShots, numberOfStars)
   local worldScores = self.world:scores()
   if worldScores[self.name] == nil or worldScores[self.name].numberOfShots > numberOfShots then
     worldScores[self.name] = { numberOfShots = numberOfShots, numberOfStars = numberOfStars }
     self.world:saveScores(worldScores)
   end
-end
-
-function levelClass:saveImage(object, imageFamily, imageName)
-  local filename = self.directory .. "/" .. imageFamily .. "-" .. imageName .. ".nocache." .. math.random() .. ".png"
-  display.save(object, { filename = filename, captureOffscreenArea = true })
-  self:removeImage(imageFamily, imageName)
-  utils.nestedSet(self:imageNames(), imageFamily, imageName, filename)
 end
 
 function levelClass:screenshotImage()

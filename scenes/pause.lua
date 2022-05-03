@@ -59,9 +59,7 @@ function scene:create(event)
   layouts.align(resumeButtonVortex, "center", "center", resumeBackground)
 
   local actionStack = layouts.newStack({ parent = self.view, separator = 10 })
-
   components.newTextButton(actionStack, i18n.t("retry"), "reload", 240, 40, { onRelease = retryLevel })
-
   if mode == "classic" then
     components.newTextButton(actionStack, i18n.t("menu"), "menu", 240, 40, { onRelease = gotoLevels })
     components.newTextButton(actionStack, i18n.t("customize"), "customize", 240, 40, { onRelease = customizeLevel })
@@ -71,7 +69,6 @@ function scene:create(event)
   elseif mode == "speedrun" then
     components.newTextButton(actionStack, i18n.t("abort"), "cancel", 240, 40, { onRelease = gotoLevels })
   end
-
   layouts.align(actionStack, "center", "center", remainingBackground)
 end
 

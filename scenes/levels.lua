@@ -112,7 +112,17 @@ function scene:createSpeedrunView()
     layouts.alignHorizontal(score, "left", frame)
     score.x = score.x + 10
 
-    local time = display.newText({ text = "00:12", fontSize = 14 })
+    local time = display.newText({ text = i18n.t("no-time"), fontSize = 14 })
+
+    if speedruns[tostring(numberOfStars)] then
+      local speedrun = speedruns[tostring(numberOfStars)]
+      local runTime = math.abs(speedrun.runTime)
+      local milliseconds = runTime % 1000
+      local seconds = math.abs(runTime / 1000) % 60
+      local minutes = math.abs(runTime / 60000)
+      time.text = i18n.t("time", minutes, seconds, milliseconds)
+    end
+
     group:insert(time)
     layouts.alignHorizontal(time, "right", frame)
     time.x = time.x - 10

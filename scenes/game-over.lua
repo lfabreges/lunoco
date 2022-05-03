@@ -47,9 +47,7 @@ function scene:create(event)
   if mode == "classic" then
     local finishedInText = display.newText({ text = i18n.p("finished_in", data.numberOfShots), fontSize = 30 })
     stack:insert(finishedInText)
-
     scene.score = components.newScore(stack, 75, data.numberOfStars)
-
     for starCount = 1, 3 do
       scene.score[starCount].alpha = 0
     end
@@ -58,13 +56,10 @@ function scene:create(event)
   end
 
   local actionStack = layouts.newStack({ parent = stack, separator = 10 })
-
   if mode == "speedrun" and not isLastLevel() then
     components.newTextButton(actionStack, i18n.t("next"), "next", 240, 40, { onRelease = gotoNextLevel })
   end
-
   components.newTextButton(actionStack, i18n.t("retry"), "reload", 240, 40, { onRelease = retryLevel })
-
   if mode == "classic" or isLastLevel() then
     components.newTextButton(actionStack, i18n.t("menu"), "menu", 240, 40, { onRelease = gotoLevels })
   elseif mode == "speedrun" then
@@ -72,6 +67,17 @@ function scene:create(event)
   end
 
   layouts.align(stack, "center", "center")
+end
+
+function scene:saveScore()
+  if mode == "classic" then
+    level:saveScore(data.numberOfShots, data.numberOfStars)
+  elseif mode == "speedrun" then
+    level:saveScore(data.levels[level.name].numberOfShots, data.levels[level.name].numberOfStars)
+    if isLastLevel() then
+      level.world:saveSpeedrun(data.stopwatch:totalTime(), data.levels)
+    end
+  end
 end
 
 function scene:show(event)
@@ -88,6 +94,7 @@ function scene:show(event)
         "displayStars"
       )
     end
+    self:saveScore()
   end
 end
 

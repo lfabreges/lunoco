@@ -223,10 +223,10 @@ function scene:gameOver()
   elseif mode == "speedrun" then
     data.stopwatch:pause()
     data.levels[level.name].endTime = data.stopwatch:totalTime()
+    data.levels[level.name].numberOfShots = numberOfShots
     data.levels[level.name].numberOfStars = numberOfStars
   end
 
-  level:saveScore(numberOfShots, numberOfStars)
   navigation.showGameOver(level, mode, data)
 end
 

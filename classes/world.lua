@@ -126,9 +126,24 @@ function worldClass:saveScores(scores)
   self._scores = scores
 end
 
-function worldClass:saveSpeedruns(speedruns)
-  utils.saveJson(speedruns, self.directory .. "/speedruns.json", system.DocumentsDirectory)
-  self._speedruns = speedruns
+function worldClass:saveSpeedrun(runTime, levels)
+  local speedruns = self:speedruns()
+  local numberOfStars = 3
+  local shouldSaveSpeedrun = false
+  for _, level in pairs(levels) do
+    numberOfStars = math.min(numberOfStars, level.numberOfStars)
+  end
+  for index = numberOfStars, 0, -1 do
+    local speedrun = speedruns[tostring(index)]
+    if speedrun == nil or speedrun.totalTime > runTime then
+      speedruns[tostring(index)] = { runTime = runTime, levels = levels }
+      shouldSaveSpeedrun = true
+    end
+  end
+  if shouldSaveSpeedrun then
+    utils.saveJson(speedruns, self.directory .. "/speedruns.json", system.DocumentsDirectory)
+    self._speedruns = speedruns
+  end
 end
 
 function worldClass:scores()
