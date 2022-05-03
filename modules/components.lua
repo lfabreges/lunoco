@@ -230,7 +230,7 @@ components.newTextButton = function(parent, text, iconName, width, height, optio
 
   local rectangle = display.newRoundedRect(group, 0, 0, width - 15 - 2 - iconSize, height - 2, 5)
   rectangle.strokeWidth = 1
-  rectangle:setFillColor(0.45, 0.67, 0.89, 0.75)
+  rectangle:setFillColor(0.21, 0.51, 0.83, 0.75)
   rectangle:setStrokeColor(1, 1, 1, 0.75)
   layouts.alignHorizontal(rectangle, "left", icon)
   rectangle.x = rectangle.x + icon.contentWidth + 15
