@@ -136,4 +136,12 @@ utils.saveJson = function(content, filename, baseDirectory)
   end
 end
 
+utils.splitTime = function(timeInMilliseconds)
+  timeInMilliseconds = math.abs(timeInMilliseconds)
+  local milliseconds = timeInMilliseconds % 1000
+  local seconds = math.abs(timeInMilliseconds / 1000) % 60
+  local minutes = math.abs(timeInMilliseconds / 60000)
+  return minutes, seconds, milliseconds
+end
+
 return utils

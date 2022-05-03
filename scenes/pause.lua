@@ -58,7 +58,13 @@ function scene:create(event)
   components.newObjectButton(resumeButtonVortex, { onRelease = resumeGame })
   layouts.align(resumeButtonVortex, "center", "center", resumeBackground)
 
-  local actionStack = layouts.newStack({ parent = self.view, separator = 10 })
+  local stack = layouts.newStack({ align = "center", parent = self.view, separator = 60 })
+
+  if mode == "speedrun" then
+    components.newRunTime(stack, data.stopwatch:totalTime())
+  end
+
+  local actionStack = layouts.newStack({ parent = stack, separator = 10 })
   components.newTextButton(actionStack, i18n.t("retry"), "reload", 240, 40, { onRelease = retryLevel })
   if mode == "classic" then
     components.newTextButton(actionStack, i18n.t("menu"), "menu", 240, 40, { onRelease = gotoLevels })
@@ -69,7 +75,8 @@ function scene:create(event)
   elseif mode == "speedrun" then
     components.newTextButton(actionStack, i18n.t("abort"), "cancel", 240, 40, { onRelease = gotoLevels })
   end
-  layouts.align(actionStack, "center", "center", remainingBackground)
+
+  layouts.align(stack, "center", "center", remainingBackground)
 end
 
 function scene:hide(event)

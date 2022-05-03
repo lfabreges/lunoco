@@ -30,6 +30,10 @@ local function gotoNextLevel()
   navigation.reloadGame(levels[index + 1], mode, data)
 end
 
+local function newButton(parent, text, iconName, onRelease)
+  return components.newTextButton(parent, i18n.t(text), iconName, 240, 40, { onRelease = onRelease })
+end
+
 local function retryLevel()
   navigation.reloadGame(level, mode, data)
 end
@@ -42,28 +46,82 @@ function scene:create(event)
   local background = components.newBackground(self.view)
   background:setFillColor(0, 0, 0, 0.9)
 
+  if mode == "classic" then
+    self:createClassic()
+  elseif mode == "speedrun" then
+    self:createSpeedrun()
+  end
+end
+
+function scene:createClassic()
   local stack = layouts.newStack({ align = "center", parent = self.view, separator = 60 })
 
-  if mode == "classic" then
-    local finishedInText = display.newText({ text = i18n.p("finished_in", data.numberOfShots), fontSize = 30 })
-    stack:insert(finishedInText)
-    scene.score = components.newScore(stack, 75, data.numberOfStars)
-    for starCount = 1, 3 do
-      scene.score[starCount].alpha = 0
-    end
-  elseif mode == "speedrun" then
-    -- TODO Afficher le tableau des temps
+  local finishedInText = display.newText({ text = i18n.p("finished_in", data.numberOfShots), fontSize = 30 })
+  stack:insert(finishedInText)
+
+  scene.score = components.newScore(stack, 75, data.numberOfStars)
+  for starCount = 1, 3 do
+    scene.score[starCount].alpha = 0
   end
 
   local actionStack = layouts.newStack({ parent = stack, separator = 10 })
-  if mode == "speedrun" and not isLastLevel() then
-    components.newTextButton(actionStack, i18n.t("next"), "next", 240, 40, { onRelease = gotoNextLevel })
+  newButton(actionStack, "retry", "reload", retryLevel)
+  newButton(actionStack, "menu", "menu", gotoLevels)
+
+  layouts.align(stack, "center", "center")
+end
+
+function scene:createSpeedrun()
+  local stack = layouts.newStack({ align = "center", parent = self.view, separator = 30 })
+  local speedruns = level.world:speedruns()
+
+  local runTime = data.stopwatch:totalTime()
+  components.newRunTime(stack, runTime)
+
+  local numberOfStars = 3
+  local texts = {}
+
+  for _, level in pairs(data.levels) do
+    numberOfStars = math.min(numberOfStars, level.numberOfStars)
   end
-  components.newTextButton(actionStack, i18n.t("retry"), "reload", 240, 40, { onRelease = retryLevel })
-  if mode == "classic" or isLastLevel() then
-    components.newTextButton(actionStack, i18n.t("menu"), "menu", 240, 40, { onRelease = gotoLevels })
-  elseif mode == "speedrun" then
-    components.newTextButton(actionStack, i18n.t("abort"), "cancel", 240, 40, { onRelease = gotoLevels })
+
+  for index = 0, 3 do
+    if numberOfStars < index then
+      texts[index] = display.newImageRect("images/icons/cancel.png", 20, 20)
+    else
+      local referenceTime = utils.nestedGet(speedruns, tostring(index), "levels", level.name, "endTime")
+      if referenceTime then
+        local deltaTime = runTime - referenceTime
+        local minutes, seconds, milliseconds = utils.splitTime(deltaTime)
+        texts[index] = display.newText({
+          text = (deltaTime < 0 and "-" or "+") .. i18n.t("time", minutes, seconds, milliseconds),
+          fontSize = 14,
+        })
+        if deltaTime > 0 then
+          texts[index]:setFillColor(1, 0.25, 0.25)
+        elseif deltaTime < 0 then
+          texts[index]:setFillColor(0.42, 0.74, 0.40)
+        end
+      else
+        texts[index] = display.newImageRect("images/icons/accept.png", 20, 20)
+      end
+    end
+  end
+
+  components.newSpeedrunBoard(stack, 260, texts)
+
+  local actionStack = layouts.newStack({ parent = stack, separator = 10 })
+
+  if not isLastLevel() then
+    newButton(actionStack, "next-level", "next", gotoNextLevel)
+  end
+
+  newButton(actionStack, "retry", "reload", retryLevel)
+
+  if isLastLevel() then
+    newButton(actionStack, "menu", "menu", gotoLevels)
+  else
+    newButton(actionStack, "abort", "cancel", gotoLevels)
   end
 
   layouts.align(stack, "center", "center")

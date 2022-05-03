@@ -1,3 +1,4 @@
+local i18n = require "modules.i18n"
 local layouts = require "modules.layouts"
 local utils = require "modules.utils"
 local widget = require "widget"
@@ -140,6 +141,16 @@ components.newPlusButton = function(parent, width, height, options)
   return components.newObjectButton(plusButtonGroup, options)
 end
 
+components.newRunTime = function(parent, runTime)
+  local stack = layouts.newStack({ align = "center", mode = "horizontal", parent = parent, separator = 20 })
+  local icon = display.newImageRect("images/icons/speedrun.png", 35, 35)
+  stack:insert(icon)
+  local minutes, seconds, milliseconds = utils.splitTime(runTime)
+  local text = display.newText({ text = i18n.t("time", minutes, seconds, milliseconds), fontSize = 30 })
+  stack:insert(text)
+  return stack
+end
+
 components.newScore = function(parent, size, numberOfStars)
   local stack = layouts.newStack({ mode = "horizontal", parent = parent, separator = size * 0.25 })
   for starCount = 1, 3 do
@@ -171,6 +182,41 @@ components.newScrollView = function(parent, options)
   })
   parent:insert(scrollView)
   return scrollView
+end
+
+components.newSpeedrunBoard = function(parent, width, texts)
+  local board = display.newGroup()
+  local frame = components.newFrame(board, width, 0)
+  local stack = layouts.newStack({ align = "center", parent = board, separator = 6 })
+
+  for numberOfStars = 0, 3 do
+    local group = display.newGroup()
+
+    local score = components.newScore(group, 20, numberOfStars)
+    layouts.alignHorizontal(score, "left", frame)
+    score.x = score.x + 10
+
+    local text = texts[numberOfStars]
+    group:insert(text)
+    layouts.alignHorizontal(text, "right", frame)
+    text.x = text.x - 10
+    layouts.alignVertical(text, "center", score)
+
+    stack:insert(group)
+
+    if numberOfStars < 3 then
+      local separator = display.newLine(0, 0, frame.contentWidth - 20, 0)
+      separator:setStrokeColor(0.5, 0.5, 0.5, 0.75)
+      stack:insert(separator)
+      separator.y = separator.y + (separator.contentHeight - separator.strokeWidth) * 0.5
+    end
+  end
+
+  frame.path.height = stack.contentHeight + 20
+  layouts.align(stack, "center", "center", frame)
+  parent:insert(board)
+
+  return board
 end
 
 components.newTabBar = function(parent, tabs, icons)
@@ -217,23 +263,33 @@ components.newTabBar = function(parent, tabs, icons)
 end
 
 components.newTextButton = function(parent, text, iconName, width, height, options)
+  if not options then
+    options = height
+    height = width
+    width = iconName
+    iconName = nil
+  end
+
   local group = display.newGroup()
-  local iconSize = height * 0.7
-  local separator = 10
 
-  local surface = display.newRect(group, 0, 0, width, height)
-  surface.isVisible = false
-  surface.isHitTestable = true
-
-  local icon = display.newImageRect(group, "images/icons/" .. iconName .. ".png", iconSize, iconSize)
-  layouts.alignHorizontal(icon, "left", surface)
-
-  local rectangle = display.newRoundedRect(group, 0, 0, width - 15 - 2 - iconSize, height - 2, 5)
+  local rectangle = display.newRoundedRect(group, 0, 0, width - 2, height - 2, 5)
   rectangle.strokeWidth = 1
   rectangle:setFillColor(0.21, 0.51, 0.83, 0.75)
   rectangle:setStrokeColor(1, 1, 1, 0.75)
-  layouts.alignHorizontal(rectangle, "left", icon)
-  rectangle.x = rectangle.x + icon.contentWidth + 15
+
+  if iconName then
+    local surface = display.newRect(group, 0, 0, width, height)
+    surface.isVisible = false
+    surface.isHitTestable = true
+
+    local iconSize = height * 0.7
+    local icon = display.newImageRect(group, "images/icons/" .. iconName .. ".png", iconSize, iconSize)
+    layouts.alignHorizontal(icon, "left", surface)
+
+    rectangle.path.width = rectangle.path.width - 15 - iconSize
+    layouts.alignHorizontal(rectangle, "left", icon)
+    rectangle.x = rectangle.x + icon.contentWidth + 15
+  end
 
   local label = display.newText({ text = text, fontSize = height * 0.4, parent = group })
   label.x = rectangle.x

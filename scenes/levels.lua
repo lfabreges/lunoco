@@ -3,6 +3,7 @@ local composer = require "composer"
 local i18n = require "modules.i18n"
 local layouts = require "modules.layouts"
 local navigation = require "modules.navigation"
+local utils = require "modules.utils"
 
 local scene = composer.newScene()
 local screenX = display.screenOriginX
@@ -38,26 +39,23 @@ function scene:create(event)
   local tabBar = components.newTabBar(self.view, self.tabs, { "menu", "speedrun" })
 
   self.separator = (screenWidth - 240) / 3
-  self.scrollViews = {}
 
-  for index = 1, 2 do
-    self.scrollViews[index] = components.newScrollView(self.tabs, {
-      top = self.topBar.contentBounds.yMax,
-      height = tabBar.contentBounds.yMin - self.topBar.contentBounds.yMax,
-      topPadding = self.separator,
-      bottomPadding = self.separator,
-    })
-  end
+  self.menuScrollView = components.newScrollView(self.tabs, {
+    top = self.topBar.contentBounds.yMax,
+    height = tabBar.contentBounds.yMin - self.topBar.contentBounds.yMax,
+    topPadding = self.separator,
+    bottomPadding = self.separator,
+  })
 
   self.tabs:addEventListener("select", function(event)
-    if event.index == event.previous then
-      self.scrollViews[event.index]:scrollTo("top", { time = event.time })
+    if event.index == 1 and event.index == event.previous then
+      self.menuScrollView:scrollTo("top", { time = event.time })
     end
   end)
 end
 
 function scene:createMenuView()
-  self.menuView = layouts.newGrid({ parent = self.scrollViews[1], separator = self.separator })
+  self.menuView = layouts.newGrid({ parent = self.menuScrollView, separator = self.separator })
 
   local levels = world:levels()
   local scores = world:scores()
@@ -72,7 +70,7 @@ function scene:createMenuView()
       levelImageBaseDir,
       120,
       180,
-      { onRelease = function() startLevel(level) end, scrollView = self.scrollViews[1] }
+      { onRelease = function() startLevel(level) end, scrollView = self.menuScrollView }
     )
 
     if scores[level.name] then
@@ -87,66 +85,36 @@ function scene:createMenuView()
   if not world.isBuiltIn then
     components.newPlusButton(self.menuView, 120, 180, {
       onRelease = function() navigation.gotoLevelEditor(world:newLevel()) end,
-      scrollView = self.scrollViews[1],
+      scrollView = self.menuScrollView,
     })
   end
 
-  layouts.alignHorizontal(self.menuView, "center", self.scrollViews[1])
+  layouts.alignHorizontal(self.menuView, "center", self.menuScrollView)
 end
 
 function scene:createSpeedrunView()
-  self.scrollViews[2]:setIsLocked(true)
-  self.speedrunView = layouts.newStack({ parent = self.scrollViews[2], separator = 15 })
+  self.speedrunView = layouts.newStack({ separator = 15 })
 
   local speedruns = world:speedruns()
   local width = screenWidth - self.separator * 2
+  local texts = {}
 
-  local board = display.newGroup()
-  local frame = components.newFrame(board, width, 0)
-  local stack = layouts.newStack({ align = "center", parent = board, separator = 10 })
-
-  for numberOfStars = 0, 3 do
-    local group = display.newGroup()
-
-    local score = components.newScore(group, 20, numberOfStars)
-    layouts.alignHorizontal(score, "left", frame)
-    score.x = score.x + 10
-
-    local time = display.newText({ text = i18n.t("no-time"), fontSize = 14 })
-
-    if speedruns[tostring(numberOfStars)] then
-      local speedrun = speedruns[tostring(numberOfStars)]
-      local runTime = math.abs(speedrun.runTime)
-      local milliseconds = runTime % 1000
-      local seconds = math.abs(runTime / 1000) % 60
-      local minutes = math.abs(runTime / 60000)
-      time.text = i18n.t("time", minutes, seconds, milliseconds)
-    end
-
-    group:insert(time)
-    layouts.alignHorizontal(time, "right", frame)
-    time.x = time.x - 10
-    layouts.alignVertical(time, "center", score)
-
-    stack:insert(group)
-
-    if numberOfStars < 3 then
-      local separator = display.newLine(0, 0, frame.contentWidth - 20, 0)
-      separator:setStrokeColor(0.5, 0.5, 0.5, 0.75)
-      stack:insert(separator)
-      separator.y = separator.y + (separator.contentHeight - separator.strokeWidth) * 0.5
+  for index = 0, 3 do
+    if speedruns[tostring(index)] then
+      local speedrun = speedruns[tostring(index)]
+      local minutes, seconds, milliseconds = utils.splitTime(speedrun.runTime)
+      texts[index] = display.newText({ text = i18n.t("time", minutes, seconds, milliseconds), fontSize = 14 })
+    else
+      texts[index] = display.newText({ text = i18n.t("no-time"), fontSize = 14 })
     end
   end
 
-  frame.path.height = stack.contentHeight + 20
-  layouts.align(stack, "center", "center", frame)
-  self.speedrunView:insert(board)
+  components.newSpeedrunBoard(self.speedrunView, width, texts)
+  components.newTextButton(self.speedrunView, i18n.t("start-speedrun"), width, 40, { onRelease = startSpeedrun })
 
-  components.newTextButton(self.speedrunView, i18n.t("start-speedrun"), "go", width, 40, {
-    onRelease = startSpeedrun,
-  })
-
-  layouts.alignHorizontal(self.speedrunView, "center", self.scrollViews[2])
+  layouts.alignHorizontal(self.speedrunView, "center")
+  self.speedrunView.y = self.topBar.contentBounds.yMax + self.separator
+  self.tabs:insert(self.speedrunView)
 end
 
 function scene:show(event)
@@ -161,7 +129,7 @@ function scene:show(event)
 
     if composer.getSceneName("previous") == "scenes.worlds" then
       self.tabs:select(1, { time = 0 })
-      self.scrollViews[1]:scrollTo("top", { time = 0 })
+      self.menuScrollView:scrollTo("top", { time = 0 })
     end
   end
 end

@@ -135,7 +135,7 @@ function worldClass:saveSpeedrun(runTime, levels)
   end
   for index = numberOfStars, 0, -1 do
     local speedrun = speedruns[tostring(index)]
-    if speedrun == nil or speedrun.totalTime > runTime then
+    if speedrun == nil or speedrun.runTime > runTime then
       speedruns[tostring(index)] = { runTime = runTime, levels = levels }
       shouldSaveSpeedrun = true
     end

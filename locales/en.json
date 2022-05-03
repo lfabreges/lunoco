@@ -9,7 +9,7 @@
   },
   "level-editor-help": "Double tap to open the sidebar",
   "menu": "Menu",
-  "next": "Next",
+  "next-level": "Next level",
   "no-time": "--:--",
   "obstacle-corner": "Corner",
   "obstacle-horizontal-barrier": "Horizontal barrier",
@@ -29,6 +29,6 @@
   "target-easy": "Easy target",
   "target-hard": "Hard target",
   "target-normal": "Normal target",
-  "time": "%02d:%02d.%02d",
+  "time": "%02d:%02d.%03d",
   "title": "Lunoco"
 }
