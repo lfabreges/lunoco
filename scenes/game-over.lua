@@ -54,29 +54,31 @@ function scene:create(event)
 end
 
 function scene:createClassic()
-  local stack = layouts.newStack({ align = "center", parent = self.view, separator = 60 })
-
   local finishedInText = display.newText({ text = i18n.p("finished_in", data.numberOfShots), fontSize = 30 })
-  stack:insert(finishedInText)
 
-  scene.score = components.newScore(stack, 75, data.numberOfStars)
+  scene.score = components.newScore(self.view, 75, data.numberOfStars)
   for starCount = 1, 3 do
     scene.score[starCount].alpha = 0
   end
 
-  local actionStack = layouts.newStack({ parent = stack, separator = 10 })
+  local actionStack = layouts.newStack({ separator = 10 })
   newButton(actionStack, "retry", "reload", retryLevel)
   newButton(actionStack, "menu", "menu", gotoLevels)
 
-  layouts.align(stack, "center", "center")
+  local contentHeight = finishedInText.contentHeight + scene.score.contentHeight + actionStack.contentHeight
+  local separator = (display.contentHeight - contentHeight) / 4
+  local stack = layouts.newStack({ align = "center", parent = self.view, separator = separator })
+  stack:insert(finishedInText)
+  stack:insert(scene.score)
+  stack:insert(actionStack)
+  layouts.align(stack, "center", "center", display.getCurrentStage())
 end
 
 function scene:createSpeedrun()
-  local stack = layouts.newStack({ align = "center", parent = self.view, separator = 30 })
   local speedruns = level.world:speedruns()
 
   local runTime = data.stopwatch:totalTime()
-  components.newRunTime(stack, runTime)
+  local runTimeText = components.newRunTimeText(self.view, runTime)
 
   local numberOfStars = 3
   local texts = {}
@@ -108,9 +110,8 @@ function scene:createSpeedrun()
     end
   end
 
-  components.newSpeedrunBoard(stack, 260, texts)
-
-  local actionStack = layouts.newStack({ parent = stack, separator = 10 })
+  local speedrunBoard = components.newSpeedrunBoard(self.view, 260, texts)
+  local actionStack = layouts.newStack({ separator = 10 })
 
   if not isLastLevel() then
     newButton(actionStack, "next-level", "next", gotoNextLevel)
@@ -124,7 +125,13 @@ function scene:createSpeedrun()
     newButton(actionStack, "abort", "cancel", gotoLevels)
   end
 
-  layouts.align(stack, "center", "center")
+  local contentHeight = runTimeText.contentHeight + speedrunBoard.contentHeight + actionStack.contentHeight
+  local separator = (display.contentHeight - contentHeight) / 4
+  local stack = layouts.newStack({ align = "center", parent = self.view, separator = separator })
+  stack:insert(runTimeText)
+  stack:insert(speedrunBoard)
+  stack:insert(actionStack)
+  layouts.align(stack, "center", "center", display.getCurrentStage())
 end
 
 function scene:saveScore()

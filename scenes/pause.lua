@@ -26,6 +26,10 @@ local function gotoLevels()
   navigation.gotoLevels(level.world)
 end
 
+local function newButton(parent, text, iconName, onRelease)
+  return components.newTextButton(parent, i18n.t(text), iconName, 240, 40, { onRelease = onRelease })
+end
+
 local function resumeGame()
   shouldResumeGame = true
   composer.hideOverlay()
@@ -46,11 +50,6 @@ function scene:create(event)
   resumeBackground.height = screenHeight * 0.33
   resumeBackground:setFillColor(1, 1, 1, 0.9)
 
-  local remainingBackground = components.newBackground(self.view)
-  remainingBackground.y = screenY + resumeBackground.height
-  remainingBackground.height = screenHeight - resumeBackground.height
-  remainingBackground:setFillColor(0, 0, 0, 0.9)
-
   local resumeButtonVortex = layouts.newVortex({ parent = self.view })
   components.newHitTestableSurface(resumeButtonVortex, resumeBackground)
   local resumeButtonImage = display.newImageRect("images/icons/resume.png", 40, 40)
@@ -58,25 +57,48 @@ function scene:create(event)
   components.newObjectButton(resumeButtonVortex, { onRelease = resumeGame })
   layouts.align(resumeButtonVortex, "center", "center", resumeBackground)
 
-  local stack = layouts.newStack({ align = "center", parent = self.view, separator = 60 })
+  local remainingBackground = components.newBackground(self.view)
+  remainingBackground.y = screenY + resumeBackground.height
+  remainingBackground.height = screenHeight - resumeBackground.height
+  remainingBackground:setFillColor(0, 0, 0, 0.9)
+
+  local stackElements = {}
 
   if mode == "speedrun" then
-    components.newRunTime(stack, data.stopwatch:totalTime())
+    stackElements[#stackElements + 1] = components.newRunTimeText(self.view, data.stopwatch:totalTime())
   end
 
-  local actionStack = layouts.newStack({ parent = stack, separator = 10 })
-  components.newTextButton(actionStack, i18n.t("retry"), "reload", 240, 40, { onRelease = retryLevel })
+  local actionStack = layouts.newStack({ separator = 10 })
+  stackElements[#stackElements + 1] = actionStack
+
+  newButton(actionStack, "retry", "reload", retryLevel)
+
   if mode == "classic" then
-    components.newTextButton(actionStack, i18n.t("menu"), "menu", 240, 40, { onRelease = gotoLevels })
-    components.newTextButton(actionStack, i18n.t("customize"), "customize", 240, 40, { onRelease = customizeLevel })
+    newButton(actionStack, "menu", "menu", gotoLevels)
+    newButton(actionStack, "customize", "customize", customizeLevel)
     if not isLevelBuiltIn then
-      components.newTextButton(actionStack, i18n.t("edit"), "edit", 240, 40, { onRelease = editLevel })
+      newButton(actionStack, "edit", "edit", editLevel)
     end
   elseif mode == "speedrun" then
-    components.newTextButton(actionStack, i18n.t("abort"), "cancel", 240, 40, { onRelease = gotoLevels })
+    newButton(actionStack, "abort", "cancel", gotoLevels)
+  end
+
+  local contentHeight = 0
+
+  for _, stackElement in pairs(stackElements) do
+    contentHeight = contentHeight + stackElement.contentHeight
+  end
+
+  local stageRemainingHeight = display.getCurrentStage().contentBounds.yMax - remainingBackground.contentBounds.yMin
+  local separator = (stageRemainingHeight - contentHeight) / (#stackElements + 1)
+  local stack = layouts.newStack({ align = "center", parent = self.view, separator = separator })
+
+  for _, stackElement in ipairs(stackElements) do
+    stack:insert(stackElement)
   end
 
   layouts.align(stack, "center", "center", remainingBackground)
+  stack.y = stack.y - (screenY + screenHeight - display.getCurrentStage().contentBounds.yMax) * 0.5
 end
 
 function scene:hide(event)

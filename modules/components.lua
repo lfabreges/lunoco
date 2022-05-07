@@ -141,12 +141,12 @@ components.newPlusButton = function(parent, width, height, options)
   return components.newObjectButton(plusButtonGroup, options)
 end
 
-components.newRunTime = function(parent, runTime)
+components.newRunTimeText = function(parent, runTime)
   local stack = layouts.newStack({ align = "center", mode = "horizontal", parent = parent, separator = 20 })
-  local icon = display.newImageRect("images/icons/speedrun.png", 35, 35)
+  local icon = display.newImageRect("images/icons/speedrun.png", 45, 45)
   stack:insert(icon)
   local minutes, seconds, milliseconds = utils.splitTime(runTime)
-  local text = display.newText({ text = i18n.t("time", minutes, seconds, milliseconds), fontSize = 30 })
+  local text = display.newText({ text = i18n.t("time", minutes, seconds, milliseconds), fontSize = 40 })
   stack:insert(text)
   return stack
 end
