@@ -7,14 +7,11 @@ local universeClass = require "classes.universe"
 local utils = require "modules.utils"
 
 local scene = composer.newScene()
-local screenX = display.screenOriginX
-local screenY = display.screenOriginY
-local screenWidth = display.actualContentWidth
-local screenHeight = display.actualContentHeight
-local topInset, leftInset, bottomInset, rightInset = display.getSafeAreaInsets()
 local universe = universeClass:new(1)
 
 function scene:create(event)
+  local topInset, leftInset, bottomInset, rightInset = display.getSafeAreaInsets()
+
   components.newBackground(self.view)
 
   self.scrollView = components.newScrollView(self.view, {

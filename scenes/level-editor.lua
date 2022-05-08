@@ -13,14 +13,9 @@ local levelView = nil
 local max = math.max
 local min = math.min
 local scene = composer.newScene()
-local screenX = display.screenOriginX
-local screenY = display.screenOriginY
-local screenWidth = display.actualContentWidth
-local screenHeight = display.actualContentHeight
 local selectedElement = nil
 local sideBar = nil
 local stars = {}
-local topInset, leftInset, bottomInset, rightInset = display.getSafeAreaInsets()
 
 local function goBack()
   if #level.world:levels() == 0 then
@@ -208,13 +203,14 @@ function scene:createHelp()
 end
 
 function scene:createSideBar()
+  local topInset, leftInset, bottomInset, rightInset = display.getSafeAreaInsets()
   local sideBarWidth = 196
-  local sideBarMinX = max(screenX + 10, 0) - sideBarWidth
-  local sideBarMaxX = screenX
+  local sideBarMinX = max(display.screenOriginX + 10, 0) - sideBarWidth
+  local sideBarMaxX = display.screenOriginX
 
   sideBar = components.newGroup(self.view)
   sideBar.x = sideBarMinX
-  sideBar.y = screenY
+  sideBar.y = display.screenOriginY
   sideBar.isOpened = false
 
   sideBar.open = function()
@@ -227,7 +223,7 @@ function scene:createSideBar()
     sideBar.isOpened = false
   end
 
-  local sideBarBackground = display.newRoundedRect(sideBar, -10, 0, sideBarWidth + 10, screenHeight, 10)
+  local sideBarBackground = display.newRoundedRect(sideBar, -10, 0, sideBarWidth + 10, display.actualContentHeight, 10)
   sideBarBackground.anchorX = 0
   sideBarBackground.anchorY = 0
   sideBarBackground.alpha = 0.9

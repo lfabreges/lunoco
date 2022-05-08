@@ -6,11 +6,6 @@ local navigation = require "modules.navigation"
 local utils = require "modules.utils"
 
 local scene = composer.newScene()
-local screenX = display.screenOriginX
-local screenY = display.screenOriginY
-local screenWidth = display.actualContentWidth
-local screenHeight = display.actualContentHeight
-local topInset, leftInset, bottomInset, rightInset = display.getSafeAreaInsets()
 local world = nil
 
 local function goBack()
@@ -38,7 +33,7 @@ function scene:create(event)
   self.tabs = layouts.newTabs({ parent = self.view })
   local tabBar = components.newTabBar(self.view, self.tabs, { "menu", "speedrun" })
 
-  self.separator = (screenWidth - 240) / 3
+  self.separator = (display.actualContentWidth - 240) / 3
 
   self.menuScrollView = components.newScrollView(self.tabs, {
     top = self.topBar.contentBounds.yMax,
@@ -96,7 +91,7 @@ function scene:createSpeedrunView()
   self.speedrunView = layouts.newStack({ separator = 15 })
 
   local speedruns = world:speedruns()
-  local width = screenWidth - self.separator * 2
+  local width = display.actualContentWidth - self.separator * 2
   local texts = {}
 
   for index = 0, 3 do

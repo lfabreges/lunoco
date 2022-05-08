@@ -7,11 +7,6 @@ local utils = require "modules.utils"
 
 local level = nil
 local scene = composer.newScene()
-local screenX = display.screenOriginX
-local screenY = display.screenOriginY
-local screenWidth = display.actualContentWidth
-local screenHeight = display.actualContentHeight
-local topInset, leftInset, bottomInset, rightInset = display.getSafeAreaInsets()
 
 local function captureAndSelectPhotoOptions(onComplete)
   local filename = "element-image." .. math.random() .. ".png"
@@ -74,11 +69,12 @@ end
 function scene:create(event)
   components.newBackground(self.view)
 
+  local topInset, leftInset, bottomInset, rightInset = display.getSafeAreaInsets()
   local topBar = components.newTopBar(self.view, { goBack = goBack })
 
   self.scrollView = components.newScrollView(self.view, {
     top = topBar.contentBounds.yMax,
-    height = screenHeight - topBar.contentHeight,
+    height = display.actualContentHeight - topBar.contentHeight,
     topPadding = 20,
     bottomPadding = bottomInset + 20,
   })

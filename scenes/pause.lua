@@ -8,10 +8,6 @@ local data = nil
 local level = nil
 local mode = nil
 local scene = composer.newScene()
-local screenX = display.screenOriginX
-local screenY = display.screenOriginY
-local screenWidth = display.actualContentWidth
-local screenHeight = display.actualContentHeight
 local shouldResumeGame = false
 
 local function customizeLevel()
@@ -47,7 +43,7 @@ function scene:create(event)
   local isLevelBuiltIn = level.world.isBuiltIn
 
   local resumeBackground = components.newBackground(self.view)
-  resumeBackground.height = screenHeight * 0.33
+  resumeBackground.height = display.actualContentHeight * 0.33
   resumeBackground:setFillColor(1, 1, 1, 0.9)
 
   local resumeButtonVortex = layouts.newVortex({ parent = self.view })
@@ -58,8 +54,8 @@ function scene:create(event)
   layouts.align(resumeButtonVortex, "center", "center", resumeBackground)
 
   local remainingBackground = components.newBackground(self.view)
-  remainingBackground.y = screenY + resumeBackground.height
-  remainingBackground.height = screenHeight - resumeBackground.height
+  remainingBackground.y = display.screenOriginY + resumeBackground.height
+  remainingBackground.height = display.actualContentHeight - resumeBackground.height
   remainingBackground:setFillColor(0, 0, 0, 0.9)
 
   local stackElements = {}
@@ -98,7 +94,7 @@ function scene:create(event)
   end
 
   layouts.align(stack, "center", "center", remainingBackground)
-  stack.y = stack.y - (screenY + screenHeight - display.getCurrentStage().contentBounds.yMax) * 0.5
+  stack.y = stack.y - (remainingBackground.contentBounds.yMax - display.getCurrentStage().contentBounds.yMax) * 0.5
 end
 
 function scene:hide(event)

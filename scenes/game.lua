@@ -15,10 +15,6 @@ local mode = nil
 local numberOfShots = nil
 local predictedBallPath = nil
 local scene = composer.newScene()
-local screenX = display.screenOriginX
-local screenY = display.screenOriginY
-local screenWidth = display.actualContentWidth
-local screenHeight = display.actualContentHeight
 
 local sounds = {
   ball = audio.loadSound("sounds/ball.wav"),
@@ -174,7 +170,7 @@ function scene:touch(event)
         elements.ball:setLinearVelocity(_ballImpulseForce.x, _ballImpulseForce.y)
         numberOfShots = numberOfShots + 1
         utils.playAudio(sounds.ball, 0.4)
-      elseif event.y <= screenY + screenHeight * 0.33 then
+      elseif event.y <= display.screenOriginY + display.actualContentHeight * 0.33 then
         self:pause()
       end
     end

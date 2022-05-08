@@ -5,12 +5,6 @@ local widget = require "widget"
 
 local components = {}
 
-local screenX = display.screenOriginX
-local screenY = display.screenOriginY
-local screenWidth = display.actualContentWidth
-local screenHeight = display.actualContentHeight
-local topInset, leftInset, bottomInset, rightInset = display.getSafeAreaInsets()
-
 components.fillWithBackground = function(object)
   display.setDefault("textureWrapX", "repeat")
   display.setDefault("textureWrapY", "repeat")
@@ -20,7 +14,12 @@ components.fillWithBackground = function(object)
 end
 
 components.newBackground = function(parent)
-  local background = display.newRect(screenX, screenY, screenWidth, screenHeight)
+  local background = display.newRect(
+    display.screenOriginX,
+    display.screenOriginY,
+    display.actualContentWidth,
+    display.actualContentHeight
+  )
   parent:insert(background)
   background.anchorX = 0
   background.anchorY = 0
@@ -170,10 +169,10 @@ end
 
 components.newScrollView = function(parent, options)
   local scrollView = widget.newScrollView({
-    left = options.left or screenX,
-    top = options.top or screenY,
-    width = options.width or screenWidth,
-    height = options.height or screenHeight,
+    left = options.left or display.screenOriginX,
+    top = options.top or display.screenOriginY,
+    width = options.width or display.actualContentWidth,
+    height = options.height or display.actualContentHeight,
     hideBackground = true,
     hideScrollBar = true,
     horizontalScrollDisabled = true,
@@ -220,11 +219,13 @@ components.newSpeedrunBoard = function(parent, width, texts)
 end
 
 components.newTabBar = function(parent, tabs, icons)
-  local tabBar = components.newGroup(parent)
-  tabBar.x = screenX
-  tabBar.y = screenY + screenHeight - bottomInset - 60
+  local topInset, leftInset, bottomInset, rightInset = display.getSafeAreaInsets()
 
-  local background = display.newRect(tabBar, 0, 0, screenWidth, bottomInset + 60)
+  local tabBar = components.newGroup(parent)
+  tabBar.x = display.screenOriginX
+  tabBar.y = display.screenOriginY + display.actualContentHeight - bottomInset - 60
+
+  local background = display.newRect(tabBar, 0, 0, display.actualContentWidth, bottomInset + 60)
   background.anchorX = 0
   background.anchorY = 0
   background.strokeWidth = 1
@@ -301,9 +302,16 @@ end
 components.newTopBar = function(parent, options)
   options = options or {}
 
+  local topInset, leftInset, bottomInset, rightInset = display.getSafeAreaInsets()
   local topBar = components.newGroup(parent)
 
-  local background = display.newRect(topBar, screenX, screenY, screenWidth, topInset + 60)
+  local background = display.newRect(
+    topBar,
+    display.screenOriginX,
+    display.screenOriginY,
+    display.actualContentWidth,
+    topInset + 60
+  )
   background.anchorX = 0
   background.anchorY = 0
   background.strokeWidth = 1
@@ -319,15 +327,15 @@ components.newTopBar = function(parent, options)
       { onRelease = options.goBack }
     )
     goBackButton.anchorX = 0
-    goBackButton.x = screenX + leftInset + 20
-    goBackButton.y = screenY + topInset + 30
+    goBackButton.x = display.screenOriginX + leftInset + 20
+    goBackButton.y = display.screenOriginY + topInset + 30
   end
 
   function topBar:insertRight(object)
     topBar:insert(object)
     object.anchorX = 1
     object.x = background.contentBounds.xMax - rightInset - 20
-    object.y = screenY + topInset + 30
+    object.y = display.screenOriginY + topInset + 30
   end
 
   return topBar

@@ -17,11 +17,6 @@ local level = nil
 local max = math.max
 local min = math.min
 local scene = composer.newScene()
-local screenX = display.screenOriginX
-local screenY = display.screenOriginY
-local screenWidth = display.actualContentWidth
-local screenHeight = display.actualContentHeight
-local topInset, leftInset, bottomInset, rightInset = display.getSafeAreaInsets()
 
 local function goBack()
   navigation.gotoCustomizeLevel(level)
@@ -88,6 +83,8 @@ local function saveImage()
 end
 
 function scene:create(event)
+  local topInset, leftInset, bottomInset, rightInset = display.getSafeAreaInsets()
+
   background = components.newBackground(self.view)
   content = components.newGroup(self.view)
 
@@ -116,8 +113,8 @@ function scene:show(event)
     backPhotoBackground = display.newRect(content, centerX, centerY, 1, 1)
     backPhoto = display.newImage(content, filename, system.TemporaryDirectory, centerX, centerY)
 
-    local xScale = min(1, screenWidth / backPhoto.width)
-    local yScale = min(1, screenHeight / backPhoto.height)
+    local xScale = min(1, display.actualContentWidth / backPhoto.width)
+    local yScale = min(1, display.actualContentHeight / backPhoto.height)
     local photoScale = max(xScale, yScale)
 
     backPhoto.xScale = photoScale
