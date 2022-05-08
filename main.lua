@@ -54,7 +54,3 @@ if version.number == nil then
 end
 
 composer.gotoScene("scenes.worlds")
-
-if utils.isSimulator() then
-  timer.performWithDelay(5000, utils.printMemoryUsage, -1)
-end
