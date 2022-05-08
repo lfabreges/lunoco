@@ -49,6 +49,13 @@ local function newFrame(parent, width, height)
   return frame
 end
 
+local function onBlur(event)
+  local element = event.target.element
+  local toolBarPosition = element.toolBar.position()
+  element.toolBar.y = element.toolBar.position()
+  transition.to(element.toolBar, { alpha = 1, time = 100 })
+end
+
 local function onFocus(event)
   local element = event.target.element
   element.contentWidthStart = element.contentWidth
@@ -57,6 +64,7 @@ local function onFocus(event)
   element.yStart = element.y
   element.xDeltaCorrection = 0
   element.yDeltaCorrection = 0
+  transition.to(element.toolBar, { alpha = 0, time = 100 })
 end
 
 local function onMovePinchRotate(event)
@@ -103,13 +111,6 @@ local function onMovePinchRotate(event)
   end
 
   element.handle.x, element.handle.y = element:localToContent(0, 0)
-
-  local toolBarPosition = element.toolBar.position()
-  if element.toolBar.y ~= toolBarPosition then
-    element.toolBar.alpha = 0
-    element.toolBar.y = toolBarPosition
-    transition.to(element.toolBar, { alpha = 1, time = 100 })
-  end
 end
 
 local function removeHelp()
@@ -425,6 +426,7 @@ function scene:configureElement(element)
       scene:selectElement(element)
 
       multitouch.addMovePinchRotateListener(handle, {
+        onBlur = onBlur,
         onFocus = onFocus,
         onMovePinchRotate = onMovePinchRotate,
       })
