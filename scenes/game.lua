@@ -237,6 +237,7 @@ function scene:show(event)
     if mode == "classic" then
       data = {}
     elseif mode == "speedrun" then
+      data = level.world:levels()[1] == level and {} or data
       data.stopwatch = data.stopwatch or stopwatchClass:new()
       utils.nestedGetOrSet(data, "levels", level.name, { startTime = data.stopwatch:totalTime() })
       data.stopwatch:start()

@@ -3,8 +3,9 @@
   "click-here-to-confirm": "Click here to confirm",
   "customize": "Customize",
   "edit": "Edit",
+  "finish": "Finish",
   "finished_in": {
-    "one": "Finished in 1 shot !",
+    "one": "Finished in 1 shot!",
     "other": "Finished in {count} shots!"
   },
   "level-editor-help": "Double tap to open the sidebar",

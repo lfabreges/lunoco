@@ -3,6 +3,7 @@
   "click-here-to-confirm": "Cliquez ici pour confirmer",
   "customize": "Personnaliser",
   "edit": "Editer",
+  "finish": "Terminer",
   "finished_in": {
     "one": "Terminé en 1 tir !",
     "other": "Terminé en {count} tirs !"

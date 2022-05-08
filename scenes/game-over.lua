@@ -113,15 +113,15 @@ function scene:createSpeedrun()
   local speedrunBoard = components.newSpeedrunBoard(self.view, 260, texts)
   local actionStack = layouts.newStack({ separator = 10 })
 
-  if not isLastLevel() then
+  if isLastLevel() then
+    newButton(actionStack, "finish", "accept", gotoLevels)
+  else
     newButton(actionStack, "next-level", "next", gotoNextLevel)
   end
 
   newButton(actionStack, "retry", "reload", retryLevel)
 
-  if isLastLevel() then
-    newButton(actionStack, "menu", "menu", gotoLevels)
-  else
+  if not isLastLevel() then
     newButton(actionStack, "abort", "cancel", gotoLevels)
   end
 
