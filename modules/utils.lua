@@ -12,6 +12,20 @@ utils.activateMultitouch = function()
   end
 end
 
+utils.activateScreenshotMode = function()
+  Runtime:addEventListener("key", function(event)
+    if event.keyName == "s" and event.phase == "up" then
+      local screenshot = display.captureScreen()
+      display.save(screenshot, {
+        filename = "screenshot." .. os.time() .. ".png",
+        baseDir = system.TemporaryDirectory,
+        captureOffscreenArea = true,
+      })
+      display.remove(screenshot)
+    end
+  end)
+end
+
 utils.deactivateMultitouch = function()
   if not utils.isSimulator() then
     system.deactivate("multitouch")
